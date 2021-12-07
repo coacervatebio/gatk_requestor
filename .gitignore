@@ -1,0 +1,16 @@
+# Sample files, alignments and references
+*.fastq
+*.fasta*
+*.gz
+*.vcf*
+*.bam*
+*.cram*
+*.sam*
+*.dict
+
+# GenomicDBImport
+*.tdb
+**/genomicsdb_meta_dir/*
+vidmap.json
+callset.json
+.__consolidation_lock
