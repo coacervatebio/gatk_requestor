@@ -8,8 +8,10 @@ rule all:
         # expand("alignments/chr21/{sample}_minified_chr21.cram", sample=samples)
         # expand("alignments/chr21/{sample}_minified_chr21.cram.crai", sample=samples)
         # expand("hc_out/chr21/{sample}_minified_chr21.g.vcf.gz", sample=samples)
-        # "combi_out/my_database"
-        "geno_out/2_sample_minified_chr21.vcf.gz"
+        # "combi_out/my_database" # gendb combine
+        # "2_sample_minified_chr21.g.vcf.gz" # basic combine
+        "geno_out/2_sample_minified_chr21_basic.vcf.gz" # basic geno
+        # "geno_out/2_sample_minified_chr21.vcf.gz"
 
 rule index_cram:
     input:
@@ -45,22 +47,40 @@ rule call_variants:
         "gatk HaplotypeCaller -I {input} "
         "-O {output} -R {ref} -L chr21 -ERC GVCF"
 
-rule db_combine:
+rule basic_combine:
     input:
         expand("hc_out/chr21/{sample}_minified_chr21.g.vcf.gz", sample=samples)
     output:
-        directory("combi_out/my_database/")
+        "combi_out/basic/2_sample_minified_chr21.g.vcf.gz"
     params:
         lambda wildcards, input: ' '.join([f'-V {file}' for file in input])
     shell:
-        "gatk GenomicsDBImport {params} --genomicsdb-workspace-path {output} -L chr21"
+        "gatk CombineGVCFs -R {ref} {params} -O {output}"
 
-rule db_genotype:
+rule basic_genotype:
     input:
-        "combi_out/my_database/"
+        "combi_out/basic/2_sample_minified_chr21.g.vcf.gz"
     output:
-        "geno_out/2_sample_minified_chr21.vcf.gz"
+        "geno_out/2_sample_minified_chr21_basic.vcf.gz"
     shell:
-        "gatk GenotypeGVCFs -R {ref} -V gendb://{input} -O {output}"
+        "gatk GenotypeGVCFs -R {ref} -V {input} -O {output}"
+
+# rule db_combine:
+#     input:
+#         expand("hc_out/chr21/{sample}_minified_chr21.g.vcf.gz", sample=samples)
+#     output:
+#         directory("combi_out/my_database/")
+#     params:
+#         lambda wildcards, input: ' '.join([f'-V {file}' for file in input])
+#     shell:
+#         "gatk GenomicsDBImport {params} --genomicsdb-workspace-path {output} -L chr21"
+
+# rule db_genotype:
+#     input:
+#         "combi_out/my_database/"
+#     output:
+#         "geno_out/2_sample_minified_chr21.vcf.gz"
+#     shell:
+#         "gatk GenotypeGVCFs -R {ref} -V gendb://{input} -O {output}"
 
 
