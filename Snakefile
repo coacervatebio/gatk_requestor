@@ -1,69 +1,77 @@
-ref = "resources/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta"
-samples = glob_wildcards("alignments/minified/2_sample/{samp}_minified.cram").samp
+import os
+
 container: "docker://broadinstitute/gatk"
+SAMP_COUNT = 6
+REF = "resources/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta"
+SAMPLES = [fn.strip("_minified.cram") for fn in os.listdir(f"alignments/minified/{SAMP_COUNT}_sample/")]
+REGIONS = [
+    "chr1",
+    "chr2",
+    "chr3",
+    "chr4",
+    # "chr5",
+    # "chr6",
+    # "chr7",
+    # "chr8",
+    # "chr9",
+    # "chr10",
+    # "chr11",
+    # "chr12",
+    # "chr13",
+    # "chr14",
+    # "chr15",
+    # "chr16",
+    # "chr17",
+    # "chr18",
+    # "chr19",
+    # "chr20",
+    # "chr21",
+    # "chr22",
+    # "chr23"
+]
+
 
 rule all:
     input:
         # expand("alignments/minified/2_sample/{sample}_minified.cram.crai", sample=samples)
-        # expand("alignments/chr21/{sample}_minified_chr21.cram", sample=samples)
+        expand("alignments/{reg}/{sample}_minified_{reg}.cram", sample=SAMPLES, reg=REGIONS)
         # expand("alignments/chr21/{sample}_minified_chr21.cram.crai", sample=samples)
         # expand("hc_out/chr21/{sample}_minified_chr21.g.vcf.gz", sample=samples)
         # "combi_out/my_database" # gendb combine
-        # "2_sample_minified_chr21.g.vcf.gz" # basic combine
-        "geno_out/2_sample_minified_chr21_basic.vcf.gz" # basic geno
         # "geno_out/2_sample_minified_chr21.vcf.gz"
 
-rule index_cram:
-    input:
-        "alignments/minified/2_sample/{sample}_minified.cram"
-    output:
-        "alignments/minified/2_sample/{sample}_minified.cram.crai"
-    shell:
-        "samtools index {input}"
+# rule index_cram:
+#     input:
+#         "alignments/minified/2_sample/{sample}_minified.cram"
+#     output:
+#         "alignments/minified/2_sample/{sample}_minified.cram.crai"
+#     shell:
+#         "samtools index {input}"
 
 rule split_cram:
     input:
-        "alignments/minified/2_sample/{sample}.cram",
+        expand("alignments/minified/{samps}_sample/{{sample}}.cram", samps=SAMP_COUNT)
     output:
-        "alignments/chr21/{sample}_chr21.cram"
+        "alignments/{reg}/{sample}_{reg}.cram"
     shell:
-        "samtools view {input} chr21 -T {ref} "
-        "-O cram -o {output}"
+        "samtools view {input} {wildcards.reg} -T {REF} -O cram -o {output}"
 
-rule index_split_cram:
-    input:
-        "alignments/chr21/{sample}.cram"
-    output:
-        "alignments/chr21/{sample}.cram.crai"
-    shell:
-        "samtools index {input}"
+# rule index_split_cram:
+#     input:
+#         "alignments/chr21/{sample}.cram"
+#     output:
+#         "alignments/chr21/{sample}.cram.crai"
+#     shell:
+#         "samtools index {input}"
 
-rule call_variants:
-    input:
-        "alignments/chr21/{sample}.cram"
-    output:
-        "hc_out/chr21/{sample}.g.vcf.gz"
-    shell:
-        "gatk HaplotypeCaller -I {input} "
-        "-O {output} -R {ref} -L chr21 -ERC GVCF"
-
-rule basic_combine:
-    input:
-        expand("hc_out/chr21/{sample}_minified_chr21.g.vcf.gz", sample=samples)
-    output:
-        "combi_out/basic/2_sample_minified_chr21.g.vcf.gz"
-    params:
-        lambda wildcards, input: ' '.join([f'-V {file}' for file in input])
-    shell:
-        "gatk CombineGVCFs -R {ref} {params} -O {output}"
-
-rule basic_genotype:
-    input:
-        "combi_out/basic/2_sample_minified_chr21.g.vcf.gz"
-    output:
-        "geno_out/2_sample_minified_chr21_basic.vcf.gz"
-    shell:
-        "gatk GenotypeGVCFs -R {ref} -V {input} -O {output}"
+# rule call_variants:
+#     input:
+#         "alignments/chr21/{sample}.cram"
+#     output:
+#         "hc_out/chr21/{sample}.g.vcf.gz"
+#     shell:
+#         "gatk HaplotypeCaller -I {input} "
+#         "-O {output} -R {ref} -L chr21 -ERC GVCF"
 
 # rule db_combine:
 #     input:
@@ -73,7 +81,7 @@ rule basic_genotype:
 #     params:
 #         lambda wildcards, input: ' '.join([f'-V {file}' for file in input])
 #     shell:
-#         "gatk GenomicsDBImport {params} --genomicsdb-workspace-path {output} -L chr21"
+#        "gatk GenomicsDBImport {params} --genomicsdb-workspace-path {output} -L chr21"
 
 # rule db_genotype:
 #     input:
