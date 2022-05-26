@@ -8,4 +8,5 @@ RUN conda env create -f env.yml
 
 # Make RUN commands use the new environment:
 RUN echo "conda activate coacervate_env" >> ~/.bashrc
-SHELL ["/bin/bash", "--login", "-c"]
+
+CMD ["conda", "run", "-n", "coacervate_env", "snakemake", "--version"]
