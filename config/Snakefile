@@ -1,7 +1,7 @@
 import os
 
-REF = "resources/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta"
-SAMPLES = [fn.strip("_minified.cram") for fn in os.listdir(f"alignments/minified/{SAMP_COUNT}_sample/")]
+REF = "config/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta"
+SAMPLES = [fn.strip(".cram") for fn in os.listdir("/datafiles/alignments/")]
 REGIONS = [
     "chr1",
     "chr2",
@@ -31,7 +31,7 @@ REGIONS = [
 
 rule all:
     input:
-        # expand("alignments/minified/{samp_c}_sample/{sample}_minified.cram.crai", sample=SAMPLES, samp_c=SAMP_COUNT)
+        expand("/datafiles/alignments/{sample}.cram.crai", sample=SAMPLES)
         # expand("alignments/{reg}/{sample}_minified_{reg}.cram", sample=SAMPLES, reg=REGIONS)
         # expand("alignments/{reg}/{sample}_minified_{reg}.cram.crai", sample=SAMPLES, reg=REGIONS),
         # expand("hc_out/{reg}/{sample}_minified_{reg}.g.vcf.gz", sample=SAMPLES, reg=REGIONS)
@@ -40,9 +40,9 @@ rule all:
 
 rule index_cram:
     input:
-        expand("alignments/minified/{samps}_sample/{{sample}}_minified.cram", samps=SAMP_COUNT)
+        "/datafiles/alignments/{sample}.cram"
     output:
-        expand("alignments/minified/{samps}_sample/{{sample}}_minified.cram.crai", samps=SAMP_COUNT)
+        "/datafiles/alignments/{sample}.cram.crai"
     shell:
         "samtools index {input}"
 

@@ -5,6 +5,7 @@ WORKDIR /env
 COPY env.yml .
 RUN conda env create -f env.yml
 
+RUN mkdir /config
 RUN mkdir /datafiles
 
 # Make RUN commands use the new environment:
