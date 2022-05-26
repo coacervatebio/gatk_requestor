@@ -19,7 +19,7 @@ callset.json
 debug/*
 
 # Snakemake
-.snakemake/*
+config/.snakemake/*
 
 # Prototyping / testing
 untracked/*
