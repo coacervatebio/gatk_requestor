@@ -1,12 +1,13 @@
 FROM continuumio/miniconda3
 
-WORKDIR /app
-
 # Create the environment:
+WORKDIR /env
 COPY env.yml .
 RUN conda env create -f env.yml
+
+RUN mkdir /datafiles
 
 # Make RUN commands use the new environment:
 RUN echo "conda activate coacervate_env" >> ~/.bashrc
 
-CMD ["conda", "run", "-n", "coacervate_env", "snakemake", "--version"]
+CMD ["conda", "run", "-n", "coacervate_env", "gatk"]

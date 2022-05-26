@@ -1,7 +1,5 @@
 import os
 
-container: "docker://broadinstitute/gatk"
-SAMP_COUNT = 1
 REF = "resources/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta"
 SAMPLES = [fn.strip("_minified.cram") for fn in os.listdir(f"alignments/minified/{SAMP_COUNT}_sample/")]
 REGIONS = [
@@ -36,7 +34,7 @@ rule all:
         # expand("alignments/minified/{samp_c}_sample/{sample}_minified.cram.crai", sample=SAMPLES, samp_c=SAMP_COUNT)
         # expand("alignments/{reg}/{sample}_minified_{reg}.cram", sample=SAMPLES, reg=REGIONS)
         # expand("alignments/{reg}/{sample}_minified_{reg}.cram.crai", sample=SAMPLES, reg=REGIONS),
-        expand("hc_out/{reg}/{sample}_minified_{reg}.g.vcf.gz", sample=SAMPLES, reg=REGIONS)
+        # expand("hc_out/{reg}/{sample}_minified_{reg}.g.vcf.gz", sample=SAMPLES, reg=REGIONS)
         # expand("combi_out/{reg}_database/", reg=REGIONS)
         # expand("geno_out/{samps}_sample_minified_{reg}.vcf.gz", reg=REGIONS, samps=SAMP_COUNT)
 
@@ -45,42 +43,40 @@ rule index_cram:
         expand("alignments/minified/{samps}_sample/{{sample}}_minified.cram", samps=SAMP_COUNT)
     output:
         expand("alignments/minified/{samps}_sample/{{sample}}_minified.cram.crai", samps=SAMP_COUNT)
-    benchmark:
-        "benchmarks/index_original/{sample}.tsv"
     shell:
         "samtools index {input}"
 
-rule split_cram:
-    input:
-        alignments=expand("alignments/minified/{samps}_sample/{{sample}}.cram", samps=SAMP_COUNT),
-        indexes=expand("alignments/minified/{samps}_sample/{{sample}}.cram.crai", samps=SAMP_COUNT)
-    output:
-        "alignments/{reg}/{sample}_{reg}.cram"
-    benchmark:
-        "benchmarks/split_cram/{sample}_{reg}.tsv"
-    shell:
-        "samtools view {input} {wildcards.reg} -T {REF} -O cram -o {output}"
+# rule split_cram:
+#     input:
+#         alignments=expand("alignments/minified/{samps}_sample/{{sample}}.cram", samps=SAMP_COUNT),
+#         indexes=expand("alignments/minified/{samps}_sample/{{sample}}.cram.crai", samps=SAMP_COUNT)
+#     output:
+#         "alignments/{reg}/{sample}_{reg}.cram"
+#     benchmark:
+#         "benchmarks/split_cram/{sample}_{reg}.tsv"
+#     shell:
+#         "samtools view {input} {wildcards.reg} -T {REF} -O cram -o {output}"
 
-rule index_split_cram:
-    input:
-        "alignments/{reg}/{sample}_minified_{reg}.cram"
-    output:
-        "alignments/{reg}/{sample}_minified_{reg}.cram.crai"
-    benchmark:
-        "benchmarks/index_split_cram/{sample}_{reg}.tsv"
-    shell:
-        "samtools index {input}"
+# rule index_split_cram:
+#     input:
+#         "alignments/{reg}/{sample}_minified_{reg}.cram"
+#     output:
+#         "alignments/{reg}/{sample}_minified_{reg}.cram.crai"
+#     benchmark:
+#         "benchmarks/index_split_cram/{sample}_{reg}.tsv"
+#     shell:
+#         "samtools index {input}"
 
-rule call_variants:
-    input:
-        alignments="alignments/{reg}/{sample}.cram",
-        indexes="alignments/{reg}/{sample}.cram.crai"
-    output:
-        "hc_out/{reg}/{sample}.g.vcf.gz"
-    benchmark:
-        "benchmarks/call_variants/{sample}_{reg}.tsv"
-    shell:
-        "gatk --java-options '-Xmx4g' HaplotypeCaller -I {input.alignments} -O {output} -R {REF} -L {wildcards.reg} -ERC GVCF"
+# rule call_variants:
+#     input:
+#         alignments="alignments/{reg}/{sample}.cram",
+#         indexes="alignments/{reg}/{sample}.cram.crai"
+#     output:
+#         "hc_out/{reg}/{sample}.g.vcf.gz"
+#     benchmark:
+#         "benchmarks/call_variants/{sample}_{reg}.tsv"
+#     shell:
+#         "gatk --java-options '-Xmx4g' HaplotypeCaller -I {input.alignments} -O {output} -R {REF} -L {wildcards.reg} -ERC GVCF"
 
 # rule db_combine:
 #     input:
