@@ -1,3 +1,6 @@
+# Python
+**/__pycache__/*
+
 # Sample files, alignments and references
 *.fastq
 *.fasta*

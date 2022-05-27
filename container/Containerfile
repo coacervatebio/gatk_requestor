@@ -11,4 +11,5 @@ RUN mkdir /datafiles
 # Make RUN commands use the new environment:
 RUN echo "conda activate coacervate_env" >> ~/.bashrc
 
-CMD ["conda", "run", "-n", "coacervate_env", "gatk"]
+ENTRYPOINT ["conda", "run", "-n", "coacervate_env"]
+CMD ["snakemake", "-c=1", "-s=/config/Snakefile"]
