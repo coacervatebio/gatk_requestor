@@ -3,12 +3,11 @@ from utils import file_to_sample
 
 REF = "config/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta"
 SAMPLES = set([file_to_sample(fn) for fn in os.listdir("/datafiles/alignments/")])
-print(SAMPLES)
 REGIONS = [
-    "chr1",
-    "chr2",
-    "chr3",
-    "chr4",
+    # "chr1",
+    # "chr2",
+    # "chr3",
+    # "chr4",
     # "chr5",
     # "chr6",
     # "chr7",
@@ -25,16 +24,15 @@ REGIONS = [
     # "chr18",
     # "chr19",
     # "chr20",
-    # "chr21",
-    # "chr22",
-    # "chr23"
+    "chr21",
+    "chr22",
 ]
 
 
 rule all:
     input:
-        # expand("/datafiles/alignments/{sample}.cram.crai", sample=SAMPLES)
-        expand("/datafiles/alignments/{reg}/{sample}_{reg}.cram", sample=SAMPLES, reg=REGIONS)
+        expand("/datafiles/alignments/{sample}.cram.crai", sample=SAMPLES)
+        # expand("/datafiles/alignments/{reg}/{sample}_{reg}.cram", sample=SAMPLES, reg=REGIONS)
         # expand("alignments/{reg}/{sample}_minified_{reg}.cram.crai", sample=SAMPLES, reg=REGIONS),
         # expand("hc_out/{reg}/{sample}_minified_{reg}.g.vcf.gz", sample=SAMPLES, reg=REGIONS)
         # expand("combi_out/{reg}_database/", reg=REGIONS)
@@ -42,20 +40,20 @@ rule all:
 
 rule index_cram:
     input:
-        expand("/datafiles/alignments/{sample}.cram", sample=SAMPLES)
+        "/datafiles/alignments/{sample}.cram"
     output:
-        expand("/datafiles/alignments/{sample}.cram.crai", sample=SAMPLES)
+        temp("/datafiles/alignments/{sample}.cram.crai")
     shell:
         "samtools index {input}"
 
-rule split_cram:
-    input:
-        alignments="/datafiles/alignments/{sample}.cram",
-        indexes="/datafiles/alignments/{sample}.cram.crai"
-    output:
-        "/datafiles/alignments/{reg}/{sample}_{reg}.cram"
-    shell:
-        "samtools view {input} {wildcards.reg} -T {REF} -O cram -o {output}"
+# rule split_cram:
+#     input:
+#         alignments="/datafiles/alignments/{sample}.cram",
+#         indexes="/datafiles/alignments/{sample}.cram.crai"
+#     output:
+#         "/datafiles/alignments/{reg}/{sample}_{reg}.cram"
+#     shell:
+#         "samtools view {input} {wildcards.reg} -T {REF} -O cram -o {output}"
 
 # rule index_split_cram:
 #     input:
