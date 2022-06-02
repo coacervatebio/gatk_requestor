@@ -1,8 +1,8 @@
 import os
 from utils import file_to_sample
 
-REF = "config/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta"
-SAMPLES = set([file_to_sample(fn) for fn in os.listdir("/datafiles/alignments/")])
+REF = "/config/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta"
+SAMPLES = set([file_to_sample(fn) for fn in os.listdir("/datafiles/alignments/full/")])
 REGIONS = [
     # "chr1",
     # "chr2",
@@ -31,50 +31,46 @@ REGIONS = [
 
 rule all:
     input:
-        expand("/datafiles/alignments/{sample}.cram.crai", sample=SAMPLES)
+        # expand("/datafiles/alignments/full/{sample}.cram.crai", sample=SAMPLES)
         # expand("/datafiles/alignments/{reg}/{sample}_{reg}.cram", sample=SAMPLES, reg=REGIONS)
-        # expand("alignments/{reg}/{sample}_minified_{reg}.cram.crai", sample=SAMPLES, reg=REGIONS),
-        # expand("hc_out/{reg}/{sample}_minified_{reg}.g.vcf.gz", sample=SAMPLES, reg=REGIONS)
+        # expand("/datafiles/alignments/{reg}/{sample}_{reg}.cram.crai", sample=SAMPLES, reg=REGIONS),
+        expand("/datafiles/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", sample=SAMPLES, reg=REGIONS)
         # expand("combi_out/{reg}_database/", reg=REGIONS)
         # expand("geno_out/{samps}_sample_minified_{reg}.vcf.gz", reg=REGIONS, samps=SAMP_COUNT)
 
 rule index_cram:
     input:
-        "/datafiles/alignments/{sample}.cram"
+        "/datafiles/alignments/full/{sample}.cram"
     output:
-        temp("/datafiles/alignments/{sample}.cram.crai")
+        "/datafiles/alignments/full/{sample}.cram.crai"
     shell:
         "samtools index {input}"
 
-# rule split_cram:
-#     input:
-#         alignments="/datafiles/alignments/{sample}.cram",
-#         indexes="/datafiles/alignments/{sample}.cram.crai"
-#     output:
-#         "/datafiles/alignments/{reg}/{sample}_{reg}.cram"
-#     shell:
-#         "samtools view {input} {wildcards.reg} -T {REF} -O cram -o {output}"
+rule split_cram:
+    input:
+        alignments="/datafiles/alignments/full/{sample}.cram",
+        indexes="/datafiles/alignments/full/{sample}.cram.crai"
+    output:
+        "/datafiles/alignments/{reg}/{sample}_{reg}.cram"
+    shell:
+        "samtools view {input.alignments} {wildcards.reg} -T {REF} -O cram -o {output}"
 
-# rule index_split_cram:
-#     input:
-#         "alignments/{reg}/{sample}_minified_{reg}.cram"
-#     output:
-#         "alignments/{reg}/{sample}_minified_{reg}.cram.crai"
-#     benchmark:
-#         "benchmarks/index_split_cram/{sample}_{reg}.tsv"
-#     shell:
-#         "samtools index {input}"
+rule index_split_cram:
+    input:
+        "/datafiles/alignments/{reg}/{sample}_{reg}.cram"
+    output:
+        "/datafiles/alignments/{reg}/{sample}_{reg}.cram.crai"
+    shell:
+        "samtools index {input}"
 
-# rule call_variants:
-#     input:
-#         alignments="alignments/{reg}/{sample}.cram",
-#         indexes="alignments/{reg}/{sample}.cram.crai"
-#     output:
-#         "hc_out/{reg}/{sample}.g.vcf.gz"
-#     benchmark:
-#         "benchmarks/call_variants/{sample}_{reg}.tsv"
-#     shell:
-#         "gatk --java-options '-Xmx4g' HaplotypeCaller -I {input.alignments} -O {output} -R {REF} -L {wildcards.reg} -ERC GVCF"
+rule call_variants:
+    input:
+        alignments="/datafiles/alignments/{reg}/{sample}.cram",
+        indexes="/datafiles/alignments/{reg}/{sample}.cram.crai"
+    output:
+        "/datafiles/hc_out/{reg}/{sample}.g.vcf.gz"
+    shell:
+        "gatk --java-options '-Xmx4g' HaplotypeCaller -I {input.alignments} -O {output} -R {REF} -L {wildcards.reg} -ERC GVCF"
 
 # rule db_combine:
 #     input:

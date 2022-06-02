@@ -11,6 +11,9 @@
 *.sam*
 *.dict
 
+# Datasets
+datasets/*
+
 # GenomicDBImport
 *.tdb
 **/genomicsdb_meta_dir/*
