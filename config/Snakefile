@@ -4,26 +4,26 @@ from utils import file_to_sample
 REF = "/config/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta"
 SAMPLES = set([file_to_sample(fn) for fn in os.listdir("/datafiles/alignments/full/")])
 REGIONS = [
-    # "chr1",
-    # "chr2",
-    # "chr3",
-    # "chr4",
-    # "chr5",
-    # "chr6",
-    # "chr7",
-    # "chr8",
-    # "chr9",
-    # "chr10",
-    # "chr11",
-    # "chr12",
-    # "chr13",
-    # "chr14",
-    # "chr15",
-    # "chr16",
-    # "chr17",
-    # "chr18",
-    # "chr19",
-    # "chr20",
+    "chr1",
+    "chr2",
+    "chr3",
+    "chr4",
+    "chr5",
+    "chr6",
+    "chr7",
+    "chr8",
+    "chr9",
+    "chr10",
+    "chr11",
+    "chr12",
+    "chr13",
+    "chr14",
+    "chr15",
+    "chr16",
+    "chr17",
+    "chr18",
+    "chr19",
+    "chr20",
     "chr21",
     "chr22",
 ]
@@ -35,66 +35,69 @@ rule all:
         # expand("/datafiles/alignments/{reg}/{sample}_{reg}.cram", sample=SAMPLES, reg=REGIONS)
         # expand("/datafiles/alignments/{reg}/{sample}_{reg}.cram.crai", sample=SAMPLES, reg=REGIONS),
         # expand("/datafiles/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", sample=SAMPLES, reg=REGIONS)
-        # expand("/datafiles/combi_out/{reg}_database/", reg=REGIONS)
-        expand("/datafiles/geno_out/combined_{reg}.vcf.gz", reg=REGIONS)
+        expand("/datafiles/combi_out/{reg}_database/", reg=REGIONS)
+        # expand("/datafiles/geno_out/combined_{reg}.vcf.gz", reg=REGIONS)
         # "/datafiles/gather_out/combined_gathered.vcf.gz"
 
-rule index_cram:
-    input:
-        "/datafiles/alignments/full/{sample}.cram"
-    output:
-        "/datafiles/alignments/full/{sample}.cram.crai"
-    shell:
-        "samtools index {input}"
+# rule index_cram:
+#     input:
+#         "/datafiles/alignments/full/{sample}.cram"
+#     output:
+#         "/datafiles/alignments/full/{sample}.cram.crai"
+#     shell:
+#         "samtools index {input}"
 
-rule split_cram:
-    input:
-        alignments="/datafiles/alignments/full/{sample}.cram",
-        indexes="/datafiles/alignments/full/{sample}.cram.crai"
-    output:
-        "/datafiles/alignments/{reg}/{sample}_{reg}.cram"
-    shell:
-        "samtools view {input.alignments} {wildcards.reg} -T {REF} -O cram -o {output}"
+# rule split_cram:
+#     input:
+#         alignments="/datafiles/alignments/full/{sample}.cram",
+#         indexes="/datafiles/alignments/full/{sample}.cram.crai"
+#     output:
+#         temp("/datafiles/alignments/{reg}/{sample}_{reg}.cram")
+#     shell:
+#         "samtools view {input.alignments} {wildcards.reg} -T {REF} -O cram -o {output}"
 
-rule index_split_cram:
-    input:
-        "/datafiles/alignments/{reg}/{sample}_{reg}.cram"
-    output:
-        "/datafiles/alignments/{reg}/{sample}_{reg}.cram.crai"
-    shell:
-        "samtools index {input}"
+# rule index_split_cram:
+#     input:
+#         "/datafiles/alignments/{reg}/{sample}_{reg}.cram"
+#     output:
+#         temp("/datafiles/alignments/{reg}/{sample}_{reg}.cram.crai")
+#     shell:
+#         "samtools index {input}"
 
-rule call_variants:
-    input:
-        alignments="/datafiles/alignments/{reg}/{sample}.cram",
-        indexes="/datafiles/alignments/{reg}/{sample}.cram.crai"
-    output:
-        "/datafiles/hc_out/{reg}/{sample}.g.vcf.gz"
-    shell:
-        "gatk --java-options '-Xmx4g' HaplotypeCaller -I {input.alignments} -O {output} -R {REF} -L {wildcards.reg} -ERC GVCF"
+# rule call_variants:
+#     input:
+#         alignments="/datafiles/alignments/{reg}/{sample}.cram",
+#         indexes="/datafiles/alignments/{reg}/{sample}.cram.crai"
+#     output:
+#         "/datafiles/hc_out/{reg}/{sample}.g.vcf.gz"
+#         # temp("/datafiles/hc_out/{reg}/{sample}.g.vcf.gz")
+#     shell:
+#         "gatk --java-options '-Xmx4g' HaplotypeCaller -I {input.alignments} -O {output} -R {REF} -L {wildcards.reg} -ERC GVCF"
 
 rule db_combine:
     input:
         set(expand("/datafiles/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", sample=SAMPLES, reg=REGIONS))
     output:
-        directory("/datafiles/combi_out/{reg}_database/")
+        temp(directory("/datafiles/combi_out/{reg}_database/"))
     params:
-        lambda wildcards, input: ' '.join([f'-V {f_outer}' for f_outer in [f_inner for f_inner in input if wildcards.reg in f_inner]])
+        lambda wildcards, input: ' '.join([f'-V {fn}' for fn in input if f'{wildcards.reg}.' in fn])
     shell:
        "gatk --java-options '-Xmx4g' GenomicsDBImport {params} -L {wildcards.reg} --genomicsdb-workspace-path {output}"
 
-rule db_genotype:
-    input:
-        "/datafiles/combi_out/{reg}_database/"
-    output:
-        "/datafiles/geno_out/combined_{reg}.vcf.gz"
-    shell:
-        "gatk --java-options '-Xmx4g' GenotypeGVCFs -R {REF} -V gendb://{input} -O {output}"
+# rule db_genotype:
+#     input:
+#         "/datafiles/combi_out/{reg}_database/"
+#     output:
+#         temp("/datafiles/geno_out/combined_{reg}.vcf.gz")
+#     shell:
+#         "gatk --java-options '-Xmx4g' GenotypeGVCFs -R {REF} -V gendb://{input} -O {output}"
 
 # rule gather_vcfs:
 #     input:
-#         expand("datafiles/geno_out/combined_{reg}.vcf.gz", reg=REGIONS)
+#         expand("/datafiles/geno_out/combined_{reg}.vcf.gz", reg=REGIONS)
 #     output:
 #         "/datafiles/gather_out/combined_gathered.vcf.gz" # Needs a better name
+#     params:
+#         lambda wildcards, input: ' '.join([f'-I {fn}' for fn in input])
 #     shell:
-#         "gatk --java-options '-Xmx4g' GatherVcfs {input} -O {output}"
+#         "gatk --java-options '-Xmx4g' GatherVcfs {params} -O {output}"
