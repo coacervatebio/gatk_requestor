@@ -29,3 +29,7 @@ config/.snakemake/*
 
 # Prototyping / testing
 untracked/*
+
+# Benchmarking
+config/benchmarks/*/*.tsv
+!config/benchmarks/*/*REPORT*.tsv

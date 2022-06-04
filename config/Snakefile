@@ -4,26 +4,26 @@ from utils import file_to_sample
 REF = "/config/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta"
 SAMPLES = set([file_to_sample(fn) for fn in os.listdir("/datafiles/alignments/full/")])
 REGIONS = [
-    # "chr1",
-    # "chr2",
-    # "chr3",
-    # "chr4",
-    # "chr5",
-    # "chr6",
-    # "chr7",
-    # "chr8",
-    # "chr9",
-    # "chr10",
-    # "chr11",
-    # "chr12",
-    # "chr13",
-    # "chr14",
-    # "chr15",
-    # "chr16",
-    # "chr17",
-    # "chr18",
-    # "chr19",
-    # "chr20",
+    "chr1",
+    "chr2",
+    "chr3",
+    "chr4",
+    "chr5",
+    "chr6",
+    "chr7",
+    "chr8",
+    "chr9",
+    "chr10",
+    "chr11",
+    "chr12",
+    "chr13",
+    "chr14",
+    "chr15",
+    "chr16",
+    "chr17",
+    "chr18",
+    "chr19",
+    "chr20",
     "chr21",
     "chr22",
 ]
@@ -53,6 +53,8 @@ rule split_cram:
         indexes="/datafiles/alignments/full/{sample}.cram.crai"
     output:
         temp("/datafiles/alignments/{reg}/{sample}_{reg}.cram")
+    benchmark:
+        "/config/benchmarks/split_cram_{sample}_{reg}.tsv"
     shell:
         "samtools view {input.alignments} {wildcards.reg} -T {REF} -O cram -o {output}"
 
@@ -70,24 +72,31 @@ rule call_variants:
         indexes="/datafiles/alignments/{reg}/{sample}.cram.crai"
     output:
         temp("/datafiles/hc_out/{reg}/{sample}.g.vcf.gz")
+    benchmark:
+        "/config/benchmarks/call_vars_{sample}_{reg}.tsv"
     shell:
         "gatk --java-options '-Xmx4g' HaplotypeCaller -I {input.alignments} -O {output} -R {REF} -L {wildcards.reg} -ERC GVCF"
 
-rule db_combine:
+rule combine_region:
     input:
         set(expand("/datafiles/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", sample=SAMPLES, reg=REGIONS))
     output:
         temp(directory("/datafiles/combi_out/{reg}_database/"))
+    benchmark:
+        "/config/benchmarks/combine_region_{reg}.tsv"
     params:
         lambda wildcards, input: ' '.join([f'-V {fn}' for fn in input if f'{wildcards.reg}.' in fn])
     shell:
        "gatk --java-options '-Xmx4g' GenomicsDBImport {params} -L {wildcards.reg} --genomicsdb-workspace-path {output}"
 
-rule db_genotype:
+rule genotype:
     input:
         "/datafiles/combi_out/{reg}_database/"
     output:
-        temp("/datafiles/geno_out/combined_{reg}.vcf.gz")
+        temp("/datafiles/geno_out/combined_{reg}.vcf.gz"),
+        temp("/datafiles/geno_out/combined_{reg}.vcf.gz.tbi")
+    benchmark:
+        "/config/benchmarks/genotype_{reg}.tsv"
     shell:
         "gatk --java-options '-Xmx4g' GenotypeGVCFs -R {REF} -V gendb://{input} -O {output}"
 
@@ -96,6 +105,8 @@ rule gather_vcfs:
         expand("/datafiles/geno_out/combined_{reg}.vcf.gz", reg=REGIONS)
     output:
         "/datafiles/gather_out/combined_gathered.vcf.gz" # Needs a better name
+    benchmark:
+        "/config/benchmarks/gather_vcfs.tsv"
     params:
         lambda wildcards, input: ' '.join([f'-I {fn}' for fn in input])
     shell:
