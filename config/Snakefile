@@ -34,9 +34,10 @@ rule all:
         # expand("/datafiles/alignments/full/{sample}.cram.crai", sample=SAMPLES)
         # expand("/datafiles/alignments/{reg}/{sample}_{reg}.cram", sample=SAMPLES, reg=REGIONS)
         # expand("/datafiles/alignments/{reg}/{sample}_{reg}.cram.crai", sample=SAMPLES, reg=REGIONS),
-        expand("/datafiles/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", sample=SAMPLES, reg=REGIONS)
-        # expand("combi_out/{reg}_database/", reg=REGIONS)
-        # expand("geno_out/{samps}_sample_minified_{reg}.vcf.gz", reg=REGIONS, samps=SAMP_COUNT)
+        # expand("/datafiles/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", sample=SAMPLES, reg=REGIONS)
+        # expand("/datafiles/combi_out/{reg}_database/", reg=REGIONS)
+        expand("/datafiles/geno_out/combined_{reg}.vcf.gz", reg=REGIONS)
+        # "/datafiles/gather_out/combined_gathered.vcf.gz"
 
 rule index_cram:
     input:
@@ -72,26 +73,28 @@ rule call_variants:
     shell:
         "gatk --java-options '-Xmx4g' HaplotypeCaller -I {input.alignments} -O {output} -R {REF} -L {wildcards.reg} -ERC GVCF"
 
-# rule db_combine:
+rule db_combine:
+    input:
+        set(expand("/datafiles/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", sample=SAMPLES, reg=REGIONS))
+    output:
+        directory("/datafiles/combi_out/{reg}_database/")
+    params:
+        lambda wildcards, input: ' '.join([f'-V {f_outer}' for f_outer in [f_inner for f_inner in input if wildcards.reg in f_inner]])
+    shell:
+       "gatk --java-options '-Xmx4g' GenomicsDBImport {params} -L {wildcards.reg} --genomicsdb-workspace-path {output}"
+
+rule db_genotype:
+    input:
+        "/datafiles/combi_out/{reg}_database/"
+    output:
+        "/datafiles/geno_out/combined_{reg}.vcf.gz"
+    shell:
+        "gatk --java-options '-Xmx4g' GenotypeGVCFs -R {REF} -V gendb://{input} -O {output}"
+
+# rule gather_vcfs:
 #     input:
-#         set(expand("hc_out/{reg}/{sample}_minified_{reg}.g.vcf.gz", sample=SAMPLES, reg=REGIONS))
+#         expand("datafiles/geno_out/combined_{reg}.vcf.gz", reg=REGIONS)
 #     output:
-#         directory("combi_out/{reg}_database/")
-#     params:
-#         lambda wildcards, input: ' '.join([f'-V {f_outer}' for f_outer in [f_inner for f_inner in input if wildcards.reg in f_inner]])
-#     benchmark:
-#         "benchmarks/db_combine/{reg}.tsv"
+#         "/datafiles/gather_out/combined_gathered.vcf.gz" # Needs a better name
 #     shell:
-#        "gatk --java-options '-Xmx4g' GenomicsDBImport {params} -L {wildcards.reg} --genomicsdb-workspace-path {output}"
-
-# rule db_genotype:
-#     input:
-#         "combi_out/{reg}_database/"
-#     output:
-#         "geno_out/{SAMP_COUNT}_sample_minified_{reg}.vcf.gz"
-#     benchmark:
-#         "benchmarks/db_genotype/{SAMP_COUNT}_{reg}.tsv"
-#     shell:
-#         "gatk --java-options '-Xmx4g' GenotypeGVCFs -R {REF} -V gendb://{input} -O {output}"
-
-
+#         "gatk --java-options '-Xmx4g' GatherVcfs {input} -O {output}"
