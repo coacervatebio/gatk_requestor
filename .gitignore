@@ -25,11 +25,11 @@ callset.json
 debug/*
 
 # Snakemake
-config/.snakemake/*
+**/.snakemake/*
 
 # Prototyping / testing
 untracked/*
 
 # Benchmarking
-benchmarks/*/*.tsv
-!benchmarks/*/*REPORT*.tsv
+**/benchmarks/*/*.tsv
+!**/benchmarks/*/*REPORT*.tsv

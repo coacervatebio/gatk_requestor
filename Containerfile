@@ -2,14 +2,8 @@ FROM condaforge/mambaforge
 
 # Create the environment:
 WORKDIR /env
-COPY env.yml .
+COPY snakemake/workflow/envs/env.yml .
 RUN mamba env create -f env.yml
-
-RUN mkdir /config
-RUN mkdir /datafiles
-
-# Make RUN commands use the new environment:
-RUN echo "conda activate coacervate_env" >> ~/.bashrc
 
 ENTRYPOINT ["conda", "run", "--no-capture-output", "-n=coacervate_env"]
 CMD ["snakemake", "-c=1", "-s=/config/Snakefile"]
