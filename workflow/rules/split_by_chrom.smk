@@ -1,7 +1,6 @@
 import os
 from utils import file_to_sample
 
-REF = "/config/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta"
 SAMPLES = set([file_to_sample(fn) for fn in os.listdir("/datafiles/alignments/full/")])
 REGIONS = [
     "chr1",

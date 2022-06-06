@@ -31,5 +31,5 @@ config/.snakemake/*
 untracked/*
 
 # Benchmarking
-config/benchmarks/*/*.tsv
-!config/benchmarks/*/*REPORT*.tsv
+benchmarks/*/*.tsv
+!benchmarks/*/*REPORT*.tsv
