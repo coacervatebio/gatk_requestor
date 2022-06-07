@@ -51,11 +51,12 @@ rule call_variants:
 
 rule combine_region:
     input:
-        set(expand(f"/mnt/results/{config['in_dir']}/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz", sample=samples, reg=config['regs']))
+        gvcfs=set(expand(f"/mnt/results/{config['in_dir']}/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz", sample=samples, reg=config['regs'])),
+        indexes=set(expand(f"/mnt/results/{config['in_dir']}/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz.tbi", sample=samples, reg=config['regs']))
     output:
         temp(directory(f"/mnt/results/{config['in_dir']}/combi_out/{{reg}}_database/"))
     params:
-        lambda wildcards, input: ' '.join([f'-V {fn}' for fn in input if f'{wildcards.reg}.' in fn])
+        lambda wildcards, input: ' '.join([f'-V {fn}' for fn in input.gvcfs if f'{wildcards.reg}.' in fn])
     shell:
        "gatk --java-options '-Xmx4g' GenomicsDBImport {params} -L {wildcards.reg} --genomicsdb-workspace-path {output}"
 
