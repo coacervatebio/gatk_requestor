@@ -9,10 +9,10 @@ rule all:
         # expand("/mnt/results/{in_dir}/alignments/{sample}.cram.crai", in_dir=config['in_dir'], sample=SAMPLES)
         # expand("/mnt/results/{in_dir}/alignments/{reg}/{sample}_{reg}.cram", in_dir=config['in_dir'], sample=samples, reg=config['regs'])
         # expand("/mnt/results/{in_dir}/alignments/{reg}/{sample}_{reg}.cram.crai", in_dir=config['in_dir'], sample=samples, reg=config['regs'])
-        # expand("/mnt/results/{in_dir}/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", in_dir=config['in_dir'], sample=samples, reg=config['regs'])
+        expand("/mnt/results/{in_dir}/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", in_dir=config['in_dir'], sample=samples, reg=config['regs'])
         # expand("/mnt/results/{in_dir}/combi_out/{reg}_database/", in_dir=config['in_dir'], reg=config['regs'])
         # expand("/mnt/results/{in_dir}/geno_out/combined_{reg}.vcf.gz", in_dir=config['in_dir'], reg=config['regs'])
-        f"/mnt/results/{config['in_dir']}/gather_out/project_{config['in_dir']}_output.vcf.gz"
+        # f"/mnt/results/{config['in_dir']}/gather_out/project_{config['in_dir']}_output.vcf.gz"
 
 rule index_cram:
     input:
@@ -27,7 +27,7 @@ rule split_cram:
         alignments=f"/mnt/results/{config['in_dir']}/alignments/full/{{sample}}.cram",
         indexes=f"/mnt/results/{config['in_dir']}/alignments/full/{{sample}}.cram.crai"
     output:
-        temp(f"/mnt/results/{config['in_dir']}/alignments/{{reg}}/{{sample}}_{{reg}}.cram")
+        f"/mnt/results/{config['in_dir']}/alignments/{{reg}}/{{sample}}_{{reg}}.cram"
     shell:
         "samtools view {input.alignments} {wildcards.reg} -T {config[ref]} -O cram -o {output}"
 
@@ -44,7 +44,7 @@ rule call_variants:
         alignments=f"/mnt/results/{config['in_dir']}/alignments/{{reg}}/{{sample}}_{{reg}}.cram",
         indexes=f"/mnt/results/{config['in_dir']}/alignments/{{reg}}/{{sample}}_{{reg}}.cram.crai"
     output:
-        called_vcf=temp(f"/mnt/results/{config['in_dir']}/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz"),
+        called_vcf=f"/mnt/results/{config['in_dir']}/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz",
         index=temp(f"/mnt/results/{config['in_dir']}/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz.tbi")
     shell:
         "gatk --java-options '-Xmx4g' HaplotypeCaller -I {input.alignments} -O {output.called_vcf} -R {config[ref]} -L {wildcards.reg} -ERC GVCF"
