@@ -33,3 +33,6 @@ untracked/*
 # Benchmarking
 **/benchmarks/*/*.tsv
 !**/benchmarks/*/*REPORT*.tsv
+
+# Golem
+golem/yagna_datadir/*
