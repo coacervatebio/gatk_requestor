@@ -36,3 +36,4 @@ untracked/*
 
 # Golem
 golem/yagna_datadir/*
+*.log

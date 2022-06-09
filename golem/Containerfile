@@ -10,4 +10,5 @@ RUN tar -xzf "golem-requestor-linux-${YAG_VER}.tar.gz"
 RUN mv golem-requestor-linux-${YAG_VER}/* /usr/bin/
 RUN rm -rf /golem/*
 
-ENTRYPOINT /bin/bash
+COPY ./start.sh /start.sh
+CMD ["/bin/bash", "-c", "/start.sh"]
