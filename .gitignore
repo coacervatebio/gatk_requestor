@@ -37,3 +37,8 @@ untracked/*
 # Golem
 golem/yagna_datadir/*
 *.log
+golem/tutorials/*
+
+# Vagrant
+.vagrant/*
+Vagrantfile
