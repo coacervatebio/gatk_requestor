@@ -41,4 +41,3 @@ golem/tutorials/*
 
 # Vagrant
 .vagrant/*
-Vagrantfile
