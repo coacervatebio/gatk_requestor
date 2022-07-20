@@ -1,0 +1,16 @@
+# Manual steps
+curl -sSf https://join.golem.network/as-requestor | bash -
+sudo dnf install pip
+pip install yapapi
+sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+sudo dnf install -y docker-ce docker-ce-cli containerd.io
+# Allow non-root docker, required for gvmkit-build
+sudo groupadd docker
+sudo usermod -aG docker $USER
+
+# Configure yagna keys
+yagna service run & #just on startup
+yagna app-key create requestor
+yagna payment fund
+yagna payment init --sender
+export YAGNA_APPKEY=32-char-key

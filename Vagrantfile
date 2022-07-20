@@ -44,7 +44,7 @@ Vagrant.configure("2") do |config|
   # the path on the guest to mount the folder. And the optional third
   # argument is a set of non-required options.
   ## My config is for kvm/libvirt on fedora, YMMV - see: https://developer.fedoraproject.org/tools/vagrant/vagrant-nfs.html
-  config.vm.synced_folder "./golem/yagna_datadir", "/root/.local/share/yagna", type: "nfs", nfs_udp: false
+  config.vm.synced_folder ".", "/home/vagrant/host_shared", type: "nfs", nfs_udp: false
 
   # Provider-specific configuration so you can fine-tune various
   # backing providers for Vagrant. These expose provider-specific options.

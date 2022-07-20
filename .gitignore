@@ -41,3 +41,7 @@ golem/tutorials/*
 
 # Vagrant
 .vagrant/*
+
+# GATK release for container image, keeping README to preserve folder
+golem/gatk_release/*
+!golem/gatk_release/README.md
