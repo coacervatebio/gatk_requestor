@@ -2,6 +2,11 @@
 
 The goal of this project is to democratize the access to the tools and infrastructure required to perform genomic analysis.
 
+Quickstart:
+- clone repo
+- need testing files
+- podman run --rm 
+
 Wants:
 - to democratize access to the tools and infra required to perform genomic analysis
 - operate in an open way that is not profit-driven

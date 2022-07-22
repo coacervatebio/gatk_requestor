@@ -38,10 +38,11 @@ untracked/*
 golem/yagna_datadir/*
 *.log
 golem/tutorials/*
+*.gvmi
 
 # Vagrant
 .vagrant/*
 
 # GATK release for container image, keeping README to preserve folder
-golem/gatk_release/*
-!golem/gatk_release/README.md
+golem/hc_image/gatk_release/*
+!golem/hc_image/gatk_release/README.md
