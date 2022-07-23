@@ -39,10 +39,13 @@ golem/yagna_datadir/*
 *.log
 golem/tutorials/*
 *.gvmi
+**/goth/*
+!**/goth/*/goth-config.yml
 
 # Vagrant
 .vagrant/*
 
-# GATK release for container image, keeping README to preserve folder
-golem/hc_image/gatk_release/*
-!golem/hc_image/gatk_release/README.md
+# Big image files, keeping README to preserve folder
+**/gatk_release/*
+**/ref_hg38.tar.gz
+!**/gatk_release/README.md

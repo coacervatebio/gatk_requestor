@@ -1,12 +1,20 @@
-# Manual steps
-curl -sSf https://join.golem.network/as-requestor | bash -
-sudo dnf install pip
-pip install yapapi
+## Tutorial Env
+
+# General
+sudo dnf update -y
+sudo dnf install pip python-devel screen -y
+pip install yapapi gvmkit-build
+
+# yagna & gftp
+wget https://github.com/golemfactory/yagna/releases/download/v0.10.1/golem-requestor-linux-v0.10.1.tar.gz
+tar -xzf golem-requestor-linux-v0.10.1.tar.gz
+mv golem-requestor-linux-v0.10.1/* ~/.local/bin/
+
+# Docker
 sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
-sudo dnf install -y docker-ce docker-ce-cli containerd.io
-# Allow non-root docker, required for gvmkit-build
-sudo groupadd docker
-sudo usermod -aG docker $USER
+sudo dnf install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+sudo systemctl enable docker && sudo systemctl start docker
+sudo usermod -aG docker $USER #login/logout, allows non-root docker, required for gvmkit-build
 
 # Configure yagna keys
 yagna service run & #just on startup
@@ -14,3 +22,7 @@ yagna app-key create requestor
 yagna payment fund
 yagna payment init --sender
 export YAGNA_APPKEY=32-char-key
+
+## Goth - instruction at https://github.com/golemfactory/goth
+docker login docker.pkg.github.com -u {username} #passwd is access token
+export GITHUB_API_TOKEN=
