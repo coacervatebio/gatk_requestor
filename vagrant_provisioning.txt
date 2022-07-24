@@ -24,5 +24,6 @@ yagna payment init --sender
 export YAGNA_APPKEY=32-char-key
 
 ## Goth - instruction at https://github.com/golemfactory/goth
+# May be best to use poetry in the future
 docker login docker.pkg.github.com -u {username} #passwd is access token
 export GITHUB_API_TOKEN=

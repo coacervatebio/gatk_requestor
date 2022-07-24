@@ -5,13 +5,13 @@ This file contains the requestor part of our application. There are three areas 
 2. Defining what commands must be run within the provider's VM.
 3. Scheduling the tasks via a yagna node running locally.
 """
-
+import os
 import argparse
 import asyncio
 from datetime import timedelta
 import json
 import math
-from pathlib import Path
+from pathlib import Path, PurePath
 from tempfile import gettempdir
 from typing import AsyncIterable, Iterator
 from uuid import uuid4
@@ -20,37 +20,36 @@ from yapapi import Golem, Task, WorkContext
 from yapapi.log import enable_default_logger
 from yapapi.payload import vm
 
-import worker
+prov_outpath = "/golem/output"
 
 # CLI arguments definition
 arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument("--hash", type=Path, default=Path("data/hash.json"))
-arg_parser.add_argument("--subnet", type=str, default="devnet-beta")
-arg_parser.add_argument("--words", type=Path, default=Path("data/words.txt"))
+arg_parser.add_argument("--alignments", type=Path)
+arg_parser.add_argument("--script", type=Path, default=Path("call.sh"))
+arg_parser.add_argument("--subnet", type=str, default="goth")
 
 # Container object for parsed arguments
 args = argparse.Namespace()
 
-ENTRYPOINT_PATH = "/golem/entrypoint/worker.py"
+ENTRYPOINT_PATH = f"/golem/entrypoint/{str(args.script)}"
 TASK_TIMEOUT = timedelta(minutes=10)
 
 
-def data(words_file: Path, chunk_size: int = 100_000) -> Iterator[Task]:
-    """Split input data into chunks, each one being a single `Task` object.
-
-    A single provider may compute multiple tasks.
-    Return an iterator of `Task` objects.
+def data(alignments_dir: Path) -> Iterator[Task]:
+    """Prepare a task object for every region-specific alignment
     """
-    with words_file.open() as f:
-        chunk = []
-        for line in f:
-            chunk.append(line.strip())
-            if len(chunk) == chunk_size:
-                yield Task(data=chunk)
-                chunk = []
-        if chunk:
-            yield Task(data=chunk)
 
+    for reg_dir in alignments_dir.glob('chr*'):
+        for sample in reg_dir.glob('*cram'):
+            
+            inputs = {
+                'align_path': f'{sample}.cram',
+                'index_path': f'{sample}.cram.crai',
+                'region': PurePath(reg_dir).name,
+                'vcf_path': f'{prov_outpath}/{sample}' #Need to fix these paths
+            }
+
+            yield Task(data=inputs)
 
 async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
     """Prepare a sequence of steps which need to happen for a task to be computed.
@@ -61,12 +60,12 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
     The signature of this function cannot change, as it's used internally by `Executor`.
     """
     script = context.new_script(timeout=timedelta(minutes=5))
-    script.upload_file(str(args.hash), worker.HASH_PATH)
+    script.upload_file(str(args.script), ENTRYPOINT_PATH) # Can use this to send script
 
     async for task in tasks:
-        script.upload_json(task.data, worker.WORDS_PATH)
+        script.upload_file(task.data, f"/golem/input/{task.data}")
 
-        script.run(ENTRYPOINT_PATH)
+        script.run(ENTRYPOINT_PATH, args=task.data.args)
 
         # Create a temporary file to avoid overwriting incoming results
         output_file = Path(gettempdir()) / str(uuid4())
