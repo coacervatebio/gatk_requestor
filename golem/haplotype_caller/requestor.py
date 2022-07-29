@@ -56,7 +56,7 @@ def data(alignments_dir: Path, vcfs_dir: Path) -> Iterator[Task]:
                 'prov_vcf_path': prov_outpath.joinpath(f'{sample}.g.vcf.gz'),
                 'prov_vcf_index_path': prov_outpath.joinpath(f'{sample}.g.vcf.gz.tbi')
             }
-
+            print(inputs)
             yield Task(data=inputs)
 
 async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
@@ -76,7 +76,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
         script.upload_file(task.data['req_align_index_path'], task.data['prov_align_index_path'])
 
         run_args = f"{task.data['prov_align_path']} {task.data['region_str']} {task.data['prov_vcf_path']}"
-        script.run(ENTRYPOINT_PATH, args=run_args)
+        future_result = script.run(ENTRYPOINT_PATH, args=run_args)
 
         script.download_file(task.data['prov_vcf_path'], task.data['req_vcf_path'])
         script.download_file(task.data['prov_vcf_index_path'], task.data['req_vcf_index_path'])
@@ -85,7 +85,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
         yield script
 
         # Mark task as accepted and set its result
-        task.accept_result()
+        task.accept_result(result=await future_result)
 
         # Re-initialize the script so that `upload_file` is executed only once per worker
         script = context.new_script(timeout=timedelta(minutes=5))
@@ -100,11 +100,12 @@ async def main():
     )
 
     async with Golem(budget=1, subnet_tag=args.subnet) as golem:
-
         async for task in golem.execute_tasks(
             steps, data(args.alignments, args.vcfs), payload=package, timeout=TASK_TIMEOUT
         ):
-            print(f"Calling: {task.data['sample']}")
+            if task.result:
+                print(f"Calling: {task.data['sample']}")
+        print("End of `async with Golem`...")
 
 
 if __name__ == "__main__":
@@ -114,7 +115,7 @@ if __name__ == "__main__":
     task = loop.create_task(main())
 
     # yapapi debug logging to a file
-    enable_default_logger(log_file="yapapi.log")
+    enable_default_logger(log_file="haplotype_caller.log")
 
     try:
         loop.run_until_complete(task)

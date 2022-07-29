@@ -2,6 +2,7 @@
 
 # General
 sudo dnf update -y
+sudo dnf install libffi-devel #for poetry goth
 sudo dnf install pip python-devel screen -y
 pip install yapapi gvmkit-build
 
@@ -24,6 +25,11 @@ yagna payment init --sender
 export YAGNA_APPKEY=32-char-key
 
 ## Goth - instruction at https://github.com/golemfactory/goth
-# May be best to use poetry in the future
+curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
 docker login docker.pkg.github.com -u {username} #passwd is access token
+
+## ~/.bash_profile aliases / exports
 export GITHUB_API_TOKEN=
+alias rg='screen -d -m python -m goth start ~/goth/my-assets/goth-config.yml' #run goth, must be in poetry venv
+alias rc='docker ps -aq | xargs docker stop | xargs docker rm' #remove containers
+alias se='source /tmp/goth_interactive.env' #set env vars from goth
