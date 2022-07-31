@@ -20,13 +20,13 @@ from yapapi import Golem, Task, WorkContext
 from yapapi.log import enable_default_logger
 from yapapi.payload import vm
 
-prov_outpath = Path("/golem/output")
 prov_inpath = Path("/golem/input")
+prov_outpath = Path("/golem/output")
 
 # CLI arguments definition
 arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument("--alignments", type=Path)
-arg_parser.add_argument("--vcfs", type=Path)
+arg_parser.add_argument("--alignments", type=Path, default=Path("/home/vagrant/host_shared/snakemake/results/2_sample/alignments"))
+arg_parser.add_argument("--vcfs", type=Path, default=Path("/home/vagrant/host_shared/snakemake/results/2_sample/hc_out"))
 arg_parser.add_argument("--script", type=Path, default=Path("run.sh"))
 arg_parser.add_argument("--subnet", type=str, default="goth")
 
@@ -34,7 +34,7 @@ arg_parser.add_argument("--subnet", type=str, default="goth")
 args = argparse.Namespace()
 
 ENTRYPOINT_PATH = "/golem/entrypoint/run.sh"
-TASK_TIMEOUT = timedelta(minutes=10)
+TASK_TIMEOUT = timedelta(minutes=30)
 
 
 def data(alignments_dir: Path, vcfs_dir: Path) -> Iterator[Task]:
@@ -56,7 +56,7 @@ def data(alignments_dir: Path, vcfs_dir: Path) -> Iterator[Task]:
                 'prov_vcf_path': prov_outpath.joinpath(f'{sample}.g.vcf.gz'),
                 'prov_vcf_index_path': prov_outpath.joinpath(f'{sample}.g.vcf.gz.tbi')
             }
-            print(inputs)
+            # print(inputs)
             yield Task(data=inputs)
 
 async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
@@ -68,18 +68,24 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
     The signature of this function cannot change, as it's used internally by `Executor`.
     """
     script = context.new_script(timeout=timedelta(minutes=5))
-    script.upload_file(str(args.script), ENTRYPOINT_PATH)
+    # script.upload_file(str(args.script), ENTRYPOINT_PATH)
 
     async for task in tasks:
         # Upload input alignments
         script.upload_file(task.data['req_align_path'], task.data['prov_align_path'])
         script.upload_file(task.data['req_align_index_path'], task.data['prov_align_index_path'])
 
-        run_args = f"{task.data['prov_align_path']} {task.data['region_str']} {task.data['prov_vcf_path']}"
-        future_result = script.run(ENTRYPOINT_PATH, args=run_args)
+        run_args = [
+            str(task.data['prov_align_path']),
+            str(task.data['region_str']),
+            str(task.data['prov_vcf_path'])
+            ]
+        
+        future_result = script.run("/bin/ls", "/")
+        # future_result = script.run("/bin/sh", ENTRYPOINT_PATH, *run_args)
 
-        script.download_file(task.data['prov_vcf_path'], task.data['req_vcf_path'])
-        script.download_file(task.data['prov_vcf_index_path'], task.data['req_vcf_index_path'])
+        # script.download_file(task.data['prov_vcf_path'], task.data['req_vcf_path'])
+        # script.download_file(task.data['prov_vcf_index_path'], task.data['req_vcf_index_path'])
 
         # Pass the prepared sequence of steps to Executor
         yield script
@@ -94,18 +100,17 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
 async def main():
     # Set of parameters for the VM run by each of the providers
     package = await vm.repo(
-        image_hash="479be4f6c3308dd77014ea07987e2df80bf5eaf59a6a5dc4f1264f94",
-        min_mem_gib=1.0,
+        image_url="https://www.google.com", # attempting to spoof lookup
+        image_hash="cb7b8d13a19318cdf2b24fdc8504dc974bb96a06f6330f8e68972917",
+        min_mem_gib=4.0,
         min_storage_gib=2.0,
     )
 
     async with Golem(budget=1, subnet_tag=args.subnet) as golem:
-        async for task in golem.execute_tasks(
+        async for completed in golem.execute_tasks(
             steps, data(args.alignments, args.vcfs), payload=package, timeout=TASK_TIMEOUT
         ):
-            if task.result:
-                print(f"Calling: {task.data['sample']}")
-        print("End of `async with Golem`...")
+            print(completed.result.stdout)
 
 
 if __name__ == "__main__":

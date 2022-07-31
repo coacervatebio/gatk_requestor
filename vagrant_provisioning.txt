@@ -2,7 +2,7 @@
 
 # General
 sudo dnf update -y
-sudo dnf install libffi-devel #for poetry goth
+sudo dnf install libffi-devel sha3sum #for poetry goth
 sudo dnf install pip python-devel screen -y
 pip install yapapi gvmkit-build
 
