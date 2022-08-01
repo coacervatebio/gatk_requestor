@@ -25,10 +25,11 @@ prov_outpath = Path("/golem/output")
 
 # CLI arguments definition
 arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument("--alignments", type=Path, default=Path("/home/vagrant/host_shared/snakemake/results/2_sample/alignments"))
+arg_parser.add_argument("--alignments", type=Path, default=Path("/home/vagrant/host_shared/snakemake/results/1_sample_chr1/alignments"))
 arg_parser.add_argument("--vcfs", type=Path, default=Path("/home/vagrant/host_shared/snakemake/results/2_sample/hc_out"))
 arg_parser.add_argument("--script", type=Path, default=Path("run.sh"))
 arg_parser.add_argument("--subnet", type=str, default="goth")
+# arg_parser.add_argument("--image", type=str, default="")
 
 # Container object for parsed arguments
 args = argparse.Namespace()
@@ -68,7 +69,9 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
     The signature of this function cannot change, as it's used internally by `Executor`.
     """
     script = context.new_script(timeout=timedelta(minutes=5))
-    # script.upload_file(str(args.script), ENTRYPOINT_PATH)
+    
+    # Upload the script to be run on provider
+    script.upload_file(str(args.script), ENTRYPOINT_PATH)
 
     async for task in tasks:
         # Upload input alignments
@@ -81,7 +84,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
             str(task.data['prov_vcf_path'])
             ]
         
-        future_result = script.run("/bin/ls", "/")
+        future_result = script.run("/usr/bin/java", "-jar", "/run/gatk-local.jar", "-version")
         # future_result = script.run("/bin/sh", ENTRYPOINT_PATH, *run_args)
 
         # script.download_file(task.data['prov_vcf_path'], task.data['req_vcf_path'])
@@ -100,8 +103,8 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
 async def main():
     # Set of parameters for the VM run by each of the providers
     package = await vm.repo(
-        image_url="https://www.google.com", # attempting to spoof lookup
-        image_hash="cb7b8d13a19318cdf2b24fdc8504dc974bb96a06f6330f8e68972917",
+        image_hash="cb7b8d13a19318cdf2b24fdc8504dc974bb96a06f6330f8e68972917", # all run
+        # image_hash="6b498c9ac23541a1aa4f1427df7e42a376c8a054c7cc8688f668fd31", # not VOLs / hc complete
         min_mem_gib=4.0,
         min_storage_gib=2.0,
     )
