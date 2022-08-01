@@ -8,7 +8,7 @@ This file contains the requestor part of our application. There are three areas 
 import os
 import argparse
 import asyncio
-from datetime import timedelta
+from datetime import timedelta, datetime
 import json
 import math
 from pathlib import Path, PurePath
@@ -26,10 +26,10 @@ prov_outpath = Path("/golem/output")
 # CLI arguments definition
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("--alignments", type=Path, default=Path("/home/vagrant/host_shared/snakemake/results/1_sample_chr1/alignments"))
-arg_parser.add_argument("--vcfs", type=Path, default=Path("/home/vagrant/host_shared/snakemake/results/2_sample/hc_out"))
+arg_parser.add_argument("--vcfs", type=Path, default=Path("/home/vagrant/host_shared/snakemake/results/1_sample_chr1/hc_out"))
 arg_parser.add_argument("--script", type=Path, default=Path("run.sh"))
 arg_parser.add_argument("--subnet", type=str, default="goth")
-# arg_parser.add_argument("--image", type=str, default="")
+arg_parser.add_argument("--image", type=str, default="cb7b8d13a19318cdf2b24fdc8504dc974bb96a06f6330f8e68972917")
 
 # Container object for parsed arguments
 args = argparse.Namespace()
@@ -84,11 +84,12 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
             str(task.data['prov_vcf_path'])
             ]
         
-        future_result = script.run("/usr/bin/java", "-jar", "/run/gatk-local.jar", "-version")
-        # future_result = script.run("/bin/sh", ENTRYPOINT_PATH, *run_args)
+        # future_result = script.run("/bin/ls", "/run")
+        # future_result = script.run("/usr/bin/java", "-jar", "/run/gatk-local.jar", "-version")
+        future_result = script.run("/bin/sh", ENTRYPOINT_PATH, *run_args)
 
-        # script.download_file(task.data['prov_vcf_path'], task.data['req_vcf_path'])
-        # script.download_file(task.data['prov_vcf_index_path'], task.data['req_vcf_index_path'])
+        script.download_file(task.data['prov_vcf_path'], task.data['req_vcf_path'])
+        script.download_file(task.data['prov_vcf_index_path'], task.data['req_vcf_index_path'])
 
         # Pass the prepared sequence of steps to Executor
         yield script
@@ -103,8 +104,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
 async def main():
     # Set of parameters for the VM run by each of the providers
     package = await vm.repo(
-        image_hash="cb7b8d13a19318cdf2b24fdc8504dc974bb96a06f6330f8e68972917", # all run
-        # image_hash="6b498c9ac23541a1aa4f1427df7e42a376c8a054c7cc8688f668fd31", # not VOLs / hc complete
+        image_hash=args.image,
         min_mem_gib=4.0,
         min_storage_gib=2.0,
     )
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     task = loop.create_task(main())
 
     # yapapi debug logging to a file
-    enable_default_logger(log_file="haplotype_caller.log")
+    enable_default_logger(log_file=f"logs/haplotype_caller_{datetime.now().strftime('%Y%m%d-%H%M')}_{args.image}.log")
 
     try:
         loop.run_until_complete(task)
