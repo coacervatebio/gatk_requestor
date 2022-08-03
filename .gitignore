@@ -43,6 +43,8 @@ golem/tutorials/*
 !**/goth/*/goth-config.yml
 
 # Vagrant
+Vagrantfile
+vagrant_provisioning.txt
 .vagrant/*
 
 # Big image files, keeping README to preserve folder
