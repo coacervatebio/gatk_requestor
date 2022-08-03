@@ -5,13 +5,10 @@ This file contains the requestor part of our application. There are three areas 
 2. Defining what commands must be run within the provider's VM.
 3. Scheduling the tasks via a yagna node running locally.
 """
-import os
 import argparse
 import asyncio
 from datetime import timedelta, datetime
-import json
-import math
-from pathlib import Path, PurePath
+from pathlib import Path
 from tempfile import gettempdir
 from typing import AsyncIterable, Iterator
 from uuid import uuid4
@@ -20,20 +17,20 @@ from yapapi import Golem, Task, WorkContext
 from yapapi.log import enable_default_logger
 from yapapi.payload import vm
 
-prov_inpath = Path("/golem/input")
-prov_outpath = Path("/golem/output")
 
 # CLI arguments definition
 arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument("--alignments", type=Path, default=Path("/home/vagrant/host_shared/snakemake/results/1_sample_chr1/alignments"))
-arg_parser.add_argument("--vcfs", type=Path, default=Path("/home/vagrant/host_shared/snakemake/results/1_sample_chr1/hc_out"))
-arg_parser.add_argument("--script", type=Path, default=Path("run.sh"))
+arg_parser.add_argument("--alignments", type=Path)
+arg_parser.add_argument("--vcfs", type=Path)
+arg_parser.add_argument("--script", type=Path, default=Path("provider_run.sh"))
 arg_parser.add_argument("--subnet", type=str, default="goth")
 arg_parser.add_argument("--image", type=str, default="cb7b8d13a19318cdf2b24fdc8504dc974bb96a06f6330f8e68972917")
 
 # Container object for parsed arguments
 args = argparse.Namespace()
 
+PROV_INPATH = Path("/golem/input")
+PROV_OUTPATH = Path("/golem/output")
 ENTRYPOINT_PATH = "/golem/entrypoint/run.sh"
 TASK_TIMEOUT = timedelta(minutes=30)
 
@@ -49,13 +46,13 @@ def data(alignments_dir: Path, vcfs_dir: Path) -> Iterator[Task]:
                 'sample': sample,
                 'req_align_path': reg_dir.joinpath(f'{sample}.cram'),
                 'req_align_index_path': reg_dir.joinpath(f'{sample}.cram.crai'),
-                'prov_align_path': prov_inpath.joinpath(f'{sample}.cram'),
-                'prov_align_index_path': prov_inpath.joinpath(f'{sample}.cram.crai'),
+                'prov_align_path': PROV_INPATH.joinpath(f'{sample}.cram'),
+                'prov_align_index_path': PROV_INPATH.joinpath(f'{sample}.cram.crai'),
                 'region_str': reg_dir.name,
                 'req_vcf_path': vcfs_dir.joinpath(f'{sample}.g.vcf.gz'),
                 'req_vcf_index_path': vcfs_dir.joinpath(f'{sample}.g.vcf.gz.tbi'),
-                'prov_vcf_path': prov_outpath.joinpath(f'{sample}.g.vcf.gz'),
-                'prov_vcf_index_path': prov_outpath.joinpath(f'{sample}.g.vcf.gz.tbi')
+                'prov_vcf_path': PROV_OUTPATH.joinpath(f'{sample}.g.vcf.gz'),
+                'prov_vcf_index_path': PROV_OUTPATH.joinpath(f'{sample}.g.vcf.gz.tbi')
             }
             yield Task(data=inputs)
 
