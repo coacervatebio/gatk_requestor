@@ -3,6 +3,7 @@
 # turn on bash's job control
 set -m
   
+# Maybe screen -d -m
 # Start the yagna daemon and put it in the background
 yagna service run &
 

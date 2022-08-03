@@ -1,9 +1,13 @@
 FROM condaforge/mambaforge
 
+COPY benchmarks /mnt/benchmarks
+COPY config /mnt/config
+COPY resources /mnt/resources
+COPY results /mnt/results
+COPY workflow /mnt/workflow
+
 # Create the environment:
-WORKDIR /env
-COPY workflow/envs/env.yml .
-RUN mamba env create -f env.yml
+RUN mamba env create -f /mnt/workflow/envs/env.yml
 
 ENTRYPOINT ["conda", "run", "--no-capture-output", "-n=coacervate_env"]
-CMD ["snakemake", "-c=1", "-s=/config/Snakefile"]
+CMD ["snakemake", "-c=1", "-s=/mnt/workflow/rules/Snakefile"]
