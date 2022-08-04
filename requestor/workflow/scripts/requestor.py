@@ -23,7 +23,7 @@ arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("--alignments", type=Path)
 arg_parser.add_argument("--vcfs", type=Path)
 arg_parser.add_argument("--script", type=Path, default=Path("run.sh"))
-arg_parser.add_argument("--subnet", type=str, default="goth")
+arg_parser.add_argument("--subnet", type=str, default="devnet")
 arg_parser.add_argument("--image", type=str, default="cb7b8d13a19318cdf2b24fdc8504dc974bb96a06f6330f8e68972917")
 
 # Container object for parsed arguments
