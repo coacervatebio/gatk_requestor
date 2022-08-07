@@ -1,6 +1,6 @@
 FROM condaforge/mambaforge
 
-RUN apt update && apt install screen -y
+RUN apt update && apt install screen jq -y
 
 VOLUME /yagna
 
@@ -19,10 +19,12 @@ RUN mv golem-requestor-linux-${YAG_VER}/* /usr/bin/
 RUN rm -rf /requestor/*
 
 # Update base env, since that's where we get dropped into by default
+# This installs GATK, snakemake and yapapi
 RUN mamba env update --name base --file /mnt/workflow/envs/env.yml
 
-COPY ./start.sh /start.sh
-CMD ["/bin/bash", "-c", "/start.sh"]
+COPY start.sh /requestor/start.sh
+ENTRYPOINT ["/bin/bash", "/requestor/start.sh"]
+CMD [ "-m", "interactive" ]
 
 # ENTRYPOINT ["conda", "run", "--no-capture-output", "-n=base"]
 # CMD ["snakemake", "-c=1", "-s=/mnt/workflow/rules/Snakefile"]

@@ -24,3 +24,8 @@ Assumptions:
 - access to bandwidth will increase dramatically faster than access to compute (source)
 - consumer hardware is ill-equipped to analyze these datasets in an efficient manner
 - cloud resources are great, but expensive
+
+Container Details:
+- option to mount yagna datadir at /yagna to persist app key and funding across runs
+- option to mount any of your own dirs (config, results, snakefile) under /mnt
+  - TODO: add hierarchy here
