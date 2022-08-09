@@ -6,7 +6,7 @@ VOLUME /yagna
 
 COPY benchmarks /mnt/benchmarks
 COPY config /mnt/config
-# COPY resources /mnt/resources
+COPY resources /mnt/resources
 COPY results /mnt/results
 COPY workflow /mnt/workflow
 
@@ -25,6 +25,3 @@ RUN mamba env update --name base --file /mnt/workflow/envs/env.yml
 COPY start.sh /requestor/start.sh
 ENTRYPOINT ["/bin/bash", "/requestor/start.sh"]
 CMD [ "-m", "interactive" ]
-
-# ENTRYPOINT ["conda", "run", "--no-capture-output", "-n=base"]
-# CMD ["snakemake", "-c=1", "-s=/mnt/workflow/rules/Snakefile"]

@@ -23,10 +23,13 @@ then
     echo "Funding.."
     yagna --datadir /yagna payment fund
     sleep 10
+else
+    echo "Found existing appkey with --datadir /yagna"
 fi
 
 echo "Exporting app key and initializing yagna as sender.."
 export YAGNA_APPKEY=$(get_appkey)
+sleep 3
 yagna --datadir /yagna payment init --sender # init sender
 
 echo "Running script in ${mode} mode.."
