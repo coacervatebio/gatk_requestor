@@ -9,10 +9,10 @@ rule all:
         # expand("/mnt/results/alignments/{sample}.cram.crai", sample=SAMPLES)
         # expand("/mnt/results/alignments/{reg}/{sample}_{reg}.cram", sample=samples, reg=config['regs'])
         # expand("/mnt/results/alignments/{reg}/{sample}_{reg}.cram.crai", sample=samples, reg=config['regs'])
-        # expand("/mnt/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", sample=samples, reg=config['regs'])
+        expand("/mnt/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", sample=samples, reg=config['regs'])
         # expand("/mnt/results/combi_out/{reg}_database/", reg=config['regs'])
         # expand("/mnt/results/geno_out/combined_{reg}.vcf.gz", reg=config['regs'])
-        f"/mnt/results/gather_out/project_output.vcf.gz"
+        # f"/mnt/results/gather_out/project_output.vcf.gz"
 
 rule index_cram:
     input:
@@ -24,30 +24,33 @@ rule index_cram:
 
 rule split_cram:
     input:
-        alignments=f"/mnt/results/alignments/full/{{sample}}.cram",
-        indexes=f"/mnt/results/alignments/full/{{sample}}.cram.crai"
+        alignment=f"/mnt/results/alignments/full/{{sample}}.cram",
+        index=f"/mnt/results/alignments/full/{{sample}}.cram.crai"
     output:
-        temp(f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram")
+        # temp(f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram")
+        f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram"
     shell:
-        "samtools view {input.alignments} {wildcards.reg} -T {config[ref]} -O cram -o {output}"
+        "samtools view {input.alignment} {wildcards.reg} -T {config[ref]} -O cram -o {output}"
 
 rule index_split_cram:
     input:
         f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram"
     output:
-        temp(f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram.crai")
+        # temp(f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram.crai")
+        f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram.crai"
     shell:
         "samtools index {input}"
 
 rule call_variants:
     input:
-        alignments=f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram",
-        indexes=f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram.crai"
+        script="/mnt/workflow/scripts/requestor.py",
+        alignments=expand("/mnt/results/alignments/{reg}/{sample}_{reg}.cram", reg=config['regs'], sample=samples),
+        indexes=expand("/mnt/results/alignments/{reg}/{sample}_{reg}.cram.crai", reg=config['regs'], sample=samples)
     output:
-        called_vcf=temp(f"/mnt/results/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz"),
-        index=temp(f"/mnt/results/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz.tbi")
+        called_vcfs=temp(expand("/mnt/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", reg=config['regs'], sample=samples)),
+        indexes=temp(expand("/mnt/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz.tbi", reg=config['regs'], sample=samples))
     shell:
-        "gatk --java-options '-Xmx4g' HaplotypeCaller -I {input.alignments} -O {output.called_vcf} -R {config[ref]} -L {wildcards.reg} -ERC GVCF"
+        "python {input.script} --alignments /mnt/results/alignment --vcfs /mnt/results/hc_out"
 
 rule combine_region:
     input:
