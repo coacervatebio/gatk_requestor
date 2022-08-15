@@ -6,13 +6,13 @@ samples = dir_to_samples(f"/mnt/results/alignments/full")
 
 rule all:
     input:
-        # expand("/mnt/results/alignments/{sample}.cram.crai", sample=SAMPLES)
+        # expand("/mnt/results/alignments/full/{sample}.cram.crai", sample=SAMPLES)
         # expand("/mnt/results/alignments/{reg}/{sample}_{reg}.cram", sample=samples, reg=config['regs'])
         # expand("/mnt/results/alignments/{reg}/{sample}_{reg}.cram.crai", sample=samples, reg=config['regs'])
-        expand("/mnt/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", sample=samples, reg=config['regs'])
+        # expand("/mnt/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", sample=samples, reg=config['regs'])
         # expand("/mnt/results/combi_out/{reg}_database/", reg=config['regs'])
         # expand("/mnt/results/geno_out/combined_{reg}.vcf.gz", reg=config['regs'])
-        # f"/mnt/results/gather_out/project_output.vcf.gz"
+        f"/mnt/results/gather_out/project_output.vcf.gz"
 
 rule index_cram:
     input:
@@ -27,8 +27,7 @@ rule split_cram:
         alignment=f"/mnt/results/alignments/full/{{sample}}.cram",
         index=f"/mnt/results/alignments/full/{{sample}}.cram.crai"
     output:
-        # temp(f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram")
-        f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram"
+        temp(f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram")
     shell:
         "samtools view {input.alignment} {wildcards.reg} -T {config[ref]} -O cram -o {output}"
 
@@ -36,8 +35,7 @@ rule index_split_cram:
     input:
         f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram"
     output:
-        # temp(f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram.crai")
-        f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram.crai"
+        temp(f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram.crai")
     shell:
         "samtools index {input}"
 
