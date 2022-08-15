@@ -7,6 +7,7 @@ This file contains the requestor part of our application. There are three areas 
 """
 import argparse
 import asyncio
+from time import sleep
 from datetime import timedelta, datetime
 from pathlib import Path
 from tempfile import gettempdir
@@ -25,6 +26,7 @@ arg_parser.add_argument("--vcfs", type=Path, default=Path("/mnt/results/hc_out")
 arg_parser.add_argument("--script", type=Path, default=Path("/mnt/workflow/scripts/run.sh"))
 arg_parser.add_argument("--subnet", type=str, default="devnet-beta")
 arg_parser.add_argument("--image", type=str, default="cb7b8d13a19318cdf2b24fdc8504dc974bb96a06f6330f8e68972917")
+arg_parser.add_argument("--debug", type=bool, default=False)
 
 # Container object for parsed arguments
 args = argparse.Namespace()
@@ -108,6 +110,9 @@ async def main():
             steps, data(args.alignments, args.vcfs), payload=package, timeout=TASK_TIMEOUT
         ):
             print(completed.result.stdout)
+
+    if args.debug:
+        sleep(3600)
 
 
 if __name__ == "__main__":
