@@ -9,7 +9,7 @@ done
 # Start the yagna daemon and put it in the background
 echo "Starting yagna daemon in screen session.."
 screen -d -m -S yagna_daemon yagna --datadir /yagna service run
-sleep 10
+sleep 15
 
 get_appkey () {
     echo $(yagna --datadir /yagna app-key list --json | jq -r .values[0][1])
@@ -37,5 +37,6 @@ case "${mode}" in
     interactive) /bin/bash;;
     local) snakemake -c2 -s=/mnt/workflow/rules/local.smk;;
     golem) snakemake -c2 -s=/mnt/workflow/rules/hc_golem.smk;;
+    req_only) python /mnt/workflow/scripts/requestor.py;;
     *) echo "Please select interactive, local, or golem mode";;
 esac
