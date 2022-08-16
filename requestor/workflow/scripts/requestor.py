@@ -51,8 +51,8 @@ def data(alignments_dir: Path, vcfs_dir: Path) -> Iterator[Task]:
                 'prov_align_path': PROV_INPATH.joinpath(f'{sample}.cram'),
                 'prov_align_index_path': PROV_INPATH.joinpath(f'{sample}.cram.crai'),
                 'region_str': reg_dir.name,
-                'req_vcf_path': vcfs_dir.joinpath(f'{sample}.g.vcf.gz'),
-                'req_vcf_index_path': vcfs_dir.joinpath(f'{sample}.g.vcf.gz.tbi'),
+                'req_vcf_path': vcfs_dir.joinpath(reg_dir.name, f'{sample}.g.vcf.gz'),
+                'req_vcf_index_path': vcfs_dir.joinpath(reg_dir.name, f'{sample}.g.vcf.gz.tbi'),
                 'prov_vcf_path': PROV_OUTPATH.joinpath(f'{sample}.g.vcf.gz'),
                 'prov_vcf_index_path': PROV_OUTPATH.joinpath(f'{sample}.g.vcf.gz.tbi')
             }

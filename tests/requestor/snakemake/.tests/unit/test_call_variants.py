@@ -36,6 +36,7 @@ def test_call_variants():
             "-s=/mnt/workflow/Snakefile",
             "--directory",
             workdir,
+            # "--config golem_subnet=goth",
         ])
 
         # Check the output byte by byte using cmp.
