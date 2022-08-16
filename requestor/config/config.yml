@@ -1,4 +1,5 @@
 ref: "/mnt/resources/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta"
+golem_subnet: "devnet-beta"
 regs:
   # - chr1
   # - chr2

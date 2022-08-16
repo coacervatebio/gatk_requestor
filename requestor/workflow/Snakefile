@@ -1,17 +1,11 @@
 import os
-from utils import dir_to_samples
+from rules.utils import dir_to_samples
 
 configfile: "/mnt/config/config.yml"
 samples = dir_to_samples(f"/mnt/results/alignments/full")
 
 rule all:
     input:
-        # expand("/mnt/results/alignments/full/{sample}.cram.crai", sample=SAMPLES)
-        # expand("/mnt/results/alignments/{reg}/{sample}_{reg}.cram", sample=samples, reg=config['regs'])
-        # expand("/mnt/results/alignments/{reg}/{sample}_{reg}.cram.crai", sample=samples, reg=config['regs'])
-        # expand("/mnt/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", sample=samples, reg=config['regs'])
-        # expand("/mnt/results/combi_out/{reg}_database/", reg=config['regs'])
-        # expand("/mnt/results/geno_out/combined_{reg}.vcf.gz", reg=config['regs'])
         f"/mnt/results/gather_out/project_output.vcf.gz"
 
 rule index_cram:
@@ -48,7 +42,7 @@ rule call_variants:
         called_vcfs=temp(expand("/mnt/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", reg=config['regs'], sample=samples)),
         indexes=temp(expand("/mnt/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz.tbi", reg=config['regs'], sample=samples))
     shell:
-        "python {input.script} --alignments /mnt/results/alignment --vcfs /mnt/results/hc_out"
+        "python {input.script} --subnet {config[golem_subnet]}"
 
 rule combine_region:
     input:

@@ -33,7 +33,7 @@ def test_index_cram():
             "-f", 
             "-j1",
             "--keep-target-files",
-    
+            "-s=/mnt/workflow/Snakefile",
             "--directory",
             workdir,
         ])
