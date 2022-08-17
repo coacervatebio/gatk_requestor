@@ -29,14 +29,15 @@ def test_call_variants():
             "python",
             "-m",
             "snakemake", 
-            "/mnt/results/hc_out/chr21/HG03633_chr21.g.vcf.gz /mnt/results/hc_out/chr21/HG03633_chr21.g.vcf.gz.tbi",
+            "/mnt/results/hc_out/chr21/HG03633_chr21.g.vcf.gz","/mnt/results/hc_out/chr21/HG03633_chr21.g.vcf.gz.tbi",
             "-f", 
             "-j1",
             "--keep-target-files",
             "-s=/mnt/workflow/Snakefile",
+            "--config",
+            "golem_subnet=goth",
             "--directory",
             workdir,
-            # "--config golem_subnet=goth",
         ])
 
         # Check the output byte by byte using cmp.

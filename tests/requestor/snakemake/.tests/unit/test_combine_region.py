@@ -33,7 +33,9 @@ def test_combine_region():
             "-f", 
             "-j1",
             "--keep-target-files",
-    
+            "-s=/mnt/workflow/Snakefile",
+            "--config",
+            "golem_subnet=goth",
             "--directory",
             workdir,
         ])

@@ -34,6 +34,8 @@ def test_index_cram():
             "-j1",
             "--keep-target-files",
             "-s=/mnt/workflow/Snakefile",
+            "--config",
+            "golem_subnet=goth",
             "--directory",
             workdir,
         ])

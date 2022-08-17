@@ -29,11 +29,14 @@ def test_genotype():
             "python",
             "-m",
             "snakemake", 
-            "/mnt/results/geno_out/combined_chr21.vcf.gz /mnt/results/geno_out/combined_chr21.vcf.gz.tbi",
+            "/mnt/results/geno_out/combined_chr21.vcf.gz",
+            "/mnt/results/geno_out/combined_chr21.vcf.gz.tbi",
             "-f", 
             "-j1",
             "--keep-target-files",
-    
+            "--config",
+            "golem_subnet=goth",
+            "-s=/mnt/workflow/Snakefile",
             "--directory",
             workdir,
         ])
