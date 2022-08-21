@@ -3,7 +3,6 @@ FROM condaforge/mambaforge
 RUN apt-get update && apt-get install screen jq -y
 
 VOLUME /yagna
-VOLUME /tests
 
 COPY benchmarks /mnt/benchmarks
 COPY config /mnt/config

@@ -49,5 +49,5 @@ vagrant_provisioning.txt
 
 # Big image files, keeping README to preserve folder
 **/gatk_release/*
-**/ref_hg38.tar.gz
+**/ref_hg38*
 !**/gatk_release/README.md
