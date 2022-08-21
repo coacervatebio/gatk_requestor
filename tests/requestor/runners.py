@@ -10,8 +10,6 @@ class SnakemakeRunner:
         logs = client.containers.run(
             test_tag,
             entrypoint="snakemake",
-            # entrypoint="/bin/ls",
-            # command="/mnt/results/alignments/full",
             command=[
                 target_files,
                 "-f", 
@@ -19,7 +17,7 @@ class SnakemakeRunner:
                 "-s=/mnt/workflow/Snakefile",
             ],
             name="test_index_cram",
-            # auto_remove=True,
+            auto_remove=True,
             volumes=vols
             )
 

@@ -9,7 +9,8 @@ workdir = Path("assets/tmp_output/")
 try:
     tester = ContainerTester(data_path, workdir, SnakemakeRunner)
     tester.run()
+    tester.check()
 except Exception as e:
     print(e)
-# finally:
-    # tester.cleanup()
+finally:
+    tester.cleanup()

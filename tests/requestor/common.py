@@ -26,7 +26,6 @@ class ContainerTester:
             for f in files
         )
         print(f"Targets: {self.target_files}")
-        # Need to add mnt in here somehow.. feels wrong though..
         
         # Setup default mounts that can be overridden before calling run()
         print(f"self.tmpdir: {self.tmpdir}")
@@ -42,7 +41,7 @@ class ContainerTester:
     def check(self):
         input_files = set(
             (Path(path) / f).relative_to(self.input_data)
-            for path, subdirs, files in os.walk(self.input_data)
+            for path, _, files in os.walk(self.input_data)
             for f in files
         )
         unexpected_files = set()
@@ -52,7 +51,7 @@ class ContainerTester:
                 if str(f).startswith(".snakemake"):
                     continue
                 if f in self.target_files:
-                    self.compare_files(self.tmpdir / f, self.expected_path / f)
+                    self.compare_files(self.tmpdir / f, self.expected_output / f)
                 elif f in input_files:
                     # ignore input files
                     pass
@@ -66,7 +65,8 @@ class ContainerTester:
             )
 
     def compare_files(self, generated_file, expected_file):
-        sp.check_output(["cmp", generated_file, expected_file])
+        # Check that cmp returns no output (no difference between files)
+        assert len(sp.check_output(["cmp", generated_file, expected_file])) == 0
 
 
     def cleanup(self):
