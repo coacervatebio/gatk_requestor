@@ -1,4 +1,5 @@
 import os
+from rules.utils import dir_to_samples
 
 configfile: "/mnt/config/config.yml"
 
@@ -44,8 +45,8 @@ rule call_variants:
 
 rule combine_region:
     input:
-        gvcfs=set(expand(f"/mnt/results/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz", reg=config['regs']), sample=config['samples']),
-        indexes=set(expand(f"/mnt/results/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz.tbi", reg=config['regs']), sample=config['samples'])
+        gvcfs=set(expand(f"/mnt/results/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz", reg=config['regs'], sample=config['samples'])),
+        indexes=set(expand(f"/mnt/results/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz.tbi", reg=config['regs'], sample=config['samples']))
     output:
         temp(directory(f"/mnt/results/combi_out/{{reg}}_database/"))
     params:
