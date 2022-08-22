@@ -2,14 +2,15 @@
 Common code for unit testing of rules generated with Snakemake 7.12.1.
 """
 
-from pathlib import Path
-import subprocess as sp
 import os
 import shutil
+import subprocess as sp
+from pathlib import Path
+from docker.errors import DockerException
 
 
 class ContainerTester:
-    def __init__(self, datadir, tmpdir, runner):
+    def __init__(self, runner, datadir, tmpdir=Path("assets/tmp_output/")):
         self.datadir = datadir
         self.tmpdir = tmpdir
         self.runner = runner
@@ -25,19 +26,17 @@ class ContainerTester:
             for path, _, files in os.walk(self.expected_output)
             for f in files
         )
-        print(f"Targets: {self.target_files}")
+        print(self.target_files)
         
         # Setup default mounts that can be overridden before calling run()
-        print(f"self.tmpdir: {self.tmpdir}")
         self.mounts = [f"{str(self.tmpdir.joinpath('mnt', 'results').resolve())}:/mnt/results"]
 
     def run(self):
         # Run the container with the correct params
         target_str = " ".join([f'/{f}' for f in self.target_files])
-        print(f"Mounting: {self.mounts}")
         logs = self.runner.run(target_str, self.mounts)
         print(logs)
-    
+
     def check(self):
         input_files = set(
             (Path(path) / f).relative_to(self.input_data)
@@ -45,18 +44,36 @@ class ContainerTester:
             for f in files
         )
         unexpected_files = set()
+        all_files = []
         for path, _, files in os.walk(self.tmpdir):
             for f in files:
                 f = (Path(path) / f).relative_to(self.tmpdir)
+                all_files.append(f)
+                print("In focus: ", f)
                 if str(f).startswith(".snakemake"):
                     continue
-                if f in self.target_files:
-                    self.compare_files(self.tmpdir / f, self.expected_output / f)
-                elif f in input_files:
+                if f in input_files:
+                    print("Ignoring: ", f)
                     # ignore input files
                     pass
+                elif f in self.target_files:
+                    print("Comparing: ", f)
+                    self.compare_files(self.tmpdir / f, self.expected_output / f)
                 else:
+                    print("Unexpected: ", f)
                     unexpected_files.add(f)
+
+        missing_targets = []
+        for tf in self.target_files:
+            if tf not in all_files:
+                missing_targets.append(tf)
+
+        if missing_targets:
+            raise FileNotFoundError("Missing targets:\n{}".format(
+                    "\n".join(sorted(map(str, missing_targets)))
+                )
+            )
+        
         if unexpected_files:
             raise ValueError(
                 "Unexpected files:\n{}".format(
@@ -72,4 +89,13 @@ class ContainerTester:
     def cleanup(self):
         if self.tmpdir.is_dir():
             shutil.rmtree(self.tmpdir)
+
+    def run_defaults(self):
+        try:
+            self.run()
+            self.check()
+        # Catch any docker SDK issues
+        except DockerException as de:
+            self.cleanup()
+            raise de
 

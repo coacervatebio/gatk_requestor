@@ -1,8 +1,6 @@
 import os
-from rules.utils import dir_to_samples
 
 configfile: "/mnt/config/config.yml"
-samples = dir_to_samples(f"/mnt/results/alignments/full")
 
 rule all:
     input:
@@ -36,18 +34,18 @@ rule index_split_cram:
 rule call_variants:
     input:
         script="/mnt/workflow/scripts/requestor.py",
-        alignments=expand("/mnt/results/alignments/{reg}/{sample}_{reg}.cram", reg=config['regs'], sample=samples),
-        indexes=expand("/mnt/results/alignments/{reg}/{sample}_{reg}.cram.crai", reg=config['regs'], sample=samples)
+        alignments=expand("/mnt/results/alignments/{reg}/{sample}_{reg}.cram", reg=config['regs'], sample=config['samples']),
+        indexes=expand("/mnt/results/alignments/{reg}/{sample}_{reg}.cram.crai", reg=config['regs'], sample=config['samples'])
     output:
-        called_vcfs=temp(expand("/mnt/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", reg=config['regs'], sample=samples)),
-        indexes=temp(expand("/mnt/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz.tbi", reg=config['regs'], sample=samples))
+        called_vcfs=temp(expand("/mnt/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", reg=config['regs'], sample=config['samples'])),
+        indexes=temp(expand("/mnt/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz.tbi", reg=config['regs'], sample=config['samples']))
     shell:
         "python {input.script} --subnet {config[golem_subnet]}"
 
 rule combine_region:
     input:
-        gvcfs=set(expand(f"/mnt/results/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz", sample=samples, reg=config['regs'])),
-        indexes=set(expand(f"/mnt/results/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz.tbi", sample=samples, reg=config['regs']))
+        gvcfs=set(expand(f"/mnt/results/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz", reg=config['regs']), sample=config['samples']),
+        indexes=set(expand(f"/mnt/results/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz.tbi", reg=config['regs']), sample=config['samples'])
     output:
         temp(directory(f"/mnt/results/combi_out/{{reg}}_database/"))
     params:

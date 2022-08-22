@@ -1,45 +1,9 @@
-import shutil
-import docker
-from tempfile import TemporaryDirectory
-from pathlib import Path, PurePosixPath
-
-import common
-from config import test_tag, test_sample
-
+from pathlib import PurePath
+from common import ContainerTester
+from runners import SnakemakeRunner
 
 def test_index_split_cram():
 
-    client = docker.from_env()
-
-    with TemporaryDirectory() as tmpdir:
-        workdir = Path(tmpdir) / "workdir"
-        data_path = PurePosixPath("assets/index_split_cram/data")
-        expected_path = PurePosixPath("assets/index_split_cram/expected")
-
-        # Copy data to the temporary workdir.
-        shutil.copytree(data_path, workdir)
-
-        # Run the test job.
-        logs = client.containers.run(
-            test_tag,
-            entrypoint="snakemake",
-            command=[
-                f"/mnt/results/alignments/chr21/{test_sample}_chr21.cram.crai",
-                "-f", 
-                "-j1",
-                "-s=/mnt/workflow/Snakefile",
-            ],
-            name="test_index_split_cram",
-            auto_remove=True,
-            volumes=[f'{str(workdir)}/mnt/results:/mnt/results']
-            )
-
-        print(logs.decode('utf-8'))
-
-        # Check the output byte by byte using cmp.
-        # To modify this behavior, you can inherit from common.OutputChecker in here
-        # and overwrite the method `compare_files(generated_file, expected_file), 
-        # also see common.py.
-        common.OutputChecker(data_path, expected_path, workdir).check()
-
-test_index_split_cram()
+    data_path = PurePath("assets/index_split_cram/")
+    tester = ContainerTester(SnakemakeRunner, data_path)
+    tester.run_defaults()

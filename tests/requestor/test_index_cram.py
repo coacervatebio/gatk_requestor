@@ -1,5 +1,4 @@
-from tempfile import TemporaryDirectory
-from pathlib import Path, PurePath
+from pathlib import PurePath
 from common import ContainerTester
 from runners import SnakemakeRunner
 
@@ -7,9 +6,8 @@ from runners import SnakemakeRunner
 def test_index_cram():
 
     data_path = PurePath("assets/index_cram/")
-    workdir = Path("assets/tmp_output/")
 
-    tester = ContainerTester(data_path, workdir, SnakemakeRunner)
+    tester = ContainerTester(SnakemakeRunner, data_path)
     tester.run()
     tester.check()
     tester.cleanup()
