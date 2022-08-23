@@ -6,7 +6,7 @@ import os
 import shutil
 import subprocess as sp
 from pathlib import Path
-from docker.errors import DockerException
+from docker.errors import DockerException, ContainerError
 
 
 class ContainerTester:
@@ -26,18 +26,21 @@ class ContainerTester:
             for path, _, files in os.walk(self.expected_output)
             for f in files
         )
-        print(self.target_files)
+        # print(self.target_files)
         
         # Setup default mounts that can be overridden before calling run()
         self.mounts = [f"{str(self.tmpdir.joinpath('mnt', 'results').resolve())}:/mnt/results"]
 
     def run(self):
         # Run the container with the correct params
+        # A leading slash is included below because the target files are 
+        # determined on host and they need to be relative to container fs
         target_str = " ".join([f'/{f}' for f in self.target_files])
-        logs = self.runner.run(target_str, self.mounts)
-        print(logs)
+        # print(target_str)
+        self.runner.run(target_str, self.mounts)
 
-    def check(self):
+    def check(self, track_unexpected=True):
+        # track_unexpected can be set to False when ignoring inputs that change with every run
         input_files = set(
             (Path(path) / f).relative_to(self.input_data)
             for path, _, files in os.walk(self.input_data)
@@ -59,7 +62,7 @@ class ContainerTester:
                 elif f in self.target_files:
                     print("Comparing: ", f)
                     self.compare_files(self.tmpdir / f, self.expected_output / f)
-                else:
+                elif track_unexpected:
                     print("Unexpected: ", f)
                     unexpected_files.add(f)
 
@@ -85,7 +88,6 @@ class ContainerTester:
         # Check that cmp returns no output (no difference between files)
         assert len(sp.check_output(["cmp", generated_file, expected_file])) == 0
 
-
     def cleanup(self):
         if self.tmpdir.is_dir():
             shutil.rmtree(self.tmpdir)
@@ -94,8 +96,12 @@ class ContainerTester:
         try:
             self.run()
             self.check()
+        except ContainerError as ce:
+            print(ce.container.logs().decode('utf-8'))
+            raise ce
         # Catch any docker SDK issues
         except DockerException as de:
-            self.cleanup()
+            print(de.container.logs().decode('utf-8'))
             raise de
-
+        finally:
+            self.cleanup()
