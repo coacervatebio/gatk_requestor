@@ -7,8 +7,6 @@ def test_genotype():
     data_path = PurePath("assets/genotype/")
     tester = ContainerTester(SnakemakeRunner, data_path)
     tester.run()
-    tester.cleanup()
-    # tester.run_defaults()
 
 debug = """
 

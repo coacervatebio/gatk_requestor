@@ -6,7 +6,7 @@ import os
 import shutil
 import subprocess as sp
 from pathlib import Path
-from docker.errors import DockerException, ContainerError
+from docker.errors import DockerException, ContainerError, APIError
 
 
 class ContainerTester:
@@ -14,6 +14,8 @@ class ContainerTester:
         self.datadir = datadir
         self.tmpdir = tmpdir
         self.runner = runner
+        self.track_unexpected = True #can be set to False when ignoring inputs that change with every run
+
 
         # Setup necessary paths, datadir must have input dir (data) and output dir (expected)
         self.input_data = datadir.joinpath('data')
@@ -26,13 +28,15 @@ class ContainerTester:
             for path, _, files in os.walk(self.expected_output)
             for f in files
         )
-        # print(self.target_files)
+        # Sometimes target_str needs to be overwritten, e.g when it
+        # is a dir producing many unspecified targets
+        self.target_str = [f'/{f}' for f in self.target_files]
         
         # Setup default mounts that can be overridden before calling run()
         self.mounts = [f"{str(self.tmpdir.joinpath('mnt', 'results').resolve())}:/mnt/results"]
 
-    def check(self, track_unexpected=True):
-        # track_unexpected can be set to False when ignoring inputs that change with every run
+
+    def check(self):
         input_files = set(
             (Path(path) / f).relative_to(self.input_data)
             for path, _, files in os.walk(self.input_data)
@@ -54,7 +58,7 @@ class ContainerTester:
                 elif f in self.target_files:
                     print("Comparing: ", f)
                     self.compare_files(self.tmpdir / f, self.expected_output / f)
-                elif track_unexpected:
+                elif self.track_unexpected:
                     print("Unexpected: ", f)
                     unexpected_files.add(f)
 
@@ -76,7 +80,8 @@ class ContainerTester:
                 )
             )
 
-    def compare_files(self, generated_file, expected_file):
+    @staticmethod
+    def compare_files(generated_file, expected_file):
         # Check that cmp returns no output (no difference between files)
         assert len(sp.check_output(["cmp", generated_file, expected_file])) == 0
 
@@ -84,21 +89,20 @@ class ContainerTester:
         if self.tmpdir.is_dir():
             shutil.rmtree(self.tmpdir)
 
-    def run(self):
+    def run(self, container=True, check=True, cleanup=True):
         try:
-            # Run the container with the correct params
-            # A leading slash is included below because the target files are 
-            # determined on host and they need to be relative to container fs
-            target_str = [f'/{f}' for f in self.target_files]
-            print(target_str)
-            self.runner.run(target_str, self.mounts)
-            self.check()
+            if container:
+                self.runner.run(self.target_str, self.mounts)
+            if check: self.check()
+        except APIError as ae:
+            raise ae
         except ContainerError as ce:
             print(ce.container.logs().decode('utf-8'))
             raise ce
         # Catch any docker SDK issues
         except DockerException as de:
-            print(de.container.logs().decode('utf-8'))
             raise de
+        except BaseException as catchall:
+            raise catchall
         finally:
-            self.cleanup()
+            if cleanup: self.cleanup()

@@ -22,11 +22,10 @@ def test_combine_region():
     data_path = PurePath("assets/combine_region/")
     tester = ContainerTester(SnakemakeRunner, data_path)
 
-    target_dir = ['/mnt/results/combi_out/chr21_database']
+    tester.track_unexpected = False
+    tester.target_str = ['/mnt/results/combi_out/chr21_database']
 
     # Filter target files against failure patterns
     tester.target_files = filter(allowed_pattern, tester.target_files)
 
-    tester.runner.run(target_dir, tester.mounts)
-    tester.check(track_unexpected=False)
-    tester.cleanup()
+    tester.run()
