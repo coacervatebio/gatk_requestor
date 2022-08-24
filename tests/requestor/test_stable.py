@@ -1,0 +1,5 @@
+from test_index_cram import test_index_cram
+from test_split_cram import test_split_cram
+from test_index_split_cram import test_index_split_cram
+from test_combine_region import test_combine_region
+# from test_genotype import test_genotype

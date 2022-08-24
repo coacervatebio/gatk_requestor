@@ -2,12 +2,14 @@ from pathlib import PurePath, Path
 from common import ContainerTester
 from runners import SnakemakeRunner
 
-expected_cmp_fail_pattern = [
-    '__',
-    'vcfheader.vcf',
-]
 
 def allowed_pattern(tf):
+    
+    expected_cmp_fail_pattern = [
+        '__',
+        'vcfheader.vcf',
+    ]
+    
     s_tf = str(tf)
     for ecfp in expected_cmp_fail_pattern:
         if ecfp in s_tf:
@@ -20,7 +22,7 @@ def test_combine_region():
     data_path = PurePath("assets/combine_region/")
     tester = ContainerTester(SnakemakeRunner, data_path)
 
-    target_dir = '/mnt/results/combi_out/chr21_database'
+    target_dir = ['/mnt/results/combi_out/chr21_database']
 
     # Filter target files against failure patterns
     tester.target_files = filter(allowed_pattern, tester.target_files)

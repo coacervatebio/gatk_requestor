@@ -31,14 +31,6 @@ class ContainerTester:
         # Setup default mounts that can be overridden before calling run()
         self.mounts = [f"{str(self.tmpdir.joinpath('mnt', 'results').resolve())}:/mnt/results"]
 
-    def run(self):
-        # Run the container with the correct params
-        # A leading slash is included below because the target files are 
-        # determined on host and they need to be relative to container fs
-        target_str = " ".join([f'/{f}' for f in self.target_files])
-        # print(target_str)
-        self.runner.run(target_str, self.mounts)
-
     def check(self, track_unexpected=True):
         # track_unexpected can be set to False when ignoring inputs that change with every run
         input_files = set(
@@ -92,9 +84,14 @@ class ContainerTester:
         if self.tmpdir.is_dir():
             shutil.rmtree(self.tmpdir)
 
-    def run_defaults(self):
+    def run(self):
         try:
-            self.run()
+            # Run the container with the correct params
+            # A leading slash is included below because the target files are 
+            # determined on host and they need to be relative to container fs
+            target_str = [f'/{f}' for f in self.target_files]
+            print(target_str)
+            self.runner.run(target_str, self.mounts)
             self.check()
         except ContainerError as ce:
             print(ce.container.logs().decode('utf-8'))
