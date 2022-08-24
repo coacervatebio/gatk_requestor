@@ -10,7 +10,7 @@ class SnakemakeRunner:
         logs = client.containers.run(
             test_tag,
             # entrypoint="/bin/ls",
-            # command="/mnt/results/",
+            # command=["-la", "/mnt/results/"],
             entrypoint="snakemake",
             command=[
                 *target_files,
@@ -21,9 +21,9 @@ class SnakemakeRunner:
             name="test_container",
             auto_remove=True,
             volumes=vols
-            )
-
-        return logs.decode('utf-8')
+            ).decode('utf-8')
+        print(logs)
+        return logs
 
 
 class RequestorRunner():
