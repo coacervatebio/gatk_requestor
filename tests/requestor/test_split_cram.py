@@ -8,4 +8,4 @@ def test_split_cram():
     data_path = PurePath("assets/split_cram/")
 
     tester = ContainerTester(SnakemakeRunner, data_path)
-    tester.run_defaults()
+    tester.run()

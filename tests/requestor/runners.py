@@ -9,15 +9,15 @@ class SnakemakeRunner:
     # Run the test job.
         logs = client.containers.run(
             test_tag,
-            entrypoint="/bin/ls",
-            command="/mnt/results/",
-            # entrypoint="snakemake",
-            # command=[
-            #     *target_files,
-            #     "-f", 
-            #     "-j1",
-            #     "-s=/mnt/workflow/Snakefile",
-            # ],
+            # entrypoint="/bin/ls",
+            # command="/mnt/results/",
+            entrypoint="snakemake",
+            command=[
+                *target_files,
+                "-f", 
+                "-j1",
+                "-s=/mnt/workflow/Snakefile",
+            ],
             name="test_container",
             auto_remove=True,
             volumes=vols
