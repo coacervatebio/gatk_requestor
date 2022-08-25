@@ -1,7 +1,4 @@
-import os
 import docker
-import rootpath
-from time import sleep
 from pathlib import Path
 
 from config import test_tag, rpath

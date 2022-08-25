@@ -102,7 +102,7 @@ class ContainerTester:
         # Catch any docker SDK issues
         except DockerException as de:
             raise de
-        except BaseException as catchall:
-            raise catchall
+        except:
+            raise
         finally:
             if cleanup: self.cleanup()
