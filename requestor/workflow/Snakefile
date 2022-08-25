@@ -1,54 +1,51 @@
-import os
-from rules.utils import dir_to_samples
-
-configfile: "/mnt/config/config.yml"
+configfile: "/data/config/config.yml"
 
 rule all:
     input:
-        f"/mnt/results/gather_out/project_output.vcf.gz"
+        f"/data/results/gather_out/project_output.vcf.gz"
 
 rule index_cram:
     input:
-        f"/mnt/results/alignments/full/{{sample}}.cram"
+        f"/data/results/alignments/full/{{sample}}.cram"
     output:
-        temp(f"/mnt/results/alignments/full/{{sample}}.cram.crai")
+        temp(f"/data/results/alignments/full/{{sample}}.cram.crai")
     shell:
         "samtools index {input}"
 
 rule split_cram:
     input:
-        alignment=f"/mnt/results/alignments/full/{{sample}}.cram",
-        index=f"/mnt/results/alignments/full/{{sample}}.cram.crai"
+        alignment=f"/data/results/alignments/full/{{sample}}.cram",
+        index=f"/data/results/alignments/full/{{sample}}.cram.crai"
     output:
-        temp(f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram")
+        temp(f"/data/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram")
     shell:
         "samtools view {input.alignment} {wildcards.reg} -T {config[ref]} -O cram -o {output}"
 
 rule index_split_cram:
     input:
-        f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram"
+        f"/data/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram"
     output:
-        temp(f"/mnt/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram.crai")
+        temp(f"/data/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram.crai")
     shell:
         "samtools index {input}"
 
 rule call_variants:
     input:
-        script="/mnt/workflow/scripts/requestor.py",
-        alignments=expand("/mnt/results/alignments/{reg}/{sample}_{reg}.cram", reg=config['regs'], sample=config['samples']),
-        indexes=expand("/mnt/results/alignments/{reg}/{sample}_{reg}.cram.crai", reg=config['regs'], sample=config['samples'])
+        script="/data/workflow/scripts/requestor.py",
+        alignments=expand("/data/results/alignments/{reg}/{sample}_{reg}.cram", reg=config['regs'], sample=config['samples']),
+        indexes=expand("/data/results/alignments/{reg}/{sample}_{reg}.cram.crai", reg=config['regs'], sample=config['samples'])
     output:
-        called_vcfs=temp(expand("/mnt/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", reg=config['regs'], sample=config['samples'])),
-        indexes=temp(expand("/mnt/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz.tbi", reg=config['regs'], sample=config['samples']))
+        called_vcfs=temp(expand("/data/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", reg=config['regs'], sample=config['samples'])),
+        indexes=temp(expand("/data/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz.tbi", reg=config['regs'], sample=config['samples']))
     shell:
         "python {input.script} --subnet {config[golem_subnet]}"
 
 rule combine_region:
     input:
-        gvcfs=set(expand(f"/mnt/results/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz", reg=config['regs'], sample=config['samples'])),
-        indexes=set(expand(f"/mnt/results/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz.tbi", reg=config['regs'], sample=config['samples']))
+        gvcfs=set(expand(f"/data/results/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz", reg=config['regs'], sample=config['samples'])),
+        indexes=set(expand(f"/data/results/hc_out/{{reg}}/{{sample}}_{{reg}}.g.vcf.gz.tbi", reg=config['regs'], sample=config['samples']))
     output:
-        temp(directory(f"/mnt/results/combi_out/{{reg}}_database/"))
+        temp(directory(f"/data/results/combi_out/{{reg}}_database/"))
     params:
         lambda wildcards, input: ' '.join([f'-V {fn}' for fn in input.gvcfs if f'{wildcards.reg}.' in fn])
     shell:
@@ -56,18 +53,18 @@ rule combine_region:
 
 rule genotype:
     input:
-        f"/mnt/results/combi_out/{{reg}}_database/"
+        f"/data/results/combi_out/{{reg}}_database/"
     output:
-        joint_vcf=temp(f"/mnt/results/geno_out/combined_{{reg}}.vcf.gz"),
-        index=temp(f"/mnt/results/geno_out/combined_{{reg}}.vcf.gz.tbi")
+        joint_vcf=temp(f"/data/results/geno_out/combined_{{reg}}.vcf.gz"),
+        index=temp(f"/data/results/geno_out/combined_{{reg}}.vcf.gz.tbi")
     shell:
         "gatk --java-options '-Xmx4g' GenotypeGVCFs -R {config[ref]} -V gendb://{input} -O {output.joint_vcf}"
 
 rule gather_vcfs:
     input:
-        expand("/mnt/results/geno_out/combined_{reg}.vcf.gz", reg=config['regs'])
+        expand("/data/results/geno_out/combined_{reg}.vcf.gz", reg=config['regs'])
     output:
-        f"/mnt/results/gather_out/project_output.vcf.gz"
+        f"/data/results/gather_out/project_output.vcf.gz"
     params:
         lambda wildcards, input: ' '.join([f'-I {fn}' for fn in input])
     shell:

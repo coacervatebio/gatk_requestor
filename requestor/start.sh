@@ -37,8 +37,8 @@ yagna payment init --sender # init sender
 echo "Running script in ${mode} mode.."
 case "${mode}" in
     interactive) /bin/bash;;
-    local) snakemake -c2 -s=/mnt/workflow/rules/local.smk;;
-    golem) snakemake -c2 -s=/mnt/workflow/rules/hc_golem.smk;;
-    req_only) python /mnt/workflow/scripts/requestor.py;;
+    local) snakemake -c2 -s=/data/workflow/rules/local.smk;;
+    golem) snakemake -c2 -s=/data/workflow/rules/hc_golem.smk;;
+    req_only) python /data/workflow/scripts/requestor.py;;
     *) echo "Please select interactive, local, or golem mode";;
 esac

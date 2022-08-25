@@ -18,7 +18,7 @@ class ContainerTester:
 
 
         # Setup necessary paths, datadir must have input dir (data) and output dir (expected)
-        self.input_data = datadir.joinpath('data')
+        self.input_data = datadir.joinpath('inputs')
         self.expected_output = datadir.joinpath('expected')
         shutil.copytree(self.input_data, self.tmpdir)
 
@@ -33,7 +33,7 @@ class ContainerTester:
         self.target_str = [f'/{f}' for f in self.target_files]
         
         # Setup default mounts that can be overridden before calling run()
-        self.mounts = [f"{str(self.tmpdir.joinpath('mnt', 'results').resolve())}:/mnt/results"]
+        self.mounts = [f"{str(self.tmpdir.joinpath('data', 'results').resolve())}:/data/results"]
 
 
     def check(self):
@@ -91,8 +91,7 @@ class ContainerTester:
 
     def run(self, container=True, check=True, cleanup=True):
         try:
-            if container:
-                self.runner.run(self.target_str, self.mounts)
+            if container: self.runner.run(self.target_str, self.mounts)
             if check: self.check()
         except APIError as ae:
             raise ae

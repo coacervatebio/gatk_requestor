@@ -10,13 +10,13 @@ class SnakemakeRunner:
         logs = client.containers.run(
             test_tag,
             # entrypoint="/bin/ls",
-            # command=["-la", "/mnt/results/"],
+            # command=["-la", "/data/results/"],
             entrypoint="snakemake",
             command=[
                 *target_files,
                 "-f", 
                 "-j1",
-                "-s=/mnt/workflow/Snakefile",
+                "-s=/data/workflow/Snakefile",
             ],
             name="test_container",
             auto_remove=True,
@@ -31,7 +31,7 @@ class RequestorRunner():
         logs = client.containers.run(
             test_tag,
             entrypoint="python",
-            command='/mnt/workflow/scripts/requestor.py --subnet goth',
+            command='/data/workflow/scripts/requestor.py --subnet goth',
             name="test_goth_requestor",
             environment=[
                 f"YAGNA_APPKEY={os.environ['YAGNA_APPKEY']}",

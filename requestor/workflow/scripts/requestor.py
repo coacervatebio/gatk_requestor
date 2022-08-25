@@ -21,9 +21,9 @@ from yapapi.payload import vm
 
 # CLI arguments definition
 arg_parser = argparse.ArgumentParser()
-arg_parser.add_argument("--alignments", type=Path, default=Path("/mnt/results/alignments"))
-arg_parser.add_argument("--vcfs", type=Path, default=Path("/mnt/results/hc_out"))
-arg_parser.add_argument("--script", type=Path, default=Path("/mnt/workflow/scripts/run.sh"))
+arg_parser.add_argument("--alignments", type=Path, default=Path("/data/results/alignments"))
+arg_parser.add_argument("--vcfs", type=Path, default=Path("/data/results/hc_out"))
+arg_parser.add_argument("--script", type=Path, default=Path("/data/workflow/scripts/run.sh"))
 arg_parser.add_argument("--subnet", type=str, default="devnet-beta")
 arg_parser.add_argument("--image", type=str, default="cb7b8d13a19318cdf2b24fdc8504dc974bb96a06f6330f8e68972917")
 arg_parser.add_argument("--debug", type=bool, default=False)
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     task = loop.create_task(main())
 
     # yapapi debug logging to a file
-    enable_default_logger(log_file=f"/mnt/workflow/logs/haplotype_caller_{datetime.now().strftime('%Y%m%d-%H%M')}_{args.image}.log")
+    enable_default_logger(log_file=f"/data/workflow/logs/haplotype_caller_{datetime.now().strftime('%Y%m%d-%H%M')}_{args.image}.log")
 
     try:
         loop.run_until_complete(task)
