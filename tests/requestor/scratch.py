@@ -1,16 +1,24 @@
-import shutil
-from pathlib import PurePath, Path
-from common import ContainerTester
-from runners import SnakemakeRunner
+import os
 
-data_path = PurePath("assets/index_cram/")
-workdir = Path("assets/tmp_output/")
+class Component:
 
-try:
-    tester = ContainerTester(data_path, workdir, SnakemakeRunner)
-    tester.run()
-    tester.check()
-except Exception as e:
-    print(e)
-finally:
-    tester.cleanup()
+    def component_method(self):
+        self.identity = 'component'
+        print(f"I am a {self.identity} method!")
+
+comp = Component()
+
+class Composite:
+
+    def __init__(self, component):
+        self.component = component
+
+    def call_component_method(self):
+        print("Calling component method..")
+        self.component.component_method()
+
+    def call_composite_method(self):
+        print("Calling composite method")
+
+classy = Composite(comp)
+classy.call_component_method()

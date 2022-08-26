@@ -1,13 +1,17 @@
 import os
 import docker
-from config import test_tag
+from config import test_tag, test_name
 
 client = docker.from_env()
 
 class SnakemakeRunner:
-    def run(target_files, vols):
+
+    def __init__(self):
+        self.cons = client.containers
+
+    def run(self, target_files, vols):
     # Run the test job.
-        logs = client.containers.run(
+        logs = self.cons.run(
             test_tag,
             # entrypoint="/bin/ls",
             # command=["-la", "/data/results/"],
@@ -18,8 +22,7 @@ class SnakemakeRunner:
                 "-j1",
                 "-s=/data/workflow/Snakefile",
             ],
-            name="test_container",
-            auto_remove=True,
+            name=test_name,
             volumes=vols
             ).decode('utf-8')
         print(logs)
@@ -27,19 +30,19 @@ class SnakemakeRunner:
 
 
 class RequestorRunner():
-    def run(target_file, vols):
-        logs = client.containers.run(
+    def run(self, target_file, vols):
+        self.cons = client.containers
+        logs = self.cons.run(
             test_tag,
             entrypoint="python",
             command='/data/workflow/scripts/requestor.py --subnet goth',
-            name="test_goth_requestor",
+            name=test_name,
             environment=[
                 f"YAGNA_APPKEY={os.environ['YAGNA_APPKEY']}",
                 f"YAGNA_API_URL={os.environ['YAGNA_API_URL']}",
                 f"GSB_URL={os.environ['GSB_URL']}",
                 ],
             network_mode="host",
-            auto_remove=True,
             volumes=vols
             )
 

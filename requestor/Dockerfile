@@ -21,7 +21,9 @@ RUN rm -rf golem-requestor*
 # This installs GATK, snakemake and yapapi
 RUN mamba env update --name base --file /data/workflow/envs/env.yml
 
-USER 5000
 COPY start.sh /home/requestor/start.sh
+RUN chown -R 5000:5000 /home
+
+USER 5000
 ENTRYPOINT ["/bin/bash", "/home/requestor/start.sh"]
 CMD [ "-m", "golem" ]

@@ -5,6 +5,7 @@ from pathlib import Path
 # TODO: Check app keys etc are set in env
 
 test_tag = 'coacervate_requestor:test'
+test_name = 'test_container'
 test_sample = 'HG03633'
 rpath = Path(rootpath.detect())
 yagna_datadir = Path('/home/vagrant/yagna_datadir/')

@@ -8,8 +8,8 @@ def test_genotype():
     data_path = PurePath("assets/genotype/")
 
     workdir = Path("/home/vagrant/tmp_guest")
-    tester = ContainerTester(SnakemakeRunner, data_path, tmpdir=workdir)
-    tester.run(check=False, cleanup=False)
+    tester = ContainerTester(SnakemakeRunner(), data_path, tmpdir=workdir)
+    tester.run(check=False, cleanup=True)
 
 debug = """
 

@@ -2,11 +2,13 @@
 Common code for unit testing of rules generated with Snakemake 7.12.1.
 """
 
+from cgi import test
 import os
 import shutil
 import subprocess as sp
 from pathlib import Path
-from docker.errors import DockerException, ContainerError, APIError
+from docker.errors import DockerException, ContainerError, APIError, NotFound
+from config import test_name
 
 
 class ContainerTester:
@@ -15,7 +17,6 @@ class ContainerTester:
         self.tmpdir = tmpdir
         self.runner = runner
         self.track_unexpected = True #can be set to False when ignoring inputs that change with every run
-
 
         # Setup necessary paths, datadir must have input dir (data) and output dir (expected)
         self.input_data = datadir.joinpath('inputs')
@@ -86,6 +87,12 @@ class ContainerTester:
         assert len(sp.check_output(["cmp", generated_file, expected_file])) == 0
 
     def cleanup(self):
+        try:
+            test_con = self.runner.cons.get(test_name)
+            test_con.remove(force=True)
+        except NotFound:
+            pass # Nothing to clean up
+
         if self.tmpdir.is_dir():
             shutil.rmtree(self.tmpdir)
 
@@ -93,15 +100,13 @@ class ContainerTester:
         try:
             if container: self.runner.run(self.target_str, self.mounts)
             if check: self.check()
-        except APIError as ae:
-            raise ae
         except ContainerError as ce:
-            print(ce.container.logs().decode('utf-8'))
             raise ce
+        except APIError as ae:
+        # Catches errors relating to getting logs from a container that never started
+            raise ae
         # Catch any docker SDK issues
-        except DockerException as de:
-            raise de
-        except:
+        except NotFound:
             raise
         finally:
             if cleanup: self.cleanup()
