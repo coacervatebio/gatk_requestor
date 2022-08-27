@@ -14,7 +14,7 @@ class SnakemakeRunner:
         logs = self.cons.run(
             test_tag,
             # entrypoint="/bin/ls",
-            # command=["-la", "/data/results/"],
+            # command=["-la", "/data/results/alignments/full"],
             entrypoint="snakemake",
             command=[
                 *target_files,

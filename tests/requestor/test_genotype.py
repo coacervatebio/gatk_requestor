@@ -9,7 +9,7 @@ def test_genotype():
 
     workdir = Path("/home/vagrant/tmp_guest")
     tester = ContainerTester(SnakemakeRunner(), data_path, tmpdir=workdir)
-    tester.run(check=False, cleanup=True)
+    tester.run()
 
 debug = """
 

@@ -1,13 +1,13 @@
 FROM condaforge/mambaforge
 
 RUN apt-get update && apt-get install screen jq -y
-RUN useradd -u 5000 -s /bin/bash --create-home requestor
+RUN useradd -u 1000 -s /bin/bash --create-home requestor
 
 COPY config /data/config
 COPY resources /data/resources
 COPY results /data/results
 COPY workflow /data/workflow
-RUN chown -R 5000:5000 /data
+RUN chown -R 1000:1000 /data
 
 # Install yagna requestor
 WORKDIR /home/requestor
@@ -22,8 +22,8 @@ RUN rm -rf golem-requestor*
 RUN mamba env update --name base --file /data/workflow/envs/env.yml
 
 COPY start.sh /home/requestor/start.sh
-RUN chown -R 5000:5000 /home
+RUN chown -R 1000:1000 /home
 
-USER 5000
+USER 1000
 ENTRYPOINT ["/bin/bash", "/home/requestor/start.sh"]
 CMD [ "-m", "golem" ]
