@@ -1,21 +1,7 @@
-from pathlib import PurePath, Path
-from common import ContainerTester
+from pathlib import PurePath
+from common import ContainerTester, allowed_pattern
 from runners import SnakemakeRunner
 from checkers import SimpleChecker
-
-
-def allowed_pattern(tf):
-    
-    expected_cmp_fail_pattern = [
-        '__',
-        'vcfheader.vcf',
-    ]
-    
-    s_tf = str(tf)
-    for ecfp in expected_cmp_fail_pattern:
-        if ecfp in s_tf:
-            return False
-    return True
 
 def test_combine_region():
     # No snakemake rule explicitly states the creation of all the output files

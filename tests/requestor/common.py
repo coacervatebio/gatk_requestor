@@ -50,11 +50,11 @@ class ContainerTester:
             for f in files:
                 f = (Path(path) / f).relative_to(self.tmpdir)
                 all_files.append(f)
-                print("In focus: ", f)
+                # print("In focus: ", f)
                 if str(f).startswith(".snakemake"):
                     continue
                 if f in input_files:
-                    print("Ignoring: ", f)
+                    # print("Ignoring: ", f)
                     # ignore input files
                     pass
                 elif f in self.target_files:
@@ -106,3 +106,20 @@ class ContainerTester:
             raise
         finally:
             if cleanup: self.cleanup()
+
+
+# Small Utils
+
+def allowed_pattern(tf):
+    
+    expected_cmp_fail_pattern = [
+        '__',
+        'vcfheader.vcf',
+        'gz.tbi'
+    ]
+    
+    s_tf = str(tf)
+    for ecfp in expected_cmp_fail_pattern:
+        if ecfp in s_tf:
+            return False
+    return True

@@ -1,4 +1,7 @@
+from cmath import exp
 import subprocess as sp
+import pysam as ps
+
 
 class SimpleChecker:
     
@@ -9,5 +12,11 @@ class SimpleChecker:
 
 
 class VcfChecker:
+
+    @staticmethod
     def compare_files(generated_file, expected_file):
-        ...
+        gv = ps.VariantFile(generated_file, 'r')
+        ev = ps.VariantFile(expected_file, 'r')
+        g_recs = [str(r) for r in gv.fetch()]
+        e_recs = [str(r) for r in ev.fetch()]
+        assert g_recs == e_recs
