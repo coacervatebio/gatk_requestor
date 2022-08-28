@@ -1,6 +1,7 @@
 from pathlib import PurePath, Path
 from common import ContainerTester
 from runners import SnakemakeRunner
+from checkers import SimpleChecker
 
 
 def allowed_pattern(tf):
@@ -20,7 +21,7 @@ def test_combine_region():
     # No snakemake rule explicitly states the creation of all the output files
     # Need to specify output from Snakefile but test for more
     data_path = PurePath("assets/combine_region/")
-    tester = ContainerTester(SnakemakeRunner(), data_path)
+    tester = ContainerTester(SnakemakeRunner(), SimpleChecker(), data_path)
 
     tester.track_unexpected = False
     tester.target_str = ['/data/results/combi_out/chr21_database']

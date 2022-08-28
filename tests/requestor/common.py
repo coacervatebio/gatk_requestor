@@ -12,10 +12,11 @@ from config import test_name
 
 
 class ContainerTester:
-    def __init__(self, runner, datadir, tmpdir=Path("assets/tmp_output/")):
+    def __init__(self, runner, checker, datadir, tmpdir=Path("assets/tmp_output/")):
         self.datadir = datadir
         self.tmpdir = tmpdir
         self.runner = runner
+        self.checker = checker
         self.track_unexpected = True #can be set to False when ignoring inputs that change with every run
 
         # Setup necessary paths, datadir must have input dir (data) and output dir (expected)
@@ -37,7 +38,7 @@ class ContainerTester:
         self.mounts = [f"{str(self.tmpdir.joinpath('data', 'results').resolve())}:/data/results"]
 
 
-    def check(self):
+    def check_files(self):
         input_files = set(
             (Path(path) / f).relative_to(self.input_data)
             for path, _, files in os.walk(self.input_data)
@@ -58,7 +59,7 @@ class ContainerTester:
                     pass
                 elif f in self.target_files:
                     print("Comparing: ", f)
-                    self.compare_files(self.tmpdir / f, self.expected_output / f)
+                    self.checker.compare_files(self.tmpdir / f, self.expected_output / f)
                 elif self.track_unexpected:
                     print("Unexpected: ", f)
                     unexpected_files.add(f)
@@ -81,11 +82,6 @@ class ContainerTester:
                 )
             )
 
-    @staticmethod
-    def compare_files(generated_file, expected_file):
-        # Check that cmp returns no output (no difference between files)
-        assert len(sp.check_output(["cmp", generated_file, expected_file])) == 0
-
     def cleanup(self):
         try:
             test_con = self.runner.cons.get(test_name)
@@ -99,7 +95,7 @@ class ContainerTester:
     def run(self, container=True, check=True, cleanup=True):
         try:
             if container: self.runner.run(self.target_str, self.mounts)
-            if check: self.check()
+            if check: self.check_files()
         except ContainerError as ce:
             raise ce
         except APIError as ae:

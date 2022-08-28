@@ -1,15 +1,14 @@
 from pathlib import Path, PurePath
 from common import ContainerTester
 from runners import SnakemakeRunner
-from tempfile import TemporaryDirectory
 
 def test_genotype():
 
     data_path = PurePath("assets/genotype/")
 
-    workdir = Path("/home/vagrant/tmp_guest")
-    tester = ContainerTester(SnakemakeRunner(), data_path, tmpdir=workdir)
-    tester.run()
+    tmpdir = Path("/home/vagrant/tmp_guest")
+    tester = ContainerTester(SnakemakeRunner(), data_path, tmpdir=tmpdir)
+    tester.run(cleanup=False)
 
 debug = """
 
