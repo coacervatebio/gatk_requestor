@@ -1,47 +1,12 @@
-import os
-import sys
-
-import subprocess as sp
-from tempfile import TemporaryDirectory
-import shutil
-from pathlib import Path, PurePosixPath
-
-sys.path.insert(0, os.path.dirname(__file__))
-
-import common
+from pathlib import PurePath, Path
+from common import ContainerTester
+from runners import SnakemakeRunner
+from checkers import VcfChecker
 
 
 def test_gather_vcfs():
 
-    with TemporaryDirectory() as tmpdir:
-        workdir = Path(tmpdir) / "workdir"
-        data_path = PurePosixPath(".tests/unit/gather_vcfs/data")
-        expected_path = PurePosixPath(".tests/unit/gather_vcfs/expected")
+    data_path = PurePath("assets/gather_vcfs/")
 
-        # Copy data to the temporary workdir.
-        shutil.copytree(data_path, workdir)
-
-        # dbg
-        print("/mnt/results/gather_out/project_output.vcf.gz", file=sys.stderr)
-
-        # Run the test job.
-        sp.check_output([
-            "python",
-            "-m",
-            "snakemake", 
-            "/mnt/results/gather_out/project_output.vcf.gz",
-            "-f", 
-            "-j1",
-            "--keep-target-files",
-            "-s=/mnt/workflow/Snakefile",
-            "--config",
-            "golem_subnet=goth",
-            "--directory",
-            workdir,
-        ])
-
-        # Check the output byte by byte using cmp.
-        # To modify this behavior, you can inherit from common.OutputChecker in here
-        # and overwrite the method `compare_files(generated_file, expected_file), 
-        # also see common.py.
-        common.OutputChecker(data_path, expected_path, workdir).check()
+    tester = ContainerTester(SnakemakeRunner(), VcfChecker(), data_path)
+    tester.run()
