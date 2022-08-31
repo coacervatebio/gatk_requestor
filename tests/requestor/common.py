@@ -82,7 +82,7 @@ class ContainerTester:
                 )
             )
 
-    def clean_cons(self):
+    def clean_con(self):
         try:
             test_con = self.runner.cons.get(test_name)
             test_con.remove(force=True)
@@ -93,9 +93,9 @@ class ContainerTester:
         if self.tmpdir.is_dir():
             shutil.rmtree(self.tmpdir)
 
-    def run(self, container=True, check=True, clean_cons=True, clean_tmp=True):
+    def run(self, run_con=True, check=True, clean_con=True, clean_tmp=True):
         try:
-            if container: self.runner.run()
+            if run_con: self.runner.run()
             if check: self.check_files()
         except ContainerError as ce:
             raise ce
@@ -106,7 +106,7 @@ class ContainerTester:
         except NotFound:
             raise
         finally:
-            if clean_cons: self.clean_cons()
+            if clean_con: self.clean_con()
             if clean_tmp: self.clean_tmp()
 
 
@@ -114,14 +114,14 @@ class ContainerTester:
 
 def allowed_pattern(tf):
     
-    expected_cmp_fail_pattern = [
+    expected_cmp_fail_patterns = [
         '__',
         'vcfheader.vcf',
         'gz.tbi'
     ]
     
     s_tf = str(tf)
-    for ecfp in expected_cmp_fail_pattern:
+    for ecfp in expected_cmp_fail_patterns:
         if ecfp in s_tf:
             return False
     return True
