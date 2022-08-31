@@ -1,6 +1,6 @@
 import os
 import docker
-from config import test_tag, test_name
+from config import test_tag, test_name, yagna_datadir
 
 client = docker.from_env()
 
@@ -52,23 +52,26 @@ class GothRequestorRunner():
                 ],
             network_mode="host",
             volumes=self.vols
-            )
+            ).decode('utf-8')
 
-        return logs.decode('utf-8')
+        return logs
 
-# class DevnetRequestorRunner():
+class DevnetRequestorRunner():
 
-#     def __init__(self):
-#         ...
+    def __init__(self):
+        self.cons = client.containers
+        self.vols = []
     
-#     def run(self):
-#         logs = client.containers.run(
-#             test_tag,
-#             command='-m req_only', # Default in /data/config/config.yml is devnet-beta
-#             name="test_devnet_requestor",
-#             auto_remove=True,
-#             volumes=[
-#                 f'{str(yagna_datadir)}:/yagna',
-#                 ]
-#             ).decode('utf-8')
-#         return logs
+    def run(self):
+        logs = client.containers.run(
+            test_tag,
+            command='-m req_only', # Default in /data/config/config.yml is devnet-beta
+            name="test_devnet_requestor",
+            auto_remove=True,
+            volumes=[
+                *self.vols,
+                f'{str(yagna_datadir)}:/home/requestor/.local/share/yagna',
+                ]
+            ).decode('utf-8')
+        
+        return logs

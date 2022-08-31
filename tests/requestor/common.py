@@ -82,17 +82,18 @@ class ContainerTester:
                 )
             )
 
-    def cleanup(self):
+    def clean_cons(self):
         try:
             test_con = self.runner.cons.get(test_name)
             test_con.remove(force=True)
         except NotFound:
             pass # Nothing to clean up
 
+    def clean_tmp(self):
         if self.tmpdir.is_dir():
             shutil.rmtree(self.tmpdir)
 
-    def run(self, container=True, check=True, cleanup=True):
+    def run(self, container=True, check=True, clean_cons=True, clean_tmp=True):
         try:
             if container: self.runner.run()
             if check: self.check_files()
@@ -105,7 +106,8 @@ class ContainerTester:
         except NotFound:
             raise
         finally:
-            if cleanup: self.cleanup()
+            if clean_cons: self.clean_cons()
+            if clean_tmp: self.clean_tmp()
 
 
 # Small Utils
