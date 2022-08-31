@@ -51,3 +51,6 @@ vagrant_provisioning.txt
 **/gatk_release/*
 **/ref_hg38*
 !**/gatk_release/README.md
+
+# Test / Dev
+tests/requestor/scratch.py

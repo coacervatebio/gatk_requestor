@@ -32,10 +32,10 @@ class ContainerTester:
         )
         # Sometimes target_str needs to be overwritten, e.g when it
         # is a dir producing many unspecified targets
-        self.target_str = [f'/{f}' for f in self.target_files]
+        self.runner.target_strings = [f'/{f}' for f in self.target_files]
         
         # Setup default mounts that can be overridden before calling run()
-        self.mounts = [f"{str(self.tmpdir.joinpath('data', 'results').resolve())}:/data/results"]
+        self.runner.vols = [f"{str(self.tmpdir.joinpath('data', 'results').resolve())}:/data/results"]
 
 
     def check_files(self):
@@ -94,7 +94,7 @@ class ContainerTester:
 
     def run(self, container=True, check=True, cleanup=True):
         try:
-            if container: self.runner.run(self.target_str, self.mounts)
+            if container: self.runner.run()
             if check: self.check_files()
         except ContainerError as ce:
             raise ce

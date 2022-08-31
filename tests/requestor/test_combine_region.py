@@ -10,7 +10,7 @@ def test_combine_region():
     tester = ContainerTester(SnakemakeRunner(), SimpleChecker(), data_path)
 
     tester.track_unexpected = False
-    tester.target_str = ['/data/results/combi_out/chr21_database']
+    tester.runner.target_strings = ['/data/results/combi_out/chr21_database']
 
     # Filter target files against failure patterns
     tester.target_files = filter(allowed_pattern, tester.target_files)
