@@ -44,7 +44,7 @@ case "${mode}" in
     interactive) /bin/bash;;
     local) snakemake -c2 -s=/data/workflow/rules/local.smk;;
     golem) snakemake -c2 -s=/data/workflow/Snakefile;;
-    specific) snakemake ${outputs} -c2 -s=/data/workflow/Snakefile -np;;
+    specific) snakemake ${outputs} -c2 -s=/data/workflow/Snakefile;;
     req_only) python /data/workflow/scripts/requestor.py;;
     *) echo "Please select interactive, local, or golem mode";;
 esac

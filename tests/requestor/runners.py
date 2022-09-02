@@ -8,24 +8,24 @@ class SnakemakeRunner:
 
     def __init__(self):
         self.cons = client.containers
-        self.target_strings = []
+        self.target_string = ''
         self.vols = []
 
     def run(self):
     # Run the test job.
         logs = self.cons.run(
             test_tag,
-            entrypoint="snakemake",
+            # entrypoint="snakemake",
             command=[
-                *self.target_strings,
-                "-f", 
-                "-j1",
-                "-s=/data/workflow/Snakefile",
+                "-m",
+                "specific",
+                "-o",
+                self.target_string,
             ],
             name=test_name,
             volumes=self.vols
             ).decode('utf-8')
-        print(logs)
+
         return logs
 
 
@@ -63,9 +63,13 @@ class DevnetRequestorRunner():
     def run(self):
         logs = client.containers.run(
             test_tag,
-            command='-m req_only', # Default in /data/config/config.yml is devnet-beta
-            name="test_devnet_requestor",
-            auto_remove=True,
+            command=[
+                "-m",
+                "req_only", # Default in /data/config/config.yml is devnet-beta
+                "-y",
+                "on"
+            ],
+            name=test_name,
             volumes=[
                 *self.vols,
                 f'{str(yagna_datadir)}:/home/requestor/.local/share/yagna',

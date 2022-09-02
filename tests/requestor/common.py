@@ -7,6 +7,7 @@ import os
 import shutil
 import subprocess as sp
 from pathlib import Path
+from icecream import ic
 from docker.errors import DockerException, ContainerError, APIError, NotFound
 from config import test_name
 
@@ -32,7 +33,7 @@ class ContainerTester:
         )
         # Sometimes target_str needs to be overwritten, e.g when it
         # is a dir producing many unspecified targets
-        self.runner.target_strings = [f'/{f}' for f in self.target_files]
+        self.runner.target_string = " ".join([f'/{f}' for f in self.target_files])
         
         # Setup default mounts that can be overridden before calling run()
         self.runner.vols = [f"{str(self.tmpdir.joinpath('data', 'results').resolve())}:/data/results"]
