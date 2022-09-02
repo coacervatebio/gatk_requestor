@@ -15,8 +15,6 @@ class SnakemakeRunner:
     # Run the test job.
         logs = self.cons.run(
             test_tag,
-            # entrypoint="/bin/ls",
-            # command=["-la", "/data/results/alignments/full"],
             entrypoint="snakemake",
             command=[
                 *self.target_strings,
@@ -55,7 +53,7 @@ class GothRequestorRunner():
             ).decode('utf-8')
 
         return logs
-
+    
 class DevnetRequestorRunner():
 
     def __init__(self):
