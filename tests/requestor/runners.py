@@ -10,17 +10,18 @@ class SnakemakeRunner:
         self.cons = client.containers
         self.target_string = ''
         self.vols = []
+        self.arb_com = []
 
     def run(self):
     # Run the test job.
         logs = self.cons.run(
             test_tag,
-            # entrypoint="snakemake",
             command=[
                 "-m",
                 "specific",
                 "-o",
                 self.target_string,
+                *self.arb_com
             ],
             name=test_name,
             volumes=self.vols

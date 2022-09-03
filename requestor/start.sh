@@ -1,10 +1,11 @@
 #!/bin/bash
-while getopts m:y:o: flag
+while getopts m:y:o:a: flag
 do
     case "${flag}" in
         m) mode=${OPTARG};;
         y) yagna=${OPTARG};;
         o) outputs=${OPTARG};;
+        a) arb_sm=${OPTARG};;
     esac
 done
 
@@ -44,7 +45,7 @@ case "${mode}" in
     interactive) /bin/bash;;
     local) snakemake -c2 -s=/data/workflow/rules/local.smk;;
     golem) snakemake -c2 -s=/data/workflow/Snakefile;;
-    specific) snakemake ${outputs} -c2 -s=/data/workflow/Snakefile;;
+    specific) snakemake ${outputs} -c2 -s=/data/workflow/Snakefile ${arb_sm};;
     req_only) python /data/workflow/scripts/requestor.py;;
     *) echo "Please select interactive, local, or golem mode";;
 esac
