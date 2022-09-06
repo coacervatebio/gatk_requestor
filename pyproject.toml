@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "coacervate-requestor"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{include = "coacervate_requestor"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+yapapi = "^0.9.2"
+
+[tool.poetry.group.test.dependencies]
+goth = "^0.13.0"
+pysam = "^0.19.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
