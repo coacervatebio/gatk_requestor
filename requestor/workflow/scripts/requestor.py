@@ -25,7 +25,7 @@ arg_parser.add_argument("--alignments", type=Path, default=Path("/data/results/a
 arg_parser.add_argument("--vcfs", type=Path, default=Path("/data/results/hc_out"))
 arg_parser.add_argument("--script", type=Path, default=Path("/data/workflow/scripts/run.sh"))
 arg_parser.add_argument("--subnet", type=str, default="devnet-beta")
-arg_parser.add_argument("--image", type=str, default="cb7b8d13a19318cdf2b24fdc8504dc974bb96a06f6330f8e68972917")
+arg_parser.add_argument("--image", type=str, default="5b504970c110509c30c44ca4b0958308bff4d33384dabefc61316190")
 arg_parser.add_argument("--debug", type=bool, default=False)
 
 # Container object for parsed arguments

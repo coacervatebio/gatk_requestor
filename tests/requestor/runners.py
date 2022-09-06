@@ -76,5 +76,5 @@ class DevnetRequestorRunner():
                 f'{str(yagna_datadir)}:/home/requestor/.local/share/yagna',
                 ]
             ).decode('utf-8')
-        
+        print(logs)
         return logs

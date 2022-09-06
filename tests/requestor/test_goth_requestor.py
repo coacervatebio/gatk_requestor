@@ -5,7 +5,6 @@ from common import ContainerTester, allowed_pattern
 from runners import GothRequestorRunner, DevnetRequestorRunner
 from checkers import VcfChecker
 
-
 def test_goth_requestor():
 
     data_path = PurePath("assets/call_variants/")
@@ -15,15 +14,4 @@ def test_goth_requestor():
     tester.track_unexpected = False
     tester.target_files = filter(allowed_pattern, tester.target_files)
 
-    tester.run()
-
-def test_devnet_requestor():
-
-    data_path = PurePath("assets/call_variants/")
-
-    tester = ContainerTester(DevnetRequestorRunner(), VcfChecker(), data_path)
-    
-    tester.track_unexpected = False
-    tester.target_files = filter(allowed_pattern, tester.target_files)
-    
     tester.run()
