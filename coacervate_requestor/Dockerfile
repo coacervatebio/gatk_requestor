@@ -1,4 +1,4 @@
-FROM condaforge/mambaforge
+FROM condaforge/mambaforge:4.13.0-1
 
 RUN apt-get update && apt-get install --no-install-recommends -y screen jq 
 RUN useradd -u 1000 -s /bin/bash --create-home requestor

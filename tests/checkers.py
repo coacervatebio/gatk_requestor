@@ -1,4 +1,3 @@
-from cmath import exp
 import subprocess as sp
 import pysam as ps
 

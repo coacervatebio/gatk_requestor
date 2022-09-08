@@ -1,9 +1,9 @@
 import docker
 from pathlib import Path
 
-from config import test_tag, rpath
+from tests.config import test_tag, ROOTPATH
 
-docker_context = Path.joinpath(rpath, 'requestor')
+docker_context = Path.joinpath(ROOTPATH, 'coacervate_requestor')
 client = docker.from_env()
 
 def test_build():

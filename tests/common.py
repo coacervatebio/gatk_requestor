@@ -9,7 +9,7 @@ import subprocess as sp
 from pathlib import Path
 from icecream import ic
 from docker.errors import DockerException, ContainerError, APIError, NotFound
-from config import test_name
+from tests.config import test_name
 
 
 class ContainerTester:

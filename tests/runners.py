@@ -1,6 +1,6 @@
 import os
 import docker
-from config import test_tag, test_name, yagna_datadir
+from tests.config import test_tag, test_name, yagna_datadir
 
 client = docker.from_env()
 

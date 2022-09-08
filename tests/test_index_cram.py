@@ -1,7 +1,7 @@
 from pathlib import PurePath
-from common import ContainerTester
-from runners import SnakemakeRunner
-from checkers import SimpleChecker
+from tests.common import ContainerTester
+from tests.runners import SnakemakeRunner
+from tests.checkers import SimpleChecker
 
 
 def test_index_cram():
