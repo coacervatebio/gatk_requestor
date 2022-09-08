@@ -1,7 +1,7 @@
-from pathlib import PurePath, Path
-from common import ContainerTester
-from runners import SnakemakeRunner
-from checkers import SimpleChecker
+from pathlib import PurePath
+from tests.common import ContainerTester
+from tests.runners import SnakemakeRunner
+from tests.checkers import SimpleChecker
 
 
 def test_split_cram():

@@ -1,7 +1,7 @@
 from pathlib import Path, PurePath
-from common import ContainerTester, allowed_pattern
-from runners import SnakemakeRunner
-from checkers import VcfChecker
+from tests.common import ContainerTester, allowed_pattern
+from tests.runners import SnakemakeRunner
+from tests.checkers import VcfChecker
 
 def test_genotype():
 

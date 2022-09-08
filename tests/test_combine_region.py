@@ -1,7 +1,7 @@
 from pathlib import PurePath
-from common import ContainerTester, allowed_pattern
-from runners import SnakemakeRunner
-from checkers import SimpleChecker
+from tests.common import ContainerTester, allowed_pattern
+from tests.runners import SnakemakeRunner
+from tests.checkers import SimpleChecker
 
 def test_combine_region():
     # No snakemake rule explicitly states the creation of all the output files

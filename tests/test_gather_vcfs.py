@@ -1,7 +1,7 @@
 from pathlib import PurePath, Path
-from common import ContainerTester
-from runners import SnakemakeRunner
-from checkers import VcfChecker
+from tests.common import ContainerTester
+from tests.runners import SnakemakeRunner
+from tests.checkers import VcfChecker
 
 
 def test_gather_vcfs():
