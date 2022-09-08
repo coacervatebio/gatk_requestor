@@ -39,7 +39,8 @@ class GothRequestorRunner():
         assert os.environ.get('YAGNA_APPKEY') is not None, 'No appkey set'
 
     def run(self):
-        logs = self.cons.run(
+        # logs = self.cons.run(
+        container = self.cons.run(
             test_tag,
             entrypoint="python",
             command=f'/data/workflow/scripts/requestor.py --subnet goth',
@@ -50,10 +51,14 @@ class GothRequestorRunner():
                 f"GSB_URL={os.environ['GSB_URL']}",
                 ],
             network_mode="host",
-            volumes=self.vols
-            ).decode('utf-8')
+            volumes=self.vols,
+            detach=True
+            )#.decode('utf-8')
+        output = container.attach(stdout=True, stream=True, logs=True)
+        for line in output:
+            print(line)
 
-        return logs
+        # return logs
     
 class DevnetRequestorRunner():
 
