@@ -1,9 +1,7 @@
-import os
-import docker
 from pathlib import PurePath
-from common import ContainerTester, allowed_pattern
-from runners import DevnetRequestorRunner
-from checkers import VcfChecker
+from tests.common import ContainerTester, allowed_pattern
+from tests.runners import DevnetRequestorRunner
+from tests.checkers import VcfChecker
 
 def test_devnet_requestor():
 

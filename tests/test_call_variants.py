@@ -1,4 +1,4 @@
-from pathlib import PurePath, Path
+from pathlib import PurePath
 from common import ContainerTester, allowed_pattern
 from runners import SnakemakeRunner
 from checkers import VcfChecker
