@@ -23,7 +23,6 @@ from yapapi.payload import vm
 arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("--alignments", type=Path, default=Path("/data/results/alignments"))
 arg_parser.add_argument("--vcfs", type=Path, default=Path("/data/results/hc_out"))
-arg_parser.add_argument("--script", type=Path, default=Path("/data/workflow/scripts/run.sh"))
 arg_parser.add_argument("--subnet", type=str, default="devnet-beta")
 arg_parser.add_argument("--image", type=str, default="15678de4a8dacd5e29d563158af1857b8e49514e66c511661a3755d4")
 arg_parser.add_argument("--debug", type=bool, default=False)
@@ -33,7 +32,7 @@ args = argparse.Namespace()
 
 PROV_INPATH = Path("/golem/input")
 PROV_OUTPATH = Path("/golem/output")
-ENTRYPOINT_PATH = "/golem/entrypoint/run.sh"
+ENTRYPOINT_PATH = "/run/run.sh"
 TASK_TIMEOUT = timedelta(minutes=30)
 
 
@@ -67,9 +66,6 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
     The signature of this function cannot change, as it's used internally by `Executor`.
     """
     script = context.new_script(timeout=timedelta(minutes=5))
-    
-    # Upload the script to be run on provider
-    script.upload_file(str(args.script), ENTRYPOINT_PATH)
 
     async for task in tasks:
         # Upload input alignments
@@ -92,10 +88,6 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
 
         # Mark task as accepted and set its result
         task.accept_result(result=await future_result)
-
-        # Re-initialize the script so that `upload_file` is executed only once per worker
-        script = context.new_script(timeout=timedelta(minutes=5))
-
 
 async def main():
     # Set of parameters for the VM run by each of the providers
