@@ -5,15 +5,18 @@ Common code for unit testing of rules generated with Snakemake 7.12.1.
 from cgi import test
 import os
 import shutil
+import logging
 import subprocess as sp
 from pathlib import Path
-from icecream import ic
 from docker.errors import DockerException, ContainerError, APIError, NotFound
 from tests.config import test_name
 
+LOGGER = logging.getLogger(__name__)
 
 class ContainerTester:
+
     def __init__(self, runner, checker, datadir, tmpdir=Path("assets/tmp_output/")):
+        LOGGER.info(f"Initializing ContainerTester with {runner}, {checker}, and {datadir}")
         self.datadir = datadir
         self.tmpdir = tmpdir
         self.runner = runner
@@ -21,6 +24,7 @@ class ContainerTester:
         self.track_unexpected = True #can be set to False when ignoring inputs that change with every run
 
         # Setup necessary paths, datadir must have input dir (data) and output dir (expected)
+        LOGGER.info("Copying mock data to temp directory")
         self.input_data = datadir.joinpath('inputs')
         self.expected_output = datadir.joinpath('expected')
         shutil.copytree(self.input_data, self.tmpdir)
@@ -31,6 +35,8 @@ class ContainerTester:
             for path, _, files in os.walk(self.expected_output)
             for f in files
         )
+        LOGGER.debug(f"Determined target files as:\n{self.target_files}")
+
         # Sometimes target_str needs to be overwritten, e.g when it
         # is a dir producing many unspecified targets
         self.runner.target_string = " ".join([f'/{f}' for f in self.target_files])
@@ -40,43 +46,49 @@ class ContainerTester:
 
 
     def check_files(self):
+        LOGGER.info("Checking files")
         input_files = set(
             (Path(path) / f).relative_to(self.input_data)
             for path, _, files in os.walk(self.input_data)
             for f in files
         )
+        LOGGER.debug(f"Input files determined as: {input_files}")
         unexpected_files = set()
         all_files = []
         for path, _, files in os.walk(self.tmpdir):
             for f in files:
                 f = (Path(path) / f).relative_to(self.tmpdir)
                 all_files.append(f)
-                # print("In focus: ", f)
+                LOGGER.debug(f"Focusing on {f}")
                 if str(f).startswith(".snakemake"):
                     continue
                 if f in input_files:
-                    # print("Ignoring: ", f)
+                    LOGGER.debug(f"Ignoring {f} since it's an input file")
                     # ignore input files
                     pass
                 elif f in self.target_files:
-                    print("Comparing: ", f)
+                    LOGGER.info(f"Comparing {f} against equivalent in {self.expected_output}")
                     self.checker.compare_files(self.tmpdir / f, self.expected_output / f)
                 elif self.track_unexpected:
-                    print("Unexpected: ", f)
+                    LOGGER.warning(f"Found unexpected file: {f}")
                     unexpected_files.add(f)
 
         missing_targets = []
         for tf in self.target_files:
             if tf not in all_files:
+                LOGGER.error(f"Missing expected target file {tf} from all files: \n{all_files}")
                 missing_targets.append(tf)
 
+        # Separate if/raise to log all missing files before the test fails/exits
         if missing_targets:
+            LOGGER.critical(f"Exiting due to missing targets..")
             raise FileNotFoundError("Missing targets:\n{}".format(
                     "\n".join(sorted(map(str, missing_targets)))
                 )
             )
         
         if unexpected_files:
+            LOGGER.critical(f"Exiting due to unexpected files..")
             raise ValueError(
                 "Unexpected files:\n{}".format(
                     "\n".join(sorted(map(str, unexpected_files)))
@@ -86,25 +98,31 @@ class ContainerTester:
     def clean_con(self):
         try:
             test_con = self.runner.cons.get(test_name)
+            LOGGER.info(f"Cleaning up {test_con}")
             test_con.remove(force=True)
         except NotFound:
             pass # Nothing to clean up
 
     def clean_tmp(self):
+        LOGGER.info(f"Cleaning up tmpdir: {self.tmpdir}")
         if self.tmpdir.is_dir():
             shutil.rmtree(self.tmpdir)
 
     def run(self, run_con=True, check=True, clean_con=True, clean_tmp=True):
+        LOGGER.debug("Entering run() method")
         try:
             if run_con: self.runner.run()
             if check: self.check_files()
         except ContainerError as ce:
+            LOGGER.critical("Container exited with non-zero code")
             raise ce
-        except APIError as ae:
         # Catches errors relating to getting logs from a container that never started
+        except APIError as ae:
+            LOGGER.critical("Docker daemon returned an error")
             raise ae
         # Catch any docker SDK issues
-        except NotFound:
+        except DockerException:
+            LOGGER.critical("Unhandled Docker exception")
             raise
         finally:
             if clean_con: self.clean_con()
@@ -114,7 +132,15 @@ class ContainerTester:
 # Small Utils
 
 def allowed_pattern(tf):
-    
+    """
+    Filter function to remove files from comparison matching certain patterns
+    identifying files that change from run-to-run. E.g. failing comparison
+    because the timestamp is different.
+
+    :param tf: Target file being evaluated
+    :returns False: File contains failure pattern
+    :returns True: File does not contain failure pattern
+    """
     expected_cmp_fail_patterns = [
         '__',
         'vcfheader.vcf',
@@ -124,5 +150,6 @@ def allowed_pattern(tf):
     s_tf = str(tf)
     for ecfp in expected_cmp_fail_patterns:
         if ecfp in s_tf:
+            LOGGER.warn(f"Excluding {s_tf} for containing {ecfp}")
             return False
     return True

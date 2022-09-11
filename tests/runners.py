@@ -1,7 +1,9 @@
 import os
+import logging
 import docker
 from tests.config import test_tag, test_name, yagna_datadir
 
+LOGGER = logging.getLogger(__name__)
 client = docker.from_env()
 
 class SnakemakeRunner:
@@ -67,7 +69,8 @@ class DevnetRequestorRunner():
         self.vols = []
     
     def run(self):
-        logs = client.containers.run(
+        # logs = client.containers.run(
+        container = client.containers.run(
             test_tag,
             command=[
                 "-m",
@@ -79,7 +82,10 @@ class DevnetRequestorRunner():
             volumes=[
                 *self.vols,
                 f'{str(yagna_datadir)}:/home/requestor/.local/share/yagna',
-                ]
-            ).decode('utf-8')
-        print(logs)
-        return logs
+                ],
+            detach=True 
+            )#.decode('utf-8')
+        output = container.attach(stdout=True, stream=True, logs=True)
+        for line in output:
+            print(line)
+        # return logs

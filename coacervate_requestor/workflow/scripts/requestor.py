@@ -24,7 +24,7 @@ arg_parser = argparse.ArgumentParser()
 arg_parser.add_argument("--alignments", type=Path, default=Path("/data/results/alignments"))
 arg_parser.add_argument("--vcfs", type=Path, default=Path("/data/results/hc_out"))
 arg_parser.add_argument("--subnet", type=str, default="devnet-beta")
-arg_parser.add_argument("--image", type=str, default="15678de4a8dacd5e29d563158af1857b8e49514e66c511661a3755d4")
+arg_parser.add_argument("--image", type=str, default="635e41034ced5d0622d0760bf6aac8377fdf225154d3f306f4fca805")
 arg_parser.add_argument("--debug", type=bool, default=False)
 
 # Container object for parsed arguments

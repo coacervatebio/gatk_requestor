@@ -54,3 +54,4 @@ vagrant_provisioning.txt
 
 # Test / Dev
 tests/requestor/scratch.py
+tests/logs/pytest.log
