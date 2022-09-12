@@ -1,12 +1,6 @@
-"""
-Common code for unit testing of rules generated with Snakemake 7.12.1.
-"""
-
-from cgi import test
 import os
 import shutil
 import logging
-import subprocess as sp
 from pathlib import Path
 from docker.errors import DockerException, ContainerError, APIError, NotFound
 from tests.config import test_name
@@ -14,14 +8,31 @@ from tests.config import test_name
 LOGGER = logging.getLogger(__name__)
 
 class ContainerTester:
+    """Main composite class for running tests within containers.
 
-    def __init__(self, runner, checker, datadir, tmpdir=Path("assets/tmp_output/")):
+    Handles setting up temporary directory, running, checking and cleanup.
+    """
+    
+
+    def __init__(self, runner, checker, datadir, tmpdir=Path("assets/TEMP/"), track_unexpected=True):
+        """
+        :param runner: Component Runner class for running container
+        :type runner: _type_
+        :param checker: Component Checker class for comparing outputs/expected
+        :type checker: _type_
+        :param datadir: Directory holding mock assets and expected outputs
+        :type datadir: PurePath
+        :param tmpdir: Directory for holding temporary outputs, defaults to Path("assets/TEMP/")
+        :type tmpdir: Path
+        :param track_unexpected: Set to False if there are output files not relevant to testing, defaults to True
+        :type track_unexpected: Bool
+        """
         LOGGER.info(f"Initializing ContainerTester with {runner}, {checker}, and {datadir}")
         self.datadir = datadir
         self.tmpdir = tmpdir
         self.runner = runner
         self.checker = checker
-        self.track_unexpected = True #can be set to False when ignoring inputs that change with every run
+        self.track_unexpected = track_unexpected #can be set to False when ignoring inputs that change with every run
 
         # Setup necessary paths, datadir must have input dir (data) and output dir (expected)
         LOGGER.info("Copying mock data to temp directory")
@@ -46,6 +57,11 @@ class ContainerTester:
 
 
     def check_files(self):
+        """Iterate through inputs and outputs, comparing and raising issues where appropriate
+
+        :raises FileNotFoundError: Raised when a target file is missing from the outputs
+        :raises ValueError: Raised when an unexpected file is encountered
+        """
         LOGGER.info("Checking files")
         input_files = set(
             (Path(path) / f).relative_to(self.input_data)
@@ -96,6 +112,8 @@ class ContainerTester:
             )
 
     def clean_con(self):
+        """Clean up container created by Runner
+        """
         try:
             test_con = self.runner.cons.get(test_name)
             LOGGER.info(f"Cleaning up {test_con}")
@@ -104,11 +122,27 @@ class ContainerTester:
             pass # Nothing to clean up
 
     def clean_tmp(self):
+        """Remove temporary directory used for test inputs/outputs
+        """
         LOGGER.info(f"Cleaning up tmpdir: {self.tmpdir}")
         if self.tmpdir.is_dir():
             shutil.rmtree(self.tmpdir)
 
     def run(self, run_con=True, check=True, clean_con=True, clean_tmp=True):
+        """Main entrypoint for running defined test case, handling errors and cleaning up.
+
+        :param run_con: Call Runner's run() method, defaults to True
+        :type run_con: bool, optional
+        :param check: Check output of container run, defaults to True
+        :type check: bool, optional
+        :param clean_con: Remove container after test, set to False to manually run things against container after test exits, defaults to True
+        :type clean_con: bool, optional
+        :param clean_tmp: Remove temp dir, set to False to manually inspect inputs/outputs, defaults to True
+        :type clean_tmp: bool, optional
+        :raises ce: ContainerError, logs issues with container process
+        :raises ae: APIError, logs issues with Docker daemon
+        :raise de: DockerException, catch-all log for Docker issue
+        """
         LOGGER.debug("Entering run() method")
         try:
             if run_con: self.runner.run()
@@ -121,9 +155,9 @@ class ContainerTester:
             LOGGER.critical("Docker daemon returned an error")
             raise ae
         # Catch any docker SDK issues
-        except DockerException:
+        except DockerException as de:
             LOGGER.critical("Unhandled Docker exception")
-            raise
+            raise de
         finally:
             if clean_con: self.clean_con()
             if clean_tmp: self.clean_tmp()
