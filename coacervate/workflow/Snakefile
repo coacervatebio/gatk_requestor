@@ -18,8 +18,10 @@ rule split_cram:
         index=f"/data/results/alignments/full/{{sample}}.cram.crai"
     output:
         temp(f"/data/results/alignments/{{reg}}/{{sample}}_{{reg}}.cram")
+    params:
+        reference=config['ref']
     shell:
-        "samtools view {input.alignment} {wildcards.reg} -T {config[ref]} -O cram -o {output}"
+        "samtools view {input.alignment} {wildcards.reg} -T {params.reference} -O cram -o {output}"
 
 rule index_split_cram:
     input:
@@ -57,8 +59,10 @@ rule genotype:
     output:
         joint_vcf=temp(f"/data/results/geno_out/combined_{{reg}}.vcf.gz"),
         index=temp(f"/data/results/geno_out/combined_{{reg}}.vcf.gz.tbi")
+    params:
+        reference=config['ref']
     shell:
-        "gatk --java-options '-Xmx4g' GenotypeGVCFs -R {config[ref]} -V gendb://{input} -O {output.joint_vcf}"
+        "gatk --java-options '-Xmx4g' GenotypeGVCFs -R {params.reference} -V gendb://{input} -O {output.joint_vcf}"
 
 rule gather_vcfs:
     input:

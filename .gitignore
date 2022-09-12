@@ -27,17 +27,11 @@ debug/*
 # Snakemake
 **/.snakemake*
 
-# Prototyping / testing
-untracked/*
-
 # Benchmarking
-**/benchmarks/*/*.tsv
-!**/benchmarks/*/*REPORT*.tsv
+coacervate/benchmarks/*
+!coacervate/benchmarks/gather_benchmarks.py
 
 # Golem
-golem/yagna_datadir/*
-*.log
-golem/tutorials/*
 *.gvmi
 **/goth/*
 !**/goth/*/goth-config.yml
@@ -53,5 +47,5 @@ vagrant_provisioning.txt
 !**/gatk_release/README.md
 
 # Test / Dev
-tests/requestor/scratch.py
+**/scratch.py
 tests/logs/pytest.log

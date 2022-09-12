@@ -3,7 +3,7 @@ from pathlib import Path
 
 from tests.config import test_tag, ROOTPATH
 
-docker_context = Path.joinpath(ROOTPATH, "coacervate_requestor")
+docker_context = Path.joinpath(ROOTPATH, "coacervate")
 client = docker.from_env()
 
 

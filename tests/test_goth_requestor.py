@@ -1,7 +1,6 @@
-import docker
 from pathlib import PurePath
 from tests.common import ContainerTester, allowed_pattern
-from tests.runners import GothRequestorRunner, DevnetRequestorRunner
+from tests.runners import GothRequestorRunner
 from tests.checkers import VcfChecker
 
 
