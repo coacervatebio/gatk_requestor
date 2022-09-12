@@ -7,14 +7,21 @@ from tests.config import test_name
 
 LOGGER = logging.getLogger(__name__)
 
+
 class ContainerTester:
     """Main composite class for running tests within containers.
 
     Handles setting up temporary directory, running, checking and cleanup.
     """
-    
 
-    def __init__(self, runner, checker, datadir, tmpdir=Path("assets/TEMP/"), track_unexpected=True):
+    def __init__(
+        self,
+        runner,
+        checker,
+        datadir,
+        tmpdir=Path("assets/TEMP/"),
+        track_unexpected=True,
+    ):
         """
         :param runner: Component Runner class for running container
         :type runner: _type_
@@ -27,17 +34,19 @@ class ContainerTester:
         :param track_unexpected: Set to False if there are output files not relevant to testing, defaults to True
         :type track_unexpected: Bool
         """
-        LOGGER.info(f"Initializing ContainerTester with {runner}, {checker}, and {datadir}")
+        LOGGER.info(
+            f"Initializing ContainerTester with {runner}, {checker}, and {datadir}"
+        )
         self.datadir = datadir
         self.tmpdir = tmpdir
         self.runner = runner
         self.checker = checker
-        self.track_unexpected = track_unexpected #can be set to False when ignoring inputs that change with every run
+        self.track_unexpected = track_unexpected  # can be set to False when ignoring inputs that change with every run
 
         # Setup necessary paths, datadir must have input dir (data) and output dir (expected)
         LOGGER.info("Copying mock data to temp directory")
-        self.input_data = datadir.joinpath('inputs')
-        self.expected_output = datadir.joinpath('expected')
+        self.input_data = datadir.joinpath("inputs")
+        self.expected_output = datadir.joinpath("expected")
         shutil.copytree(self.input_data, self.tmpdir)
 
         # Determine target files for container execution and comparison
@@ -50,11 +59,12 @@ class ContainerTester:
 
         # Sometimes target_str needs to be overwritten, e.g when it
         # is a dir producing many unspecified targets
-        self.runner.target_string = " ".join([f'/{f}' for f in self.target_files])
-        
-        # Setup default mounts that can be overridden before calling run()
-        self.runner.vols = [f"{str(self.tmpdir.joinpath('data', 'results').resolve())}:/data/results"]
+        self.runner.target_string = " ".join([f"/{f}" for f in self.target_files])
 
+        # Setup default mounts that can be overridden before calling run()
+        self.runner.vols = [
+            f"{str(self.tmpdir.joinpath('data', 'results').resolve())}:/data/results"
+        ]
 
     def check_files(self):
         """Iterate through inputs and outputs, comparing and raising issues where appropriate
@@ -80,11 +90,14 @@ class ContainerTester:
                     continue
                 if f in input_files:
                     LOGGER.debug(f"Ignoring {f} since it's an input file")
-                    # ignore input files
                     pass
                 elif f in self.target_files:
-                    LOGGER.info(f"Comparing {f} against equivalent in {self.expected_output}")
-                    self.checker.compare_files(self.tmpdir / f, self.expected_output / f)
+                    LOGGER.info(
+                        f"Comparing {f} against equivalent in {self.expected_output}"
+                    )
+                    self.checker.compare_files(
+                        self.tmpdir / f, self.expected_output / f
+                    )
                 elif self.track_unexpected:
                     LOGGER.warning(f"Found unexpected file: {f}")
                     unexpected_files.add(f)
@@ -92,17 +105,20 @@ class ContainerTester:
         missing_targets = []
         for tf in self.target_files:
             if tf not in all_files:
-                LOGGER.error(f"Missing expected target file {tf} from all files: \n{all_files}")
+                LOGGER.error(
+                    f"Missing expected target file {tf} from all files: \n{all_files}"
+                )
                 missing_targets.append(tf)
 
         # Separate if/raise to log all missing files before the test fails/exits
         if missing_targets:
             LOGGER.critical(f"Exiting due to missing targets..")
-            raise FileNotFoundError("Missing targets:\n{}".format(
+            raise FileNotFoundError(
+                "Missing targets:\n{}".format(
                     "\n".join(sorted(map(str, missing_targets)))
                 )
             )
-        
+
         if unexpected_files:
             LOGGER.critical(f"Exiting due to unexpected files..")
             raise ValueError(
@@ -112,18 +128,16 @@ class ContainerTester:
             )
 
     def clean_con(self):
-        """Clean up container created by Runner
-        """
+        """Clean up container created by Runner"""
         try:
             test_con = self.runner.cons.get(test_name)
             LOGGER.info(f"Cleaning up {test_con}")
             test_con.remove(force=True)
         except NotFound:
-            pass # Nothing to clean up
+            pass  # Nothing to clean up
 
     def clean_tmp(self):
-        """Remove temporary directory used for test inputs/outputs
-        """
+        """Remove temporary directory used for test inputs/outputs"""
         LOGGER.info(f"Cleaning up tmpdir: {self.tmpdir}")
         if self.tmpdir.is_dir():
             shutil.rmtree(self.tmpdir)
@@ -145,8 +159,10 @@ class ContainerTester:
         """
         LOGGER.debug("Entering run() method")
         try:
-            if run_con: self.runner.run()
-            if check: self.check_files()
+            if run_con:
+                self.runner.run()
+            if check:
+                self.check_files()
         except ContainerError as ce:
             LOGGER.critical("Container exited with non-zero code")
             raise ce
@@ -159,11 +175,14 @@ class ContainerTester:
             LOGGER.critical("Unhandled Docker exception")
             raise de
         finally:
-            if clean_con: self.clean_con()
-            if clean_tmp: self.clean_tmp()
+            if clean_con:
+                self.clean_con()
+            if clean_tmp:
+                self.clean_tmp()
 
 
 # Small Utils
+
 
 def allowed_pattern(tf):
     """
@@ -175,12 +194,8 @@ def allowed_pattern(tf):
     :returns False: File contains failure pattern
     :returns True: File does not contain failure pattern
     """
-    expected_cmp_fail_patterns = [
-        '__',
-        'vcfheader.vcf',
-        'gz.tbi'
-    ]
-    
+    expected_cmp_fail_patterns = ["__", "vcfheader.vcf", "gz.tbi"]
+
     s_tf = str(tf)
     for ecfp in expected_cmp_fail_patterns:
         if ecfp in s_tf:

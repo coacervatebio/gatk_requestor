@@ -4,6 +4,7 @@ from tests.common import ContainerTester, allowed_pattern
 from tests.runners import GothRequestorRunner, DevnetRequestorRunner
 from tests.checkers import VcfChecker
 
+
 def test_goth_requestor():
 
     data_path = PurePath("assets/call_variants/")
