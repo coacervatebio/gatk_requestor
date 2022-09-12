@@ -55,7 +55,7 @@ class ContainerTester:
             for path, _, files in os.walk(self.expected_output)
             for f in files
         )
-        LOGGER.debug(f"Determined target files as:\n{self.target_files}")
+        LOGGER.debug(f"Determined target files as: {self.target_files}")
 
         # Sometimes target_str needs to be overwritten, e.g when it
         # is a dir producing many unspecified targets
@@ -106,7 +106,7 @@ class ContainerTester:
         for tf in self.target_files:
             if tf not in all_files:
                 LOGGER.error(
-                    f"Missing expected target file {tf} from all files: \n{all_files}"
+                    f"Missing expected target file {tf} from all files: {all_files}"
                 )
                 missing_targets.append(tf)
 
