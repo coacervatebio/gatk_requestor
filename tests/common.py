@@ -3,7 +3,7 @@ import shutil
 import logging
 from pathlib import Path
 from docker.errors import DockerException, ContainerError, APIError, NotFound
-from tests.config import test_name
+from tests.config import test_name, default_tmp
 
 LOGGER = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class ContainerTester:
         runner,
         checker,
         datadir,
-        tmpdir=Path("assets/TEMP/"),
+        tmpdir=default_tmp,
         track_unexpected=True,
     ):
         """

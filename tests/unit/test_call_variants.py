@@ -1,13 +1,12 @@
-from pathlib import PurePath
 from tests.common import ContainerTester, allowed_pattern
 from tests.runners import SnakemakeRunner
 from tests.checkers import VcfChecker
-from tests.config import yagna_datadir
+from tests.config import yagna_datadir, unit_assets_root
 
 
 def test_call_variants():
 
-    data_path = PurePath("assets/call_variants/")
+    data_path = unit_assets_root.joinpath("call_variants")
 
     tester = ContainerTester(SnakemakeRunner(), VcfChecker(), data_path)
     tester.runner.arb_com = ["-y", "on"]  # Turns on yagna

@@ -1,12 +1,12 @@
-from pathlib import Path, PurePath
+from pathlib import Path
 from tests.common import ContainerTester, allowed_pattern
 from tests.runners import SnakemakeRunner
 from tests.checkers import VcfChecker
-
+from tests.config import unit_assets_root
 
 def test_genotype():
 
-    data_path = PurePath("assets/genotype/")
+    data_path = unit_assets_root.joinpath("genotype")
 
     tmpdir = Path("/home/vagrant/tmp_guest")
     tester = ContainerTester(SnakemakeRunner(), VcfChecker(), data_path, tmpdir=tmpdir)

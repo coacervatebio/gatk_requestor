@@ -1,11 +1,11 @@
-from pathlib import PurePath
 from tests.common import ContainerTester
 from tests.runners import SnakemakeRunner
 from tests.checkers import SimpleChecker
+from tests.config import unit_assets_root
 
+def test_split_cram():
 
-def test_index_split_cram():
+    data_path = unit_assets_root.joinpath("split_cram")
 
-    data_path = PurePath("assets/index_split_cram/")
     tester = ContainerTester(SnakemakeRunner(), SimpleChecker(), data_path)
     tester.run()

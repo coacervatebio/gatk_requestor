@@ -1,13 +1,13 @@
-from pathlib import PurePath
 from tests.common import ContainerTester, allowed_pattern
 from tests.runners import SnakemakeRunner
 from tests.checkers import SimpleChecker
+from tests.config import unit_assets_root
 
 
 def test_combine_region():
     # No snakemake rule explicitly states the creation of all the output files
     # Need to specify output from Snakefile but test for more
-    data_path = PurePath("assets/combine_region/")
+    data_path = unit_assets_root.joinpath("combine_region")
     tester = ContainerTester(SnakemakeRunner(), SimpleChecker(), data_path)
 
     tester.track_unexpected = False

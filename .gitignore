@@ -48,4 +48,4 @@ vagrant_provisioning.txt
 
 # Test / Dev
 **/scratch.py
-tests/logs/pytest.log
+**/pytest.log
