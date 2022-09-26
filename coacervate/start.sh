@@ -1,28 +1,32 @@
 #!/bin/bash
-while getopts m:y:o:a: flag
+while getopts m:d:o:a: flag
 do
     case "${flag}" in
         m) mode=${OPTARG};;
-        y) yagna=${OPTARG};;
+        d) yagna_daemon=${OPTARG};;
         o) outputs=${OPTARG};;
         a) arb_sm=${OPTARG};;
     esac
 done
 
-if [[ $yagna = "on" ]]
+if [[ $yagna_daemon = "on" ]]
     then
     # Start the yagna daemon and put it in the background
     # Using `-v yagna_datadir:/home/coacervate/.local/share/yagna`
     # will persist yagna datadir between containers
     echo "Starting yagna daemon in screen session.."
-    screen -d -m -S yagna_daemon yagna service run
+    screen -dmS yagna_daemon yagna service run
     sleep 15
 
     get_appkey () {
         echo $(yagna app-key list --json | jq -r .values[0][1])
     }
 
-    if [ $(get_appkey) = "null" ]
+    if [ -z $(get_appkey) ]
+    then
+        echo "Problem initializing requestor, check permissions.."
+        exit 1
+    elif [ $(get_appkey) = "null" ]
     then
         echo "No appkey found, creating requestor.."
         yagna app-key create requestor
