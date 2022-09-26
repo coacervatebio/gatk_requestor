@@ -11,6 +11,10 @@
 *.sam*
 *.dict
 
+# Include small demo alignments
+!coacervate/results/alignments/full/HG03633_sub.cram
+!coacervate/results/alignments/full/HG04149_sub.cram
+
 # Datasets
 datasets/*
 

@@ -12,7 +12,7 @@ done
 if [[ $yagna = "on" ]]
     then
     # Start the yagna daemon and put it in the background
-    # Using `-v /host/yagna/datadir:/home/coacervate/.local/share/yagna`
+    # Using `-v yagna_datadir:/home/coacervate/.local/share/yagna`
     # will persist yagna datadir between containers
     echo "Starting yagna daemon in screen session.."
     screen -d -m -S yagna_daemon yagna service run

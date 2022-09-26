@@ -1,31 +1,27 @@
 # Coacervate
 
-The goal of this project is to democratize the access to the tools and infrastructure required to perform genomic analysis.
+## Introduction
 
-Quickstart:
-- clone repo
-- need testing files
-- podman run --rm 
+Genomic data has been generated [faster and faster](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.1002195) since the first human genome was sequenced - with no signs of slowing down. The demand for expertise, and the raw compute power needed to turn those enormous datasets into actionable insights, has exploded alongside it.
 
-Wants:
-- to democratize access to the tools and infra required to perform genomic analysis
-- operate in an open way that is not profit-driven
-- collaborate instead of compete (competition can breed innovation though)
-- by opening the tools and the datasets, you increase education
-- a rising tide lifts all boats
+Analyzing that data relies on a highly-specialized, [multi-disciplinary](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5471940/) skillset. Tools exist that make this step easier, but they are often black-boxes and prohibitively expensive at scale - precluding access from aspiring researchers and stifling collaboration.
 
-Problem:
-- volume of genomic data is outpacing the ability to analyse it (source)
-- there are many good open source tools for analyzing, but they require specialized knowledge
-- making these tools user-friendly is often done in a closed-source way
-- lots of closed databases and the open ones are often not well integrated
+Usability aside, there's no getting around the sheer scale of computing resources needed. Coupled with the fact that we can no longer rely on [Moore's Law](https://www.technologyreview.com/2016/05/13/245938/moores-law-is-dead-now-what/) to pick up the slack, we need to get creative to maximize the pace of progress.
 
-Assumptions:
-- access to bandwidth will increase dramatically faster than access to compute (source)
-- consumer hardware is ill-equipped to analyze these datasets in an efficient manner
-- cloud resources are great, but expensive
+Leveraging an extremely low-cost [global supercomputer](golem.network) and incredible open-source [tools](https://gatk.broadinstitute.org/hc/en-us) and [frameworks](https://snakemake.github.io/) - this project aims to democratize access to the knowledge and infrastructure required to carry out these analyses. Coacervate is a free and open-source public good, built to empower every citizen-scientist and eek out every last drop of efficiency in the name of biomedical progess.
 
-Container Details:
+
+## Quickstart:
+- `docker run --rm -it -v yagna_datadir:/home/coacervate/.local/share/yagna coacervate/requestor`
+
+  This will pull and run the requestor component of Coacervate. A Yagna daemon is spun up in the container and the default workflow is executed on test data bundled with the image.
+
+## Architecture
+-
+
+## Features:
 - option to mount yagna datadir at /yagna to persist app key and funding across runs
 - option to mount any of your own dirs (config, results, snakefile) under /mnt
   - TODO: add hierarchy here
+- known issues
+
