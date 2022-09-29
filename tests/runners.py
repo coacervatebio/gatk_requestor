@@ -98,7 +98,7 @@ class DevnetRequestorRunner:
         ]
         vols = [
             *self.vols,
-            f"{str(yagna_datadir)}:/home/requestor/.local/share/yagna",
+            f"{str(yagna_datadir)}:/home/coacervate/.local/share/yagna",
         ]
 
         LOGGER.debug(

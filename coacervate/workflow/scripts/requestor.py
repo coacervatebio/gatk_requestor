@@ -39,7 +39,7 @@ args = argparse.Namespace()
 PROV_INPATH = Path("/golem/input")
 PROV_OUTPATH = Path("/golem/output")
 ENTRYPOINT_PATH = "/run/run.sh"
-TASK_TIMEOUT = timedelta(minutes=300)
+TASK_TIMEOUT = timedelta(minutes=30)
 
 
 def data(alignments_dir: Path, vcfs_dir: Path) -> Iterator[Task]:
@@ -73,7 +73,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
     Tasks are provided from a common, asynchronous queue.
     The signature of this function cannot change, as it's used internally by `Executor`.
     """
-    script = context.new_script(timeout=timedelta(minutes=5))
+    script = context.new_script()
 
     async for task in tasks:
         # Upload input alignments
@@ -88,6 +88,8 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
             str(task.data["prov_vcf_path"]),
         ]
 
+        # future_result = script.run("/usr/bin/which", "tar")
+        # future_result = script.run("/usr/bin/tar", "xf", "/run/reference_HG38.tar.zst", "-C", "/golem/entrypoint", "&&", "/bin/ls", "/golem/entrypoint")
         future_result = script.run("/bin/sh", ENTRYPOINT_PATH, *run_args)
 
         script.download_file(task.data["prov_vcf_path"], task.data["req_vcf_path"])
