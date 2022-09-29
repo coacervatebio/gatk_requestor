@@ -1,8 +1,8 @@
 ref: "/data/resources/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta"
 golem_subnet: "devnet-beta"
 samples:
-  - HG03633_sub
-  - HG04149_sub
+  - HG03633
+  - HG04149
 regs:
   - chr1
   - chr2

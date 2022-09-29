@@ -93,7 +93,7 @@ class DevnetRequestorRunner:
         com = [
             "-m",
             "req_only",  # Default in /data/config/config.yml is devnet-beta
-            "-y",
+            "-d",
             "on",
         ]
         vols = [

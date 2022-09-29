@@ -39,7 +39,7 @@ args = argparse.Namespace()
 PROV_INPATH = Path("/golem/input")
 PROV_OUTPATH = Path("/golem/output")
 ENTRYPOINT_PATH = "/run/run.sh"
-TASK_TIMEOUT = timedelta(minutes=30)
+TASK_TIMEOUT = timedelta(minutes=300)
 
 
 def data(alignments_dir: Path, vcfs_dir: Path) -> Iterator[Task]:

@@ -3,7 +3,7 @@ import shutil
 import logging
 from pathlib import Path
 from docker.errors import DockerException, ContainerError, APIError, NotFound
-from tests.config import test_name, default_tmp
+from tests.config import test_name, default_tmp, unit_assets_root
 
 LOGGER = logging.getLogger(__name__)
 
@@ -63,6 +63,7 @@ class ContainerTester:
 
         # Setup default mounts that can be overridden before calling run()
         self.runner.vols = [
+            f"{str(unit_assets_root.joinpath('test_config.yml'))}:/data/config/config.yml",
             f"{str(self.tmpdir.joinpath('data', 'results').resolve())}:/data/results"
         ]
 
