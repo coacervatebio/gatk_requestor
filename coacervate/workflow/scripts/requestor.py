@@ -26,6 +26,7 @@ arg_parser.add_argument(
 )
 arg_parser.add_argument("--vcfs", type=Path, default=Path("/data/results/hc_out"))
 arg_parser.add_argument("--subnet", type=str, default="devnet-beta")
+arg_parser.add_argument("--budget", type=int, default=5)
 arg_parser.add_argument(
     "--image",
     type=str,
@@ -112,7 +113,7 @@ async def main():
         min_storage_gib=2.0,
     )
 
-    async with Golem(budget=1, subnet_tag=args.subnet) as golem:
+    async with Golem(budget=args.budget, subnet_tag=args.subnet) as golem:
         async for completed in golem.execute_tasks(
             steps,
             data(args.alignments, args.vcfs),

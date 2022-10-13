@@ -28,4 +28,3 @@ The directory structure loosely follows the Snakemake [best-practices](https://s
 ## Future Plans
 - Fully fog-based, only access a portal from your browser
 
-

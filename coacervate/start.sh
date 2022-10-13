@@ -41,7 +41,7 @@ if [[ $yagna_daemon = "on" ]]
     echo "Exporting app key and initializing yagna as sender.."
     export YAGNA_APPKEY=$(get_appkey)
     sleep 3
-    yagna payment init --sender # init sender
+    yagna payment init --sender
 fi
 
 echo "Running script in ${mode} mode.."
