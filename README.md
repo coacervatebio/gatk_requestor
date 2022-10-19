@@ -12,19 +12,27 @@ Leveraging an extremely low-cost [global supercomputer](golem.network) and incre
 
 
 ## Quickstart:
-- `docker run --rm -it -v yagna_datadir:/home/coacervate/.local/share/yagna coacervate/requestor`
+- `docker run --rm -it coacervate/requestor`
 
-  This will pull and run the requestor component of Coacervate. A Golem daemon is spun up in the container and the default Snakemake workflow is executed on test data bundled with the image. If you'd like to write the analysis output to your host please mount an empty directory using `-v /path/to/local/dir:/data/results/gather_out`
+  This will pull and run the requestor component of Coacervate. A Golem daemon is spun up in the container and the default Snakemake workflow is executed on test data bundled with the image. If you'd like to write the analysis output to your host please mount an empty directory using `-v /path/to/local/dir:/data/results/gather_out`.
 
 ## Status
 This project is currently in the PROOF OF CONCEPT stage. 
 
 ## Approach
-The requestor image contains a workflow, defined in Snakemake, that uses GATK to process alignments in the CRAM format to joint genotype called (link) VCF files. What's unique about this workflow is how the computation is parallelized and executed. Alignments are first split based on chromosome (snakemake DAG). HaplotypeCaller jobs are then requested (thus the name) from a pool of Providers on the Golem network. HC was chosen because it is the most computationally demanding while taking into account input and output file size (link to aws lambda study / graphs). The assumption here being that people are more likely to have access to high-bandwidth internet than high-performance compute (link 2.5 gig residential offerings). Someone could run these analyses on a chromebook. 
+The requestor image contains a workflow, defined in Snakemake, that uses GATK to process alignments in the CRAM format to [joint called](https://gatk.broadinstitute.org/hc/en-us/articles/360035890431-The-logic-of-joint-calling-for-germline-short-variants) VCF files. What's unique about this workflow is how the computation is parallelized and executed. Alignments are first split based on chromosome (snakemake DAG). HaplotypeCaller jobs are then requested from a pool of providers on the Golem network. HaplotypeCaller was chosen because it is the most computationally demanding while taking into account input and output file size.
 
-## Structure
-The directory structure loosely follows the Snakemake [best-practices](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#distribution-and-reproducibility). (tree) The recommended way of making it your own is to overwrite different files/directories with compatible equivalents from the host machine. E.g. overwrite the config and input alignments with `-v /host/config:/data/config/config.yml` and ` -v /host/alignments:/data/results/alignments/full/`
+![kredit](https://journals.plos.org/plosone/article/figure/image?download&size=original&id=10.1371/journal.pone.0254363.g003)
+
+The assumption here being that people are more likely to have access to high-bandwidth internet than high-performance compute (link 2.5 gig residential offerings). Someone could run these analyses on a chromebook. 
+
+## Getting Started with Your Own Data
+The recommended way of using Coacervate with your own data is to overwrite different files/directories in the requestor container with compatible equivalents from the host machine. For example, you can overwrite the config and input alignments with `-v /host/config:/data/config/config.yml` and ` -v /host/alignments:/data/results/alignments/full/`. Please see the files and folders already in place to get an idea of the required formats.
+
+The directory structure loosely follows the Snakemake [best-practices](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#distribution-and-reproducibility) (tree)  
 
 ## Future Plans
+- Distributed data storage in IPFS to remove 1-to-many data transfer bottleneck
 - Fully fog-based, only access a portal from your browser
+- FHE for sensitive data using [Zama](https://www.zama.ai/)
 
