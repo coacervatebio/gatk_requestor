@@ -26,7 +26,7 @@ The requestor image contains a workflow, defined in Snakemake, that uses GATK to
   src="https://user-images.githubusercontent.com/31577879/196818454-80820d76-f585-4850-8565-63a1aeaa206e.PNG"
   alt="Alt text"
   title="Task 12 is HaplotypeCaller"
-  style="display: inline-block; margin: 0 auto; max-width: 300px">
+  style="display: inline-block; margin: 0 auto; max-width: 100px">
 
 The assumption here being that people are more likely to have access to [high-bandwidth connectivity](https://www.fiercetelecom.com/broadband/att-upgrades-its-fiber-network-offer-2-gig-5-gig-speeds) than high-performance compute. 
 
