@@ -20,19 +20,53 @@ Leveraging an extremely low-cost [global supercomputer](golem.network) and incre
 This project is currently in the PROOF OF CONCEPT stage. 
 
 ## Approach
-The requestor image contains a workflow, defined in Snakemake, that uses GATK to process alignments in the CRAM format to [joint called](https://gatk.broadinstitute.org/hc/en-us/articles/360035890431-The-logic-of-joint-calling-for-germline-short-variants) VCF files. What's unique about this workflow is how the computation is parallelized and executed. Alignments are first split based on chromosome (snakemake DAG). HaplotypeCaller jobs are then requested from a pool of providers on the Golem network. HaplotypeCaller was chosen because it is the most computationally demanding while taking into account input and output file size.
+The requestor image contains a workflow, defined in Snakemake, that uses GATK to process alignments in the CRAM format to [joint called](https://gatk.broadinstitute.org/hc/en-us/articles/360035890431-The-logic-of-joint-calling-for-germline-short-variants) VCF files. What's unique about this workflow is how the computation is parallelized and executed. Alignments are first split based on chromosome (snakemake DAG). HaplotypeCaller jobs are then requested from a pool of providers on the Golem network. HaplotypeCaller was chosen because it is the most computationally demanding while taking into account input and output file size, as demonstrated in the following figure from [this study](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0254363#pone-0254363-g003).
 
-![kredit](https://journals.plos.org/plosone/article/figure/image?download&size=original&id=10.1371/journal.pone.0254363.g003)
+<img
+  src="https://user-images.githubusercontent.com/31577879/196818454-80820d76-f585-4850-8565-63a1aeaa206e.PNG"
+  alt="Alt text"
+  title="Task 12 is HaplotypeCaller"
+  style="display: inline-block; margin: 0 auto; max-width: 300px">
 
-The assumption here being that people are more likely to have access to high-bandwidth internet than high-performance compute (link 2.5 gig residential offerings). Someone could run these analyses on a chromebook. 
+The assumption here being that people are more likely to have access to [high-bandwidth connectivity](https://www.fiercetelecom.com/broadband/att-upgrades-its-fiber-network-offer-2-gig-5-gig-speeds) than high-performance compute. 
 
 ## Getting Started with Your Own Data
 The recommended way of using Coacervate with your own data is to overwrite different files/directories in the requestor container with compatible equivalents from the host machine. For example, you can overwrite the config and input alignments with `-v /host/config:/data/config/config.yml` and ` -v /host/alignments:/data/results/alignments/full/`. Please see the files and folders already in place to get an idea of the required formats.
 
-The directory structure loosely follows the Snakemake [best-practices](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#distribution-and-reproducibility) (tree)  
+The directory structure is similar to the Snakemake [best-practices](https://snakemake.readthedocs.io/en/stable/snakefiles/deployment.html#distribution-and-reproducibility):
+```
+├── config
+│   └── config.yml
+├── Dockerfile
+├── __init__.py
+├── resources
+│   └── reference
+│       ├── resources_broad_hg38_v0_Homo_sapiens_assembly38.dict
+│       ├── resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta
+│       └── resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta.fai
+├── results
+│   └── alignments
+│       └── full
+│           ├── HG03633.cram
+│           └── HG04149.cram
+├── start.sh
+└── workflow
+    ├── envs
+    │   └── env.yml
+    ├── logs
+    ├── rules
+    │   ├── benchmark.smk
+    │   ├── local.smk
+    │   └── utils.py
+    ├── scripts
+    │   └── requestor.py
+    └── Snakefile
+```
 
 ## Future Plans
 - Distributed data storage in IPFS to remove 1-to-many data transfer bottleneck
 - Fully fog-based, only access a portal from your browser
 - FHE for sensitive data using [Zama](https://www.zama.ai/)
 
+### References
+John, Aji, et al. “Evaluation of Serverless Computing for Scalable Execution of a Joint Variant Calling Workflow.” PLOS ONE, Public Library of Science, https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0254363#pone-0254363-g003.
