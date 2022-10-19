@@ -58,4 +58,6 @@ Please see the files and folders already in place to get an idea of the required
 - FHE for clinical samples / sensitive data using [Zama](https://www.zama.ai/)
 
 ### References
-John, Aji, et al. “Evaluation of Serverless Computing for Scalable Execution of a Joint Variant Calling Workflow.” PLOS ONE, Public Library of Science, https://journals.plos.org/plosone/article?id=10.1371%2Fjournal.pone.0254363#pone-0254363-g003.
+  - Stephens, Zachary D., et al. “Big Data: Astronomical or Genomical?” PLOS Biology, Public Library of Science, https://journals.plos.org/plosbiology/article?id=10.1371%2Fjournal.pbio.1002195. 
+  - Heo, Go Eun, et al. “Analyzing the Field of Bioinformatics with the Multi-Faceted Topic Modeling Technique.” BMC Bioinformatics, BioMed Central, 31 May 2017, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5471940/.
+  - John, Aji, et al. “Evaluation of Serverless Computing for Scalable Execution of a Joint Variant Calling Workflow.” PLOS ONE, Public Library of Science, https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0254363.
