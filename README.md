@@ -8,8 +8,9 @@ Analyzing that data relies on a highly-specialized, [multi-disciplinary](https:/
 
 Usability aside, there's no getting around the sheer scale of computing resources needed. Coupled with the fact that we can no longer rely on [Moore's Law](https://www.technologyreview.com/2016/05/13/245938/moores-law-is-dead-now-what/) to pick up the slack, we need to get creative to maximize the pace of progress.
 
-Leveraging an extremely low-cost [global supercomputer](golem.network) and incredible open-source [tools](https://gatk.broadinstitute.org/hc/en-us) and [frameworks](https://snakemake.github.io/), this project aims to democratize access to the knowledge _and_ infrastructure required to carry out these analyses. Coacervate is a free and open-source public good, built to empower every citizen-scientist and eek out every last drop of efficiency in the name of progess.
+Leveraging the fact that people are more likely to have access to [high-bandwidth connectivity](https://www.fiercetelecom.com/broadband/att-upgrades-its-fiber-network-offer-2-gig-5-gig-speeds) than to high-performance compute, Coacervate lets you run genomic analyses on an extremely low-cost [global supercomputer](golem.network). By using incredible open-source [tools](https://gatk.broadinstitute.org/hc/en-us) and [frameworks](https://snakemake.github.io/), this project aims to democratize access to the knowledge _and_ infrastructure required to carry out groundbreaking research.
 
+Coacervate is a free and open-source public good, built to empower every citizen-scientist and eek out every last drop of efficiency in the name of progess.
 
 ## Quickstart:
 - `docker run --rm -it coacervate/requestor`
@@ -20,7 +21,7 @@ Leveraging an extremely low-cost [global supercomputer](golem.network) and incre
 This project is currently a **Proof of Concept**. 
 
 ## Approach
-Coacervate accepts genomic sequence alignments and produces [joint called](https://gatk.broadinstitute.org/hc/en-us/articles/360035890431-The-logic-of-joint-calling-for-germline-short-variants) VCF files ready for annotation and actionable interpretation. This is achieved by splitting the inputs to parallelize the most [computationally intensive](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0254363#pone-0254363-g003) step via the Golem Network. A major advantage of Coacervate is leveraging the fact that people are more likely to have access to [high-bandwidth connectivity](https://www.fiercetelecom.com/broadband/att-upgrades-its-fiber-network-offer-2-gig-5-gig-speeds) than to high-performance compute.
+Coacervate accepts genomic sequence alignments and produces [joint called](https://gatk.broadinstitute.org/hc/en-us/articles/360035890431-The-logic-of-joint-calling-for-germline-short-variants) VCF files ready for annotation and actionable interpretation. This is achieved by splitting the inputs to parallelize the most [computationally intensive](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0254363#pone-0254363-g003) step via the Golem Network. 
 
 
 ## Getting Started with Your Own Data
