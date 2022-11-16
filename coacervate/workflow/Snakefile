@@ -39,8 +39,11 @@ rule call_variants:
     output:
         called_vcfs=temp(expand("/data/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz", reg=config['regs'], sample=config['samples'])),
         indexes=temp(expand("/data/results/hc_out/{reg}/{sample}_{reg}.g.vcf.gz.tbi", reg=config['regs'], sample=config['samples']))
+    log: 
+        # Capture stderr, DEBUG info in separate logfile
+        "/data/workflow/logs/call_variants_stderr.log"
     shell:
-        "python {input.script} --subnet {config[golem_subnet]}"
+        "python {input.script} --subnet {config[golem_subnet]} > {log}"
 
 rule combine_region:
     input:
