@@ -74,7 +74,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
     Tasks are provided from a common, asynchronous queue.
     The signature of this function cannot change, as it's used internally by `Executor`.
     """
-    script = context.new_script()
+    script = context.new_script(timeout=timedelta(minutes=30))
 
     async for task in tasks:
         # Upload input alignments

@@ -8,7 +8,7 @@ Analyzing that data relies on a highly-specialized, [multi-disciplinary](https:/
 
 Usability aside, there's no getting around the sheer scale of computing resources needed. Coupled with the fact that we can no longer rely on [Moore's Law](https://www.technologyreview.com/2016/05/13/245938/moores-law-is-dead-now-what/) to pick up the slack, we need to get creative to maximize the pace of progress.
 
-Leveraging the fact that people are more likely to have access to [high-bandwidth connectivity](https://www.fiercetelecom.com/broadband/att-upgrades-its-fiber-network-offer-2-gig-5-gig-speeds) than to high-performance compute, Coacervate lets you run genomic analyses on an extremely low-cost [global supercomputer](golem.network). By using incredible open-source [tools](https://gatk.broadinstitute.org/hc/en-us) and [frameworks](https://snakemake.github.io/), this project aims to democratize access to the knowledge _and_ infrastructure required to carry out groundbreaking research.
+Leveraging the fact that people are more likely to have access to [high-bandwidth connectivity](https://www.fiercetelecom.com/broadband/att-upgrades-its-fiber-network-offer-2-gig-5-gig-speeds) than to high-performance compute, Coacervate lets you run genomic analyses on an extremely low-cost [global supercomputer](https://www.golem.network). By using incredible open-source [tools](https://gatk.broadinstitute.org/hc/en-us) and [frameworks](https://snakemake.github.io/), this project aims to democratize access to the knowledge _and_ infrastructure required to carry out groundbreaking research.
 
 Coacervate is a free and open-source public good, built to empower every citizen-scientist and eek out every last drop of efficiency in the name of progess.
 
