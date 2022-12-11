@@ -19,7 +19,7 @@ if [[ $yagna_daemon = "on" ]]
     sleep 15
 
     get_appkey () {
-        echo $(yagna app-key list --json | jq -r .values[0][1])
+        echo $(yagna app-key list --json | jq -r .[0].key)
     }
 
     if [ -z $(get_appkey) ]
@@ -49,7 +49,7 @@ case "${mode}" in
     interactive) /bin/bash;;
     local) snakemake -c4 -s=/data/workflow/rules/local.smk;;
     golem) snakemake -c4 -s=/data/workflow/Snakefile;;
-    specific) snakemake ${outputs} -c4-s=/data/workflow/Snakefile ${arb_sm};;
+    specific) snakemake ${outputs} -c4 -s=/data/workflow/Snakefile ${arb_sm};;
     req_only) python /data/workflow/scripts/requestor.py;;
     *) echo "Please select interactive, local, or golem mode";;
 esac

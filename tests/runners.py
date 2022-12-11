@@ -29,8 +29,8 @@ class SnakemakeRunner:
 
         LOGGER.debug(
             f"Running container {test_tag} with: "
-            f"Command: {com}, "
-            f"Volumes: {self.vols}"
+            f"Command: {' '.join(com)}, "
+            f"Volumes: {' -v '.join(self.vols)}"
         )
 
         container = self.cons.run(
