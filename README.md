@@ -58,6 +58,7 @@ Please see the files and folders already in place to get an idea of the required
 - Distributed data storage in IPFS to remove 1-to-many data transfer bottleneck
 - Fully fog-based, only access a portal from your browser
 - FHE for clinical samples / sensitive data using [Zama](https://www.zama.ai/)
+- Verifiable compute using [Risc Zero](https://www.risczero.com/)
 
 ### References
   - Stephens, Zachary D., et al. “Big Data: Astronomical or Genomical?” PLOS Biology, Public Library of Science, https://journals.plos.org/plosbiology/article?id=10.1371%2Fjournal.pbio.1002195. 
