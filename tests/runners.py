@@ -81,7 +81,7 @@ class GothRequestorRunner:
         log_container_output(container)
 
 
-class DevnetRequestorRunner:
+class TestnetRequestorRunner:
     """Execute requestor script using devnet"""
 
     def __init__(self):
