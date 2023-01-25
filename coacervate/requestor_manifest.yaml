@@ -1,17 +1,43 @@
----
+apiVersion: apps/v1
 
- apiVersion: v1
+kind: Deployment
 
- kind: Pod
+metadata:
 
- metadata:
+  name: coacervate-deployment
 
-   name: coacervate
+  labels:
 
- spec:
+    app: coacervate
 
-   containers:
+spec:
 
-     - name: yagna
+  replicas: 1
 
-       image: yagna
+  selector:
+
+    matchLabels:
+
+      app: coacervate
+
+  template:
+
+    metadata:
+
+      labels:
+
+        app: coacervate
+
+    spec:
+
+      containers:
+
+      - name: yagna
+
+        image: yagna:latest
+
+        imagePullPolicy: Never
+
+        ports:
+
+        - containerPort: 80
