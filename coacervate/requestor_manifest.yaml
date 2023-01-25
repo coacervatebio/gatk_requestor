@@ -1,0 +1,17 @@
+---
+
+ apiVersion: v1
+
+ kind: Pod
+
+ metadata:
+
+   name: coacervate
+
+ spec:
+
+   containers:
+
+     - name: yagna
+
+       image: yagna
