@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+  name: coacervate-deployment
+
+  labels:
+    app: coacervate
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: coacervate
+
+  template:
+    metadata:
+      labels:
+        app: coacervate
+
+    spec:
+      volumes:
+        - name: coacervate-pv-storage
+          persistentVolumeClaim:
+            claimName: coacervate-pv-claim
+        - name: yagna-socket
+          emptyDir: {}
+      initContainers:
+        - name: volume-permissioner
+          image: busybox
+          command: ["sh", "-c", "chown -R 1000:1000 /tmp/yagna.sock"]
+          volumeMounts:
+          - name: yagna-socket
+            mountPath: /tmp/yagna.sock
+      containers:
+        - name: yagna
+          image: yagna:latest
+          # command: ["yagna", "-d", "/coacervate/yagna", "service", "run"]
+          command: ["sleep", "3600"]
+          imagePullPolicy: Never
+          volumeMounts:
+            - name: coacervate-pv-storage
+              mountPath: /coacervate
+            - name: yagna-socket
+              mountPath: /tmp/yagna.sock
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
+        - name: testo
+          image: yagna:latest
+          imagePullPolicy: Never
+          command: ["sleep", "3600"]
+          volumeMounts:
+            - name: coacervate-pv-storage
+              mountPath: /coacervate
+            - name: yagna-socket
+              mountPath: /tmp/yagna.sock
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
