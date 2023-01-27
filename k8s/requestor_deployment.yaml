@@ -30,20 +30,18 @@ spec:
       containers:
         - name: yagna
           image: yagna:latest
-          # command: ["yagna", "service", "run"]
-          command: ["sleep", "3600"]
           imagePullPolicy: Never
           volumeMounts:
             - name: coacervate-pv-storage
               mountPath: /root/.local/share/
             - name: yagna-socket
               mountPath: /tmp
-        # - name: testo
-        #   image: yagna:latest
-        #   imagePullPolicy: Never
-        #   command: ["sleep", "3600"]
-        #   volumeMounts:
-        #     - name: coacervate-pv-storage
-        #       mountPath: /coacervate
-        #     - name: yagna-socket
-        #       mountPath: /tmp/yagna.sock
+        - name: testo
+          image: yagna:latest
+          imagePullPolicy: Never
+          command: ["sleep", "3600"]
+          volumeMounts:
+            - name: coacervate-pv-storage
+              mountPath: /coacervate
+            - name: yagna-socket
+              mountPath: /tmp

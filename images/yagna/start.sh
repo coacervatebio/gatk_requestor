@@ -4,7 +4,7 @@
 # Using `-v yagna_datadir:/home/coacervate/.local/share/yagna`
 # will persist yagna datadir between containers
 echo "Starting yagna daemon.."
-nohup yagna service run &
+yagna service run &
 sleep 20
 
 get_appkey () {
@@ -31,3 +31,5 @@ echo "Exporting app key and initializing yagna as sender.."
 export YAGNA_APPKEY=$(get_appkey)
 sleep 3
 yagna payment init --sender
+
+sleep infinity
