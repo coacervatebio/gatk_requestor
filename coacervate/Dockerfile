@@ -11,4 +11,4 @@ COPY --chown=1000:1000 workflow /data/workflow
 # This installs GATK, snakemake and yapapi
 RUN mamba env update --name base --file /data/workflow/envs/env.yml
 
-CMD [ "-m", "golem", "-d", "on" ]
+ENTRYPOINT [ "executable" ]
