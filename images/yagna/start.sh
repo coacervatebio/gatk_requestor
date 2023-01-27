@@ -4,11 +4,11 @@
 # Using `-v yagna_datadir:/home/coacervate/.local/share/yagna`
 # will persist yagna datadir between containers
 echo "Starting yagna daemon.."
-nohup yagna -d /coacervate/yagna service run &
+nohup yagna service run &
 sleep 20
 
 get_appkey () {
-    echo $(yagna -d /coacervate/yagna app-key list --json | jq -r .[0].key)
+    echo $(yagna app-key list --json | jq -r .[0].key)
 }
 
 if [ -z $(get_appkey) ]
@@ -18,10 +18,10 @@ then
 elif [ $(get_appkey) = "null" ]
 then
     echo "No appkey found, creating requestor.."
-    yagna -d /coacervate/yagna app-key create requestor
+    yagna app-key create requestor
     sleep 5
     echo "Funding.."
-    yagna -d /coacervate/yagna payment fund
+    yagna payment fund
     sleep 10
 else
     echo "Found existing appkey"
@@ -30,4 +30,4 @@ fi
 echo "Exporting app key and initializing yagna as sender.."
 export YAGNA_APPKEY=$(get_appkey)
 sleep 3
-yagna -d /coacervate/yagna payment init --sender
+yagna payment init --sender

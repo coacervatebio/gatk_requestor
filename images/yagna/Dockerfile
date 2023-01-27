@@ -10,7 +10,5 @@ RUN tar -xzf "golem-requestor-linux-${YAG_VER}.tar.gz"
 RUN mv golem-requestor-linux-${YAG_VER}/* /usr/local/bin/
 RUN rm -rf golem-requestor*
 
-COPY --chown=1000:1000 start.sh /home/coacervate/start.sh
-RUN mkdir -p /coacervate/yagna && chown -R 1000:1000 /coacervate
-USER 1000
-ENTRYPOINT ["/bin/sh", "/home/coacervate/start.sh"]
+COPY start.sh /coacervate/start.sh
+ENTRYPOINT ["/bin/sh", "/coacervate/start.sh"]

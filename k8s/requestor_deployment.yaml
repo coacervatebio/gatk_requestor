@@ -24,39 +24,26 @@ spec:
       volumes:
         - name: coacervate-pv-storage
           persistentVolumeClaim:
-            claimName: coacervate-pv-claim
+            claimName: coacervate-pvc
         - name: yagna-socket
           emptyDir: {}
-      initContainers:
-        - name: volume-permissioner
-          image: busybox
-          command: ["sh", "-c", "chown -R 1000:1000 /tmp/yagna.sock"]
-          volumeMounts:
-          - name: yagna-socket
-            mountPath: /tmp/yagna.sock
       containers:
         - name: yagna
           image: yagna:latest
-          # command: ["yagna", "-d", "/coacervate/yagna", "service", "run"]
+          # command: ["yagna", "service", "run"]
           command: ["sleep", "3600"]
           imagePullPolicy: Never
           volumeMounts:
             - name: coacervate-pv-storage
-              mountPath: /coacervate
+              mountPath: /root/.local/share/
             - name: yagna-socket
-              mountPath: /tmp/yagna.sock
-          securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
-        - name: testo
-          image: yagna:latest
-          imagePullPolicy: Never
-          command: ["sleep", "3600"]
-          volumeMounts:
-            - name: coacervate-pv-storage
-              mountPath: /coacervate
-            - name: yagna-socket
-              mountPath: /tmp/yagna.sock
-          securityContext:
-            runAsUser: 1000
-            runAsGroup: 1000
+              mountPath: /tmp
+        # - name: testo
+        #   image: yagna:latest
+        #   imagePullPolicy: Never
+        #   command: ["sleep", "3600"]
+        #   volumeMounts:
+        #     - name: coacervate-pv-storage
+        #       mountPath: /coacervate
+        #     - name: yagna-socket
+        #       mountPath: /tmp/yagna.sock
