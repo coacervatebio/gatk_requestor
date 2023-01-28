@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import asyncio
 from typing import AsyncIterable
 
@@ -5,13 +6,11 @@ from yapapi import Golem, Task, WorkContext
 from yapapi.log import enable_default_logger
 from yapapi.payload import vm
 
-greeting = "\nHello from Goth!"
-
 
 async def worker(context: WorkContext, tasks: AsyncIterable[Task]):
     async for task in tasks:
         script = context.new_script()
-        future_result = script.run("/bin/echo", greeting)
+        future_result = script.run("/bin/sh", "-c", "date")
 
         yield script
 
@@ -20,7 +19,7 @@ async def worker(context: WorkContext, tasks: AsyncIterable[Task]):
 
 async def main():
     package = await vm.repo(
-        image_hash="5e1013bb93f876d38b0fd6c24435bd118a5700c118a64c5d7f61630f",  # alpine vols only
+        image_hash="d646d7b93083d817846c2ae5c62c72ca0507782385a2e29291a3d376",
     )
 
     tasks = [Task(data=None)]
@@ -30,7 +29,8 @@ async def main():
             print(completed.result.stdout)
 
 
-def test_goth_hello():
+if __name__ == "__main__":
+    enable_default_logger(log_file="hello.log")
 
     loop = asyncio.get_event_loop()
     task = loop.create_task(main())

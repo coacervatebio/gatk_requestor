@@ -28,16 +28,16 @@ spec:
         - name: yagna-socket
           emptyDir: {}
       containers:
-        - name: yagna
-          image: yagna:latest
-          imagePullPolicy: Never
-          volumeMounts:
-            - name: coacervate-pv-storage
-              mountPath: /root/.local/share/
-            - name: yagna-socket
-              mountPath: /tmp
+        # - name: yagna
+        #   image: yagna:latest
+        #   imagePullPolicy: Never
+        #   volumeMounts:
+        #     - name: coacervate-pv-storage
+        #       mountPath: /root/.local/share/
+        #     - name: yagna-socket
+        #       mountPath: /tmp
         - name: testo
-          image: yagna:latest
+          image: coacervate:latest
           imagePullPolicy: Never
           command: ["sleep", "3600"]
           volumeMounts:
