@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
+import os
+import json
 import asyncio
+import subprocess
+from time import sleep
 from typing import AsyncIterable
 
 from yapapi import Golem, Task, WorkContext
@@ -31,6 +35,12 @@ async def main():
 
 if __name__ == "__main__":
     enable_default_logger(log_file="hello.log")
+
+    # Set app key
+    while os.getenv('YAGNA_APPKEY') is None:
+        key_list = subprocess.run(["yagna", "app-key", "list", "--json"], capture_output=True)
+        os.environ['YAGNA_APPKEY'] = json.loads(key_list.stdout)[0].get('key')
+        sleep(5)
 
     loop = asyncio.get_event_loop()
     task = loop.create_task(main())
