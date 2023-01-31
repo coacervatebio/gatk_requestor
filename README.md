@@ -18,7 +18,7 @@ Coacervate is a free and open-source public good, built to empower every citizen
   This will pull and run the requestor component of Coacervate. A Golem daemon is spun up in the container and the default Snakemake workflow is executed on test data bundled with the image. If you'd like to write the analysis output to your host please mount an empty directory using `-v /path/to/local/dir:/data/results/gather_out`.
 
 ## Status
-This project is currently a **Proof of Concept**. 
+⚠️⚠️⚠️ This project is currently a **Proof of Concept** and undergoing a *significant* refactor. The quickstart probably still works but is not representative of the new direction. Testing is very much under-construction.
 
 ## Approach
 Coacervate accepts genomic sequence alignments and produces [joint called](https://gatk.broadinstitute.org/hc/en-us/articles/360035890431-The-logic-of-joint-calling-for-germline-short-variants) VCF files ready for annotation and actionable interpretation. This is achieved by splitting the inputs to parallelize the most [computationally intensive](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0254363#pone-0254363-g003) step via the Golem Network. 
