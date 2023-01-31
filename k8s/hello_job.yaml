@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+
+kind: Job
+
+metadata:
+  name: hello
+
+  labels:
+    app: coacervate
+
+spec:
+
+  template:
+    metadata:
+      labels:
+        app: coacervate
+
+    spec:
+      volumes:
+        - name: coacervate-pv-storage
+          persistentVolumeClaim:
+            claimName: coacervate-pvc
+      containers:
+        - name: requestor
+          image: coacervate:latest
+          imagePullPolicy: Never
+          # command: ["sleep", "3600"]
+          command: ["python", "/data/workflow/scripts/hello.py"]
+          volumeMounts:
+            - name: coacervate-pv-storage
+              mountPath: /tmp
+              subPath: socket
+          env:
+          - name: YAGNA_API_URL
+            value: "http://yagna-service:7465"
+      restartPolicy: Never

@@ -15,3 +15,5 @@ RUN rm -rf golem-requestor*
 # Update base env, since that's where we get dropped into by default
 # This installs GATK, snakemake and yapapi
 RUN mamba env update --name base --file /data/workflow/envs/env.yml
+
+CMD [ "snakemake", "-f", "/data/workflow/Snakefile", "-c", "4" ]
