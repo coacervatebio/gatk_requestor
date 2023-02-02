@@ -13,12 +13,12 @@ spec:
 
   selector:
     matchLabels:
-      app: coacervate
+      daemon: yagna
 
   template:
     metadata:
       labels:
-        app: coacervate
+        daemon: yagna
 
     spec:
       volumes:

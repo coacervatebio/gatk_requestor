@@ -13,7 +13,7 @@ spec:
   template:
     metadata:
       labels:
-        app: coacervate
+        task: get-date
 
     spec:
       volumes:
@@ -24,7 +24,7 @@ spec:
         - name: requestor
           image: coacervate:latest
           imagePullPolicy: Never
-          # command: ["sleep", "3600"]
+          # command: ["sleep", "infinity"]
           command: ["python", "/data/workflow/scripts/hello.py"]
           volumeMounts:
             - name: coacervate-pv-storage

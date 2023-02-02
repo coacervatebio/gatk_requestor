@@ -3,10 +3,10 @@ kind: Service
 metadata:
   name: yagna-service
   labels:
-    app: coacervate
+    service: yagna
 spec:
   ports:
   - port: 7465
     protocol: TCP
   selector:
-    app: coacervate
+    daemon: yagna
