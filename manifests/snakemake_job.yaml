@@ -3,7 +3,7 @@ apiVersion: batch/v1
 kind: Job
 
 metadata:
-  name: snakemake-job
+  name: snakemake
 
   labels:
     app: coacervate
@@ -20,15 +20,22 @@ spec:
         - name: coacervate-pv-storage
           persistentVolumeClaim:
             claimName: coacervate-pvc
+        - name: host-mount
+          hostPath:
+            path: /minikube-host/Desktop/coacervate/coacervate/coacervate
+            type: Directory
       containers:
         - name: requestor
           image: coacervate:latest
           imagePullPolicy: Never
-          command: ["snakemake", "-f", "/data/workflow/Snakefile", "-c", "4"]
+          command: ["sleep", "infinity"]
+          # command: ["snakemake", "-s", "/data/workflow/Snakefile", "-c", "4"]
           volumeMounts:
             - name: coacervate-pv-storage
               mountPath: /tmp
               subPath: socket
+            - name: host-mount
+              mountPath: /data
           env:
           - name: YAGNA_API_URL
             value: "http://yagna-service:7465"

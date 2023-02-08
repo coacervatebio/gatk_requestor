@@ -1,5 +1,5 @@
 ref: "/data/resources/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta"
-golem_subnet: "devnet-beta"
+golem_subnet: "public"
 samples:
   - HG03633
   - HG04149
