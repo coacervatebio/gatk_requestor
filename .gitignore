@@ -53,3 +53,4 @@ vagrant_provisioning.txt
 # Test / Dev
 **/scratch.py
 **/pytest.log
+tests/manifests/test_pv.yaml
