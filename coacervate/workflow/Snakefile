@@ -1,8 +1,0 @@
-configfile: "/data/config/config.yml"
-
-include: "rules/mapping.smk"
-include: "rules/calling.smk"
-
-rule all:
-    input:
-        f"/data/results/gather_out/project_output.vcf.gz"

@@ -1,0 +1,15 @@
+apiVersion: v1
+
+kind: PersistentVolume
+
+metadata:
+  name: coacervate-test-pv
+
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 5Gi
+  hostPath:
+    path: "/minikube-host/Desktop/coacervate/coacervate/tests/unit/assets/"

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+
+kind: Deployment
+
+metadata:
+  name: yagna
+
+  labels:
+    app: coacervate
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      daemon: yagna
+
+  template:
+    metadata:
+      labels:
+        daemon: yagna
+
+    spec:
+      volumes:
+        - name: coacervate-pv-storage
+          persistentVolumeClaim:
+            claimName: coacervate-pvc
+      containers:
+        - name: yagna
+          image: yagna:latest
+          imagePullPolicy: Never
+          volumeMounts:
+            - name: coacervate-pv-storage
+              mountPath: /root/.local/share/yagna
+              subPath: yagna
+            - name: coacervate-pv-storage
+              mountPath: /tmp
+              subPath: socket
+          env:
+          - name: YAGNA_API_URL
+            value: "http://0.0.0.0:7465"
+          ports:
+          - containerPort: 7465
