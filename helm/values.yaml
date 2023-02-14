@@ -15,7 +15,8 @@ image:
     tag: latest
 
 storage:
-  
+  yagnaHostPath: /data
+  inputHostPath: ""
 
 imagePullSecrets: []
 nameOverride: ""

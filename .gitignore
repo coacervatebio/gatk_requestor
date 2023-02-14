@@ -55,3 +55,6 @@ vagrant_provisioning.txt
 **/scratch.py
 **/pytest.log
 tests/manifests/test_pv.yaml
+
+# Helm
+helm/my_values.yaml

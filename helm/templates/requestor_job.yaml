@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+
+kind: Job
+
+metadata:
+  name: {{ include "coacervate.fullname" . }}
+  labels:
+    {{- include "coacervate.labels" . | nindent 4 }}
+
+spec:
+
+  template:
+    metadata:
+      labels:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+        task: requestor
+
+    spec:
+      volumes:
+        - name: yagna-storage
+          persistentVolumeClaim:
+            claimName: yagna-pvc
+        - name: input-data
+          hostPath:
+            path: {{ .Values.storage.inputHostPath }}
+            type: Directory
+      containers:
+        - name: requestor
+          image: coacervate:latest
+          imagePullPolicy: Never
+          command:
+            - snakemake
+            - '-s'
+            - /data/workflow/Snakefile
+            - '-c'
+            - '4'
+          volumeMounts:
+            - name: yagna-storage
+              mountPath: /tmp
+              subPath: socket
+            - name: input-data
+              mountPath: /data
+          env:
+          - name: YAGNA_API_URL
+            value: "http://yagna-service:7465"
+      restartPolicy: Never
