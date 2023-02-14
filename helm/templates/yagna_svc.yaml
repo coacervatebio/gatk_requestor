@@ -9,4 +9,4 @@ spec:
   - port: 7465
     protocol: TCP
   selector:
-    daemon: yagna
+    {{- include "coacervate.selectorLabels" . | nindent 4 }}

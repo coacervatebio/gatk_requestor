@@ -51,6 +51,7 @@ vagrant_provisioning.txt
 !**/gatk_release/README.md
 
 # Test / Dev
+**/tmp*
 **/scratch.py
 **/pytest.log
 tests/manifests/test_pv.yaml
