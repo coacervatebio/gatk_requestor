@@ -4,30 +4,31 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: test-requestor
-  annotations:
-    "helm.sh/hook": test
+  # annotations:
+  #   "helm.sh/hook": test
   labels:
-    app: coacervate
+    module: test-runner-job
 spec:
   backoffLimit: 0
   template:
     metadata:
       labels:
-        task: snakemake
+        module: test-runner-pod
     spec:
       restartPolicy: Never
       volumes:
-        - name: coacervate-test-assets
+        - name: {{ $.Values.test.assetVolName }}
           persistentVolumeClaim:
-            claimName: coacervate-test-pvc
+            claimName: {{ $.Values.test.pvcName }}
         - name: testing-tempdir
           emptyDir: {}
-      initContainers:
+      # initContainers:
+      containers:
         - name: test-setup-{{ .name }}
           image: 'alpine:latest'
           volumeMounts:
-            - name: coacervate-test-assets
-              mountPath: /data
+            - name: {{ $.Values.test.assetVolName }}
+              mountPath: /data/results
               subPath: {{ .subPath }}/inputs/data/results
             - name: testing-tempdir
               mountPath: /tempdir
@@ -37,37 +38,36 @@ spec:
             # - sh
             # - '-c'
             # - cp -r /data/results /tempdir/results
-      containers:
-        - name: test-requestor-{{ .name }}
-          image: 'coacervate:latest'
-          imagePullPolicy: Never
-          command:
-            - snakemake
-            - '-s'
-            - /data/workflow/Snakefile
-            - '-c'
-            - '4'
-            - '--nt'
-          volumeMounts:
-            - name: testing-tempdir
-              subPath: data/results
-              mountPath: /data/results
-            - name: coacervate-test-assets
-              subPath: {{ .subPath }}/inputs/data/workflow/Snakefile
-              mountPath: /data/workflow/Snakefile
-          env:
-            - name: YAGNA_API_URL
-              value: 'http://yagna-service:7465'
-        - name: test-checker-{{ .name }}
-          image: 'alpine:latest'
-          command:
-            - sleep
-            - infinity
-          volumeMounts:
-            - name: testing-tempdir
-              subPath: data/results
-              mountPath: /data/results
-            - name: coacervate-test-assets
-              subPath: {{ .subPath }}/expected
-              mountPath: /data/expected_results
+        # - name: test-requestor-{{ .name }}
+        #   image: 'coacervate:latest'
+        #   imagePullPolicy: Never
+        #   command:
+        #     - snakemake
+        #     - '-s'
+        #     - /data/workflow/Snakefile
+        #     - '-c'
+        #     - '4'
+        #     - '--nt'
+        #   volumeMounts:
+        #     - name: testing-tempdir
+        #       subPath: data/results
+        #       mountPath: /data/results
+        #     - name: {{ $.Values.test.assetVolName }}
+        #       subPath: {{ .subPath }}/inputs/data/workflow/Snakefile
+        #       mountPath: /data/workflow/Snakefile
+        #   env:
+        #     - name: YAGNA_API_URL
+        #       value: 'http://yagna-service:7465'
+        # - name: test-checker-{{ .name }}
+        #   image: 'alpine:latest'
+        #   command:
+        #     - sleep
+        #     - infinity
+        #   volumeMounts:
+        #     - name: testing-tempdir
+        #       subPath: data/results
+        #       mountPath: /data/results
+        #     - name: {{ $.Values.test.assetVolName }}
+        #       subPath: {{ .subPath }}/expected
+        #       mountPath: /data/expected_results
 {{- end }}
