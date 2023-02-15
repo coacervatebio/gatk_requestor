@@ -22,8 +22,7 @@ spec:
             claimName: {{ $.Values.test.pvcName }}
         - name: testing-tempdir
           emptyDir: {}
-      # initContainers:
-      containers:
+      initContainers:
         - name: test-setup-{{ .name }}
           image: 'alpine:latest'
           volumeMounts:
@@ -32,32 +31,30 @@ spec:
               subPath: {{ .subPath }}/inputs/data/results
             - name: testing-tempdir
               mountPath: /tempdir
-          command:
-            - sleep
-            - infinity
-            # - sh
-            # - '-c'
-            # - cp -r /data/results /tempdir/results
-        # - name: test-requestor-{{ .name }}
-        #   image: 'coacervate:latest'
-        #   imagePullPolicy: Never
-        #   command:
-        #     - snakemake
-        #     - '-s'
-        #     - /data/workflow/Snakefile
-        #     - '-c'
-        #     - '4'
-        #     - '--nt'
-        #   volumeMounts:
-        #     - name: testing-tempdir
-        #       subPath: data/results
-        #       mountPath: /data/results
-        #     - name: {{ $.Values.test.assetVolName }}
-        #       subPath: {{ .subPath }}/inputs/data/workflow/Snakefile
-        #       mountPath: /data/workflow/Snakefile
-        #   env:
-        #     - name: YAGNA_API_URL
-        #       value: 'http://yagna-service:7465'
+          command: ["/bin/sh"]
+          args: 
+            - '-c'
+            - cp -r /data/results /tempdir/results
+      containers:
+        - name: test-requestor-{{ .name }}
+          image: 'coacervate:latest'
+          imagePullPolicy: Never
+          # command: ["sleep", "infinity"]
+          command: ["snakemake"]
+          args:
+            - '-s=/data/workflow/Snakefile'
+            - '-c=4'
+            - '--nt'
+          volumeMounts:
+            - name: testing-tempdir
+              subPath: results
+              mountPath: /data/results
+            - name: {{ $.Values.test.assetVolName }}
+              subPath: {{ .subPath }}/inputs/data/workflow/Snakefile
+              mountPath: /data/workflow/Snakefile
+          env:
+            - name: YAGNA_API_URL
+              value: 'http://yagna-service:7465'
         # - name: test-checker-{{ .name }}
         #   image: 'alpine:latest'
         #   command:
