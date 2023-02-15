@@ -11,3 +11,5 @@ spec:
   resources:
     requests:
       storage: 3Gi
+  selector:
+    matchLabels: {{ .Values.test.pvcLabel }}

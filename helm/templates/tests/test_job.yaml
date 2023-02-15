@@ -32,9 +32,11 @@ spec:
             - name: testing-tempdir
               mountPath: /tempdir
           command:
-            - sh
-            - '-c'
-            - cp -r /data/results /tempdir/results
+            - sleep
+            - infinity
+            # - sh
+            # - '-c'
+            # - cp -r /data/results /tempdir/results
       containers:
         - name: test-requestor-{{ .name }}
           image: 'coacervate:latest'

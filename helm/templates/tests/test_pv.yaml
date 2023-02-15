@@ -6,6 +6,7 @@ metadata:
   name: coacervate-test-pv
   annotations:
     "helm.sh/hook": test
+  label: {{ .Values.test.pvcLabel }}
 
 spec:
   storageClassName: manual
