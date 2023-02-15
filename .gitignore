@@ -58,3 +58,4 @@ tests/manifests/test_pv.yaml
 
 # Helm
 helm/my_values.yaml
+helm/my_test_values.yaml

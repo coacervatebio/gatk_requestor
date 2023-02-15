@@ -23,3 +23,4 @@
 .vscode/
 # Local Configs
 my_values.yaml
+my_test_values.yaml

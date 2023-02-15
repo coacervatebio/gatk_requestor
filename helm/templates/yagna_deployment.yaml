@@ -3,7 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 
 metadata:
-  name: {{ include "coacervate.fullname" . }}
+  name: {{ include "coacervate.fullname" . }}-yagna-deployment
   labels:
     {{- include "coacervate.labels" . | nindent 4 }}
 
@@ -27,7 +27,7 @@ spec:
       volumes:
         - name: yagna-storage
           persistentVolumeClaim:
-            claimName: yagna-pvc
+            claimName: {{ include "coacervate.fullname" . }}-yagna-pv
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.yagna.repository }}:{{ .Values.image.yagna.tag | default .Chart.AppVersion }}"

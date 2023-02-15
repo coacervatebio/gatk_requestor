@@ -1,21 +1,21 @@
+{{- range .Values.test.registered }}
+---
 apiVersion: batch/v1
-
 kind: Job
-
 metadata:
   name: test-requestor
-
+  annotations:
+    "helm.sh/hook": test
   labels:
     app: coacervate
-
 spec:
-
+  backoffLimit: 0
   template:
     metadata:
       labels:
         task: snakemake
-
     spec:
+      restartPolicy: Never
       volumes:
         - name: coacervate-test-assets
           persistentVolumeClaim:
@@ -23,40 +23,49 @@ spec:
         - name: testing-tempdir
           emptyDir: {}
       initContainers:
-        - name: test-setup
-          image: alpine:latest
-          # image: coacervate_test_runner
-          command: ["sh", "-c", "cp -r /inputs/index_cram/inputs/data/ /tempdir/"] #TODO
+        - name: test-setup-{{ .name }}
+          image: 'alpine:latest'
           volumeMounts:
             - name: coacervate-test-assets
-              mountPath: /inputs
+              mountPath: /data
+              subPath: {{ .subPath }}/inputs/data/results
             - name: testing-tempdir
               mountPath: /tempdir
+          command:
+            - sh
+            - '-c'
+            - cp -r /data/results /tempdir/results
       containers:
-        - name: test-requestor
-          image: coacervate:latest
+        - name: test-requestor-{{ .name }}
+          image: 'coacervate:latest'
           imagePullPolicy: Never
-          # command: ["sleep", "infinity"]
-          command: ["snakemake", "-s", "/data/workflow/Snakefile", "-c", "4", "--nt"]
+          command:
+            - snakemake
+            - '-s'
+            - /data/workflow/Snakefile
+            - '-c'
+            - '4'
+            - '--nt'
           volumeMounts:
             - name: testing-tempdir
               subPath: data/results
               mountPath: /data/results
             - name: coacervate-test-assets
-              subPath: index_cram/inputs/data/workflow/Snakefile
+              subPath: {{ .subPath }}/inputs/data/workflow/Snakefile
               mountPath: /data/workflow/Snakefile
           env:
-          - name: YAGNA_API_URL
-            value: "http://yagna-service:7465"
-        - name: test-checker
-          image: alpine:latest
-          command: ["sleep", "infinity"]
+            - name: YAGNA_API_URL
+              value: 'http://yagna-service:7465'
+        - name: test-checker-{{ .name }}
+          image: 'alpine:latest'
+          command:
+            - sleep
+            - infinity
           volumeMounts:
             - name: testing-tempdir
               subPath: data/results
               mountPath: /data/results
             - name: coacervate-test-assets
-              subPath: index_cram/expected
+              subPath: {{ .subPath }}/expected
               mountPath: /data/expected_results
-
-      restartPolicy: Never
+{{- end }}

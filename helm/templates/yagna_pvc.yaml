@@ -3,7 +3,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 
 metadata:
-  name: yagna-pvc
+  name: {{ include "coacervate.fullname" . }}-yagna-pvc
   labels:
     {{- include "coacervate.labels" . | nindent 4 }}
 

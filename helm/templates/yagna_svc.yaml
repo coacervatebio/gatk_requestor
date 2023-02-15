@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: yagna-service
+  name: {{ include "coacervate.fullname" . }}-yagna-service
   labels:
     service: yagna
 spec:
