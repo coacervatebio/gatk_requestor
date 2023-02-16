@@ -11,7 +11,6 @@ python = "^3.10"
 yapapi = "^0.10.0"
 black = "21.7b0"
 ya-aioclient = "^0.6.4"
-pysam = "^0.20.0"
 kubernetes = "^25.3.0"
 
 [tool.poetry.group.test.dependencies]
