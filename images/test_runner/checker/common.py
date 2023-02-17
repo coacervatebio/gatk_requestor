@@ -5,8 +5,7 @@ from pathlib import Path
 
 LOGGER = logging.getLogger(__name__)
 
-
-class ContainerTester:
+class TestRunner:
     """Main composite class for running tests within containers.
 
     Handles setting up temporary directory, running, checking and cleanup.
@@ -16,7 +15,7 @@ class ContainerTester:
         self,
         checker,
         datadir,
-        tmpdir='',
+        tmpdir,
         track_unexpected=True,
     ):
         """
@@ -30,16 +29,16 @@ class ContainerTester:
         LOGGER.info(
             f"Initializing tester with {checker}, and {datadir}"
         )
+        self.checker = checker
         self.datadir = datadir
         self.tmpdir = tmpdir
-        self.checker = checker
         self.track_unexpected = track_unexpected  # can be set to False when ignoring inputs that change with every run
 
         # Setup necessary paths, datadir must have input dir (data) and output dir (expected)
-        LOGGER.info("Copying mock data to temp directory")
+        # LOGGER.info("Copying mock data to temp directory")
         self.input_data = datadir.joinpath("inputs")
         self.expected_output = datadir.joinpath("expected")
-        shutil.copytree(self.input_data, self.tmpdir)
+        # shutil.copytree(self.input_data, self.tmpdir)
 
         # Determine target files for container execution and comparison
         self.target_files = set(

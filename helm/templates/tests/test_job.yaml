@@ -22,6 +22,9 @@ spec:
             claimName: {{ $.Values.test.pvcName }}
         - name: testing-tempdir
           emptyDir: {}
+        - name: exec-mount
+          hostPath: 
+            path: /minikube-host/Desktop/coacervate/images/test_runner/checker
       initContainers:
         - name: test-setup-{{ .name }}
           image: 'alpine:latest'
@@ -56,15 +59,21 @@ spec:
             - name: YAGNA_API_URL
               value: 'http://yagna-service:7465'
         - name: test-checker-{{ .name }}
-          image: 'alpine:latest'
+          image: coa_test_runner:latest
+          imagePullPolicy: Never
           command:
             - sleep
             - infinity
           volumeMounts:
             - name: testing-tempdir
               subPath: results
-              mountPath: /data/results
+              mountPath: /temp_test/data/results
+            # - name: {{ $.Values.test.assetVolName }}
+            #   subPath: {{ .subPath }}/expected/data/results
+            #   mountPath: /data/expected_results
             - name: {{ $.Values.test.assetVolName }}
-              subPath: {{ .subPath }}/expected/data/results
-              mountPath: /data/expected_results
+              subPath: {{ .subPath }}
+              mountPath: /assets             
+            - name: exec-mount  ######## TMP ########
+              mountPath: /checker ######## TMP ########
 {{- end }}
