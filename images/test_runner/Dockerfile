@@ -1,10 +1,10 @@
-FROM alpine
+FROM debian:stable-slim
 
 # Install python/pip
-ENV PYTHONUNBUFFERED=1
-RUN apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
-RUN python3 -m ensurepip
-RUN pip3 install --no-cache --upgrade pip setuptools click
+RUN apt-get update && apt-get install -y python3 python3-pip
+
+# Install testing dependencies
+RUN pip install pysam click
 
 # Add checking logic
 COPY checker /checker

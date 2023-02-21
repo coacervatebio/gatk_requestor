@@ -35,10 +35,8 @@ class TestRunner:
         self.track_unexpected = track_unexpected  # can be set to False when ignoring inputs that change with every run
 
         # Setup necessary paths, datadir must have input dir (data) and output dir (expected)
-        # LOGGER.info("Copying mock data to temp directory")
         self.input_data = datadir.joinpath("inputs")
         self.expected_output = datadir.joinpath("expected")
-        # shutil.copytree(self.input_data, self.tmpdir)
 
         # Determine target files for container execution and comparison
         self.target_files = set(
@@ -70,7 +68,7 @@ class TestRunner:
                 LOGGER.debug(f"Focusing on {f}")
                 if str(f).startswith(".snakemake"):
                     continue
-                if f in input_files:
+                elif f in input_files:
                     LOGGER.debug(f"Ignoring {f} since it's an input file")
                     pass
                 elif f in self.target_files:

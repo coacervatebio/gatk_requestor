@@ -20,6 +20,7 @@ spec:
         - name: {{ $.Values.test.assetVolName }}
           persistentVolumeClaim:
             claimName: {{ $.Values.test.pvcName }}
+            readOnly: True
         - name: testing-tempdir
           emptyDir: {}
         - name: exec-mount
@@ -43,6 +44,7 @@ spec:
         - name: test-requestor-{{ .name }}
           image: 'coacervate:latest'
           imagePullPolicy: Never
+          # command: ["sleep", "infinity"]
           command: ["snakemake"]
           args:
             - '-s=/data/workflow/Snakefile'
@@ -62,15 +64,14 @@ spec:
           image: coa_test_runner:latest
           imagePullPolicy: Never
           command:
+            # - python
+            # - /checker/cli.py
             - sleep
             - infinity
           volumeMounts:
             - name: testing-tempdir
               subPath: results
               mountPath: /temp_test/data/results
-            # - name: {{ $.Values.test.assetVolName }}
-            #   subPath: {{ .subPath }}/expected/data/results
-            #   mountPath: /data/expected_results
             - name: {{ $.Values.test.assetVolName }}
               subPath: {{ .subPath }}
               mountPath: /assets             

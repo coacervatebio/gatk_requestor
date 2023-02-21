@@ -1,6 +1,6 @@
 import logging
 import subprocess as sp
-# import pysam as ps
+import pysam as ps
 
 LOGGER = logging.getLogger(__name__)
 
