@@ -78,7 +78,7 @@ class TestRunner:
                     self.checker.compare_files(
                         self.tmpdir / f, self.expected_output / f
                     )
-                elif self.track_unexpected:
+                elif self.track_unexpected and 'test.done' not in str(f):
                     LOGGER.warning(f"Found unexpected file: {f}")
                     unexpected_files.add(f)
 
