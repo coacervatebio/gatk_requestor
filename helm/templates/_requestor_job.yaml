@@ -20,16 +20,16 @@ spec:
 
     spec:
       volumes:
-        - name: yagna-storage
+        - name: {{ .Values.yagnaRootVolName }}
           persistentVolumeClaim:
-            claimName: yagna-pvc
+            claimName: {{ .Values.yagnaPvcName }}
         - name: input-data
           hostPath:
             path: {{ .Values.storage.inputHostPath }}
             type: Directory
       containers:
         - name: requestor
-          image: coacervate:latest
+          image: "{{ .Values.image.requestor.repository }}:{{ .Values.image.requestor.tag }}"
           imagePullPolicy: Never
           command:
             - snakemake
@@ -38,12 +38,12 @@ spec:
             - '-c'
             - '4'
           volumeMounts:
-            - name: yagna-storage
-              mountPath: /tmp
-              subPath: socket
+            - name: {{ .Values.yagnaRootVolName }}
+              subPath: {{ .Values.yagnaSocketSubpath }}
+              mountPath: {{ .Values.yagnaSocketMount }}
             - name: input-data
               mountPath: /data
           env:
           - name: YAGNA_API_URL
-            value: "http://yagna-service:7465"
+            value: "http://{{ .Values.yagnaSvcName }}:{{ .Values.yagnaPort }}"
       restartPolicy: Never

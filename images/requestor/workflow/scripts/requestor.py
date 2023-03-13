@@ -5,15 +5,17 @@ This file contains the requestor part of our application. There are three areas 
 2. Defining what commands must be run within the provider's VM.
 3. Scheduling the tasks via a yagna node running locally.
 """
-import argparse
+import os
+import json
 import asyncio
+import argparse
+import subprocess
 from time import sleep
 from datetime import timedelta, datetime
 from pathlib import Path
 from tempfile import gettempdir
 from typing import AsyncIterable, Iterator
 from uuid import uuid4
-
 from yapapi import Golem, Task, WorkContext
 from yapapi.log import enable_default_logger
 from yapapi.payload import vm
@@ -136,6 +138,12 @@ if __name__ == "__main__":
     enable_default_logger(
         log_file=f"/data/workflow/logs/haplotype_caller_{datetime.now().strftime('%Y%m%d-%H%M')}_{args.image}.log"
     )
+
+    # Set app key
+    while os.getenv('YAGNA_APPKEY') is None:
+        key_list = subprocess.run(["yagna", "app-key", "list", "--json"], capture_output=True)
+        os.environ['YAGNA_APPKEY'] = json.loads(key_list.stdout)[0].get('key')
+        sleep(5)
 
     try:
         loop.run_until_complete(task)
