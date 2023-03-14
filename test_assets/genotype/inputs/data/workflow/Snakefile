@@ -1,0 +1,12 @@
+configfile: "/data/config/config.yml"
+
+# Override default config
+config['regs'] = ['chr21', 'chr22']
+
+include: "rules/mapping.smk"
+
+rule all:
+    input: 
+        "/data/results/alignments/chr21/HG03633_chr21.cram"
+    output:
+        touch("/data/results/test.done")

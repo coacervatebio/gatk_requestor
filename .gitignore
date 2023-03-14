@@ -15,16 +15,6 @@
 !coacervate/results/alignments/full/HG03633.cram
 !coacervate/results/alignments/full/HG04149.cram
 
-# Datasets
-datasets/*
-
-# GenomicDBImport
-*.tdb
-**/genomicsdb_meta_dir/*
-vidmap.json
-callset.json
-.__consolidation_lock
-
 # Debug
 debug/*
 
@@ -54,7 +44,6 @@ vagrant_provisioning.txt
 **/tmp*
 **/scratch.py
 **/pytest.log
-tests/manifests/test_pv.yaml
 
 # Helm
 helm/my_values.yaml

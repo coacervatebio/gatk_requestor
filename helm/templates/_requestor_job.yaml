@@ -31,18 +31,19 @@ spec:
         - name: requestor
           image: "{{ .Values.image.requestor.repository }}:{{ .Values.image.requestor.tag }}"
           imagePullPolicy: Never
-          command:
-            - snakemake
-            - '-s'
-            - /data/workflow/Snakefile
-            - '-c'
-            - '4'
+          command: ["sleep", "infinity"]
+          # command:
+          #   - snakemake
+          #   - '-s'
+          #   - /data/workflow/Snakefile
+          #   - '-c'
+          #   - '4'
           volumeMounts:
             - name: {{ .Values.yagnaRootVolName }}
               subPath: {{ .Values.yagnaSocketSubpath }}
               mountPath: {{ .Values.yagnaSocketMount }}
             - name: input-data
-              mountPath: /data
+              mountPath: /mnt
           env:
           - name: YAGNA_API_URL
             value: "http://{{ .Values.yagnaSvcName }}:{{ .Values.yagnaPort }}"
