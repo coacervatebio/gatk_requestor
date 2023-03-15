@@ -66,6 +66,10 @@ class TestRunner:
                 f = (Path(path) / f).relative_to(self.tmpdir)
                 all_files.append(f)
                 LOGGER.debug(f"Focusing on {f}")
+                print('\n')
+                print(type(f))
+                print(self.target_files)
+                print('\n')
                 if str(f).startswith(".snakemake"):
                     continue
                 elif f in input_files:

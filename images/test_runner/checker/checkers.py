@@ -25,12 +25,23 @@ class VcfChecker:
         e_recs = [str(r) for r in ev.fetch()]
         assert g_recs == e_recs
 
+class CramChecker:
+    """
+    Very crudely checks to ensure CRAM files do not *immediately* differ.
+    Prevents needing to have the reference genome present in the test-checker
+    image.
+    """
+
+    @staticmethod
+    def compare_files(generated_file, expected_file):
+        proc = sp.run(["cmp", generated_file, expected_file], capture_output=True)
+        assert "line 1" not in str(proc.stdout)
+
 # Utils
 def allowed_pattern(tf):
     """
-    Filter function to remove files from comparison matching certain patterns
-    identifying files that change from run-to-run. E.g. failing comparison
-    because the timestamp is different.
+    Filter function to remove files which may be expected but should
+    not be compared, e.g. index files.
 
     :param tf: Target file being evaluated
     :returns False: File contains failure pattern

@@ -1,12 +1,16 @@
 configfile: "/data/config/config.yml"
 
 # Override default config
-config['regs'] = ['chr21', 'chr22']
+config['regs'] = ['chr21']
 
-include: "rules/mapping.smk"
+include: "rules/calling.smk"
 
 rule all:
     input: 
-        "/data/results/alignments/chr21/HG03633_chr21.cram"
+        "/data/results/geno_out/combined_chr21.vcf.gz"
     output:
         touch("/data/results/test.done")
+
+
+data/results/hc_out/chr21/HG03633_chr21.g.vcf.gz
+data/results/hc_out/chr21/HG03633_chr21.g.vcf.gz
