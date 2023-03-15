@@ -36,22 +36,3 @@ class CramChecker:
     def compare_files(generated_file, expected_file):
         proc = sp.run(["cmp", generated_file, expected_file], capture_output=True)
         assert "line 1" not in str(proc.stdout)
-
-# Utils
-def allowed_pattern(tf):
-    """
-    Filter function to remove files which may be expected but should
-    not be compared, e.g. index files.
-
-    :param tf: Target file being evaluated
-    :returns False: File contains failure pattern
-    :returns True: File does not contain failure pattern
-    """
-    expected_cmp_fail_patterns = ["__", "vcfheader.vcf", "gz.tbi"]
-
-    s_tf = str(tf)
-    for ecfp in expected_cmp_fail_patterns:
-        if ecfp in s_tf:
-            LOGGER.warn(f"Excluding {s_tf} for containing {ecfp}")
-            return False
-    return True

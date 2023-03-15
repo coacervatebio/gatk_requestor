@@ -69,12 +69,12 @@ spec:
         - name: test-checker-{{ .name }}
           image: "{{ $.Values.test.imageRepo }}:{{ $.Values.test.imageTag }}"
           imagePullPolicy: Never
-          command: ["sleep", "infinity"]
-          # {{ if .checkCom }}
-          # command: {{ .checkCom }}
-          # {{ else }}
-          # command: {{ $.Values.test.defaultCheckCom }}
-          # {{ end }}
+          # command: ["sleep", "infinity"]
+          {{ if .checkCom }}
+          command: {{ .checkCom }}
+          {{ else }}
+          command: {{ $.Values.test.defaultCheckCom }}
+          {{ end }}
           volumeMounts:
             - name: testing-tempdir
               subPath: results

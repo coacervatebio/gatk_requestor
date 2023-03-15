@@ -4,7 +4,7 @@ import time
 import logging
 from pathlib import Path
 from common import TestRunner
-from checkers import SimpleChecker, VcfChecker, CramChecker, allowed_pattern
+from checkers import SimpleChecker, VcfChecker, CramChecker
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -22,8 +22,6 @@ checkers = {
 def check(checker_type, assets_root, temp_dir, track_unexpected):
 
     runner = TestRunner(checkers[checker_type], Path(assets_root), Path(temp_dir), track_unexpected)
-
-    runner.target_files = set(filter(allowed_pattern, runner.target_files))
 
     while not Path(temp_dir).joinpath('data/results/test.done').is_file():
         time.sleep(2)

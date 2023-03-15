@@ -10,7 +10,3 @@ rule all:
         "/data/results/geno_out/combined_chr21.vcf.gz"
     output:
         touch("/data/results/test.done")
-
-
-data/results/hc_out/chr21/HG03633_chr21.g.vcf.gz
-data/results/hc_out/chr21/HG03633_chr21.g.vcf.gz
