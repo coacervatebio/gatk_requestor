@@ -4,8 +4,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: test-requestor-{{ .name }}
-  # annotations:
-  #   "helm.sh/hook": test
+  annotations:
+    "helm.sh/hook": test
   labels:
     module: test-runner-job
 spec:
