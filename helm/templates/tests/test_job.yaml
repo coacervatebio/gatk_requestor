@@ -6,8 +6,9 @@ metadata:
   name: test-requestor-{{ .name }}
   annotations:
     "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": hook-succeeded
   labels:
-    module: test-runner-job
+    module: test-runner
 spec:
   backoffLimit: 0
   template:
@@ -26,9 +27,6 @@ spec:
             readOnly: True
         - name: testing-tempdir
           emptyDir: {}
-        - name: exec-mount
-          hostPath: 
-            path: /minikube-host/Desktop/coacervate/images/test_runner/checker #### TMP ####
       initContainers:
         - name: test-setup-{{ .name }}
           image: 'alpine:latest'
@@ -47,7 +45,6 @@ spec:
         - name: test-requestor-{{ .name }}
           image: "{{ $.Values.image.requestor.repository }}:{{ $.Values.image.requestor.tag }}"
           imagePullPolicy: Never
-          # command: ["sleep", "infinity"]
           command: ["snakemake"]
           args:
             - '-s=/data/workflow/Snakefile'
@@ -69,7 +66,6 @@ spec:
         - name: test-checker-{{ .name }}
           image: "{{ $.Values.test.imageRepo }}:{{ $.Values.test.imageTag }}"
           imagePullPolicy: Never
-          # command: ["sleep", "infinity"]
           {{ if .checkCom }}
           command: {{ .checkCom }}
           {{ else }}
@@ -81,7 +77,5 @@ spec:
               mountPath: /temp_test/data/results
             - name: {{ $.Values.test.assetVolName }}
               subPath: {{ .subPath }}
-              mountPath: /assets        
-            - name: exec-mount  ######## TMP ########
-              mountPath: /checker ######## TMP ########
+              mountPath: /assets
 {{- end }}

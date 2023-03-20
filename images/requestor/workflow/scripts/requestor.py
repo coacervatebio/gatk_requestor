@@ -27,7 +27,7 @@ arg_parser.add_argument(
     "--alignments", type=Path, default=Path("/data/results/alignments")
 )
 arg_parser.add_argument("--vcfs", type=Path, default=Path("/data/results/hc_out"))
-arg_parser.add_argument("--subnet", type=str, default="devnet-beta")
+arg_parser.add_argument("--subnet", type=str, default="public")
 arg_parser.add_argument("--budget", type=int, default=5)
 arg_parser.add_argument(
     "--image",
