@@ -18,9 +18,9 @@ spec:
     spec:
       restartPolicy: Never
       volumes:
-        - name: {{ $.Values.yagnaRootVolName }}
+        - name: {{ $.Values.yagna.rootVolName }}
           persistentVolumeClaim:
-            claimName: {{ $.Values.yagnaPvcName }}
+            claimName: {{ $.Values.yagna.pvcName }}
         - name: {{ $.Values.test.assetVolName }}
           persistentVolumeClaim:
             claimName: {{ $.Values.test.pvcName }}
@@ -57,12 +57,12 @@ spec:
             - name: {{ $.Values.test.assetVolName }}
               subPath: {{ .subPath }}/inputs/data/workflow/Snakefile
               mountPath: /data/workflow/Snakefile
-            - name: {{ $.Values.yagnaRootVolName }}
-              subPath: {{ $.Values.yagnaSocketSubpath }}
-              mountPath: {{ $.Values.yagnaSocketMount }}
+            - name: {{ $.Values.yagna.rootVolName }}
+              subPath: {{ $.Values.yagna.socketSubpath }}
+              mountPath: {{ $.Values.yagna.socketMount }}
           env:
             - name: YAGNA_API_URL
-              value: "http://{{ $.Values.yagnaSvcName }}:{{ $.Values.yagnaPort }}"
+              value: "http://{{ $.Values.yagna.svcName }}:{{ $.Values.yagna.port }}"
         - name: test-checker-{{ .name }}
           image: "{{ $.Values.test.imageRepo }}:{{ $.Values.test.imageTag }}"
           imagePullPolicy: Never

@@ -25,22 +25,22 @@ spec:
 
     spec:
       volumes:
-        - name: {{ .Values.yagnaRootVolName }}
+        - name: {{ .Values.yagna.rootVolName }}
           persistentVolumeClaim:
-            claimName: {{ .Values.yagnaPvcName }}
+            claimName: {{ .Values.yagna.pvcName }}
       containers:
-        - name: {{ .Values.yagnaDeploymentName }}
+        - name: {{ .Values.yagna.deploymentName }}
           image: "{{ .Values.image.yagna.repository }}:{{ .Values.image.yagna.tag }}"
           imagePullPolicy: {{ .Values.image.yagna.pullPolicy }}
           volumeMounts:
-            - name: {{ .Values.yagnaRootVolName }}
-              subPath: {{ .Values.yagnaKeySubpath }}
-              mountPath: {{ .Values.yagnaKeyMount }}
-            - name: {{ .Values.yagnaRootVolName }}
-              subPath: {{ .Values.yagnaSocketSubpath }}
-              mountPath: {{ .Values.yagnaSocketMount }}
+            - name: {{ .Values.yagna.rootVolName }}
+              subPath: {{ .Values.yagna.keySubpath }}
+              mountPath: {{ .Values.yagna.keyMount }}
+            - name: {{ .Values.yagna.rootVolName }}
+              subPath: {{ .Values.yagna.socketSubpath }}
+              mountPath: {{ .Values.yagna.socketMount }}
           env:
           - name: YAGNA_API_URL
             value: "http://0.0.0.0:7465"
           ports:
-          - containerPort: 7465
+          - containerPort: {{ .Values.yagna.port }}
