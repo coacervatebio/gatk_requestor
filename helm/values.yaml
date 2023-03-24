@@ -6,17 +6,28 @@ replicaCount: 1
 
 image:
   yagna:
-    repository: yagna
-    pullPolicy: Never
+    repository: coacervate-yagna
     tag: latest
+    pullPolicy: Never
   requestor:
-    repository: requestor
-    pullPolicy: Never
+    repository: coacervate-requestor
     tag: latest
+    pullPolicy: Never
 
 storage:
-  yagnaHostPath: /data
   inputHostPath: ""
+
+yagnaDeploymentName: yagna-deployment
+yagnaPvcName: yagna-pvc
+yagnaStorageClass: standard # Default minikube storage class, adjust PVC as needed
+yagnaRootVolName: yagna-storage
+yagnaRootHostPath: /data # Generic hostPath that's likely to always exist
+yagnaSocketSubpath: yagna-socket
+yagnaSocketMount: /tmp # Allows yagna daemon to communicate over unix socket
+yagnaKeySubpath: yagna-keys
+yagnaKeyMount: /root/.local/share/yagna # Default location yagna looks for appkeys etc
+yagnaSvcName: yagna-service
+yagnaPort: 7465
 
 imagePullSecrets: []
 nameOverride: ""
@@ -52,9 +63,3 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
-
-test:
-  index_cram:
-    volumes:
-    - blah
-    - blah

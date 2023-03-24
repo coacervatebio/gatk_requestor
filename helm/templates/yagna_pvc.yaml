@@ -9,11 +9,9 @@ metadata:
     module: yagna
 
 spec:
-  storageClassName: manual
-
+  storageClassName: {{ .Values.yagnaStorageClass }}
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 3Gi
-  volumeName: {{ .Values.yagnaPvName }}
