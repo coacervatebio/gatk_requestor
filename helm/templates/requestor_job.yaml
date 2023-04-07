@@ -1,14 +1,11 @@
+{{ if .Values.manualJob.enabled }}
 apiVersion: batch/v1
-
 kind: Job
-
 metadata:
-  name: {{ include "coacervate.fullname" . }}-requestor-job
+  name: "{{ .Values.manualJob.jobName }}-{{ now | unixEpoch }}"
   labels:
     {{- include "coacervate.labels" . | nindent 4 }}
-
 spec:
-
   template:
     metadata:
       labels:
@@ -17,18 +14,17 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
         task: requestor
-
     spec:
       volumes:
-        - name: {{ .Values.yagnaRootVolName }}
+        - name: {{ .Values.yagna.rootVolName }}
           persistentVolumeClaim:
-            claimName: {{ .Values.yagnaPvcName }}
+            claimName: {{ .Values.yagna.pvcName }}
         - name: input-data
           hostPath:
-            path: {{ .Values.storage.inputHostPath }}
+            path: {{ .Values.manualJob.inputHostPath }}
             type: Directory
       containers:
-        - name: requestor
+        - name: {{ .Values.manualJob.containerName }}
           image: "{{ .Values.image.requestor.repository }}:{{ .Values.image.requestor.tag }}"
           imagePullPolicy: Never
           command: ["sleep", "infinity"]
@@ -39,12 +35,13 @@ spec:
           #   - '-c'
           #   - '4'
           volumeMounts:
-            - name: {{ .Values.yagnaRootVolName }}
-              subPath: {{ .Values.yagnaSocketSubpath }}
-              mountPath: {{ .Values.yagnaSocketMount }}
+            - name: {{ .Values.yagna.rootVolName }}
+              subPath: {{ .Values.yagna.socketSubpath }}
+              mountPath: {{ .Values.yagna.socketMount }}
             - name: input-data
-              mountPath: /mnt
+              mountPath: {{ .Values.manualJob.containerMountPath }}
           env:
           - name: YAGNA_API_URL
-            value: "http://{{ .Values.yagnaSvcName }}:{{ .Values.yagnaPort }}"
+            value: "http://{{ .Values.yagna.svcName }}:{{ .Values.yagna.port }}"
       restartPolicy: Never
+{{ end }}

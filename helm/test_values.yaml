@@ -3,7 +3,7 @@ test:
   pvcLabel: test-storage-label
   pvcName: test-pvc
   assetVolName: test-assets-volume
-  assetPath: "/minikube-host/Desktop/coacervate/test_assets/"
+  assetPath: ""
   imageRepo: coacervate-test-runner
   imageTag: latest
 

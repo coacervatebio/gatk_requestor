@@ -3,7 +3,7 @@ kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
   name: {{ .Values.local.storageClass }}
-    labels:
+  labels:
     {{- include "coacervate.labels" . | nindent 4 }}
     module: yagna
 provisioner: kubernetes.io/no-provisioner
