@@ -1,1 +1,2 @@
-HG03633_short.sam
+xaa
+xab

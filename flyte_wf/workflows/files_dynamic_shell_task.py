@@ -34,12 +34,12 @@ def read_samps(samples: FlyteFile) -> List[str]:
 
 @dynamic
 def process_samples(infiles: List[str]) -> str:
-    # for i in infiles:
-    #     ff = FlyteFile(path=i)
-    #     s1(infile=ff)
-    first = infiles[0]
-    s1(infile=FlyteFile(first))
-    return first
+    for i in infiles:
+        ff = FlyteFile(path=i)
+        s1(infile=ff)
+    # first = infiles[0]
+    # s1(infile=FlyteFile(first))
+    return "PROCESSED"
 
 @workflow
 def wf(samples: FlyteFile) -> str:
