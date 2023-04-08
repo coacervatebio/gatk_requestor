@@ -32,27 +32,26 @@ t2 = ShellTask(
     debug=True,
     script="""
     set -ex
-    cp {inputs.x} {inputs.y}
-    tar -zcvf {outputs.j} {inputs.y}
+    head {inputs.x} > {outputs.j}
     """,
     inputs=kwtypes(x=FlyteFile, y=FlyteDirectory),
     output_locs=[
-        OutputLocation(var="j", var_type=FlyteFile, location="{inputs.y}.tar.gz")
+        OutputLocation(var="j", var_type=FlyteFile, location="{inputs.y}/flyte_file_short.txt")
     ],
 )
 
 
-t3 = ShellTask(
-    name="task_3",
-    debug=True,
-    script="""
-    set -ex
-    tar -zxvf {inputs.z}
-    cat {inputs.y}/$(basename {inputs.x}) | wc -m > {outputs.k}
-    """,
-    inputs=kwtypes(x=FlyteFile, y=FlyteDirectory, z=FlyteFile),
-    output_locs=[OutputLocation(var="k", var_type=FlyteFile, location="output.txt")],
-)
+# t3 = ShellTask(
+#     name="task_3",
+#     debug=True,
+#     script="""
+#     set -ex
+#     tar -zxvf {inputs.z}
+#     cat {inputs.y}/$(basename {inputs.x}) | wc -m > {outputs.k}
+#     """,
+#     inputs=kwtypes(x=FlyteFile, y=FlyteDirectory, z=FlyteFile),
+#     output_locs=[OutputLocation(var="k", var_type=FlyteFile, location="output.txt")],
+# )
 # Use arbitrary name for an output and reference it in the `script` arg. Location 
 # of output_loc treated like a variable that can be templated in.
 
@@ -70,11 +69,15 @@ def wf() -> FlyteFile:
     x = FlyteFile("s3://my-s3-bucket/input-data/HG03633_short.sam")
     y = FlyteDirectory("s3://my-s3-bucket/input-data/")
     # y = create_entities()
-    t1_out = t1(x=x)
-    t2_out = t2(x=t1_out, y=y)
-    t3_out = t3(x=x, y=y, z=t2_out)
-    return t3_out
-
+    # for file in [os.path.join(y, lcv) for lcv in sorted(os.listdir(y))]:
+    #     t1_out = t1(x=file)
+    # t1_out = t1(x=x)
+    t2_out = t2(x=x, y=y)
+    # t2_out = t2(x=t1_out, y=y)
+    # t3_out = t3(x=x, y=y, z=t2_out)
+    # return t1_out
+    return t2_out
+    # return t3_out
 
 if __name__ == "__main__":
     print(f"Running wf() {wf()}")
