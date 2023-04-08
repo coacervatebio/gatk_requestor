@@ -6,16 +6,16 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
-# s1 = ShellTask(
-#     name="shorten",
-#     debug=True,
-#     script="""
-#     set -ex
-#     echo mooooooore >> {inputs.infile}
-#     """,
-#     inputs=kwtypes(infile=FlyteFile),
-#     output_locs=[OutputLocation(var="i", var_type=FlyteFile, location="{inputs.infile}")],
-# )
+s1 = ShellTask(
+    name="shorten",
+    debug=True,
+    script="""
+    set -ex
+    echo mooooooore >> {inputs.infile}
+    """,
+    inputs=kwtypes(infile=FlyteFile),
+    output_locs=[OutputLocation(var="i", var_type=FlyteFile, location="{inputs.infile}")],
+)
 
 # @task
 # def make_flytedir() -> FlyteDirectory:
@@ -24,14 +24,24 @@ from flytekit.types.directory import FlyteDirectory
 #     return FlyteDirectory(path=str(local_dir))
 
 @task
-def read_samps(samples: FlyteFile) -> List[FlyteFile]:
+def read_samps(samples: FlyteFile) -> List[str]:
     lst = []
     with open(samples, 'r') as s_in:
         for i in s_in.readlines():
-            ff = FlyteFile(f"s3://my-s3-bucket/input-data/{i}")
-            lst.append(ff)
+            ffs = f"s3://my-s3-bucket/input-data/{i}"
+            lst.append(ffs)
     return lst
 
+@dynamic
+def process_samples(infiles: List[str]) -> str:
+    # for i in infiles:
+    #     ff = FlyteFile(path=i)
+    #     s1(infile=ff)
+    s1(infile=FlyteFile("s3://my-s3-bucket/input-data/HG03633_short.sam"))
+    return "PROCESSED"
+
 @workflow
-def wf(samples: FlyteFile) -> List[FlyteFile]:
-    return read_samps(samples=samples)
+def wf(samples: FlyteFile) -> str:
+    ffs = read_samps(samples=samples)
+    out_ = process_samples(infiles=ffs)
+    return out_
