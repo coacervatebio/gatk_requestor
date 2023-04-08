@@ -29,7 +29,7 @@ def read_samps(samples: FlyteFile) -> List[str]:
     with open(samples, 'r') as s_in:
         for i in s_in.readlines():
             ffs = f"s3://my-s3-bucket/input-data/{i}"
-            lst.append(ffs)
+            lst.append(ffs.strip())
     return lst
 
 @dynamic
@@ -37,8 +37,9 @@ def process_samples(infiles: List[str]) -> str:
     # for i in infiles:
     #     ff = FlyteFile(path=i)
     #     s1(infile=ff)
-    s1(infile=FlyteFile("s3://my-s3-bucket/input-data/HG03633_short.sam"))
-    return "PROCESSED"
+    first = infiles[0]
+    s1(infile=FlyteFile(first))
+    return first
 
 @workflow
 def wf(samples: FlyteFile) -> str:
