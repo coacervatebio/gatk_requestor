@@ -17,26 +17,22 @@ s1 = ShellTask(
     output_locs=[OutputLocation(var="i", var_type=FlyteFile, location="{inputs.infile}")],
 )
 
-# @task
-# def make_flytedir() -> FlyteDirectory:
-#     local_dir = Path("s3://my-s3-bucket/user-inputs-made")
-#     local_dir.mkdir(exist_ok=True)
-#     return FlyteDirectory(path=str(local_dir))
-
 @task
-def read_samps(samples: FlyteFile) -> List[str]:
+def read_samps(samples: FlyteFile) -> List[FlyteFile]:
     lst = []
     with open(samples, 'r') as s_in:
         for i in s_in.readlines():
             ffs = f"s3://my-s3-bucket/input-data/{i}"
-            lst.append(ffs.strip())
+            lst.append(FlyteFile(path=ffs.strip()))
     return lst
 
 @dynamic
-def process_samples(infiles: List[str]) -> str:
+def process_samples(infiles: List[FlyteFile]) -> str:
+
+    s1_out = []
     for i in infiles:
-        ff = FlyteFile(path=i)
-        s1(infile=ff)
+        s1_out.append(s1(infile=i))
+
     # first = infiles[0]
     # s1(infile=FlyteFile(first))
     return "PROCESSED"
