@@ -1,20 +1,39 @@
 import os
 from pathlib import Path
 from typing import List
-from flytekit import kwtypes, workflow, dynamic, task
-from flytekit.extras.tasks.shell import OutputLocation, ShellTask
+from flytekit import kwtypes, workflow, dynamic, task, ContainerTask
+from flytekit.extras.tasks.shell import OutputLocation
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 
-s1 = ShellTask(
-    name="shorten",
-    debug=True,
-    script="""
-    set -ex
-    echo mooooooore >> {inputs.infile}
-    """,
+calculate_ellipse_area_python = ContainerTask(
+    name="ellipse-area-metadata-python",
+    input_data_dir="/var/inputs",
+    output_data_dir="/var/outputs",
+    inputs=kwtypes(a=float, b=float),
+    outputs=kwtypes(area=float, metadata=str),
+    image="ghcr.io/flyteorg/rawcontainers-python:v2",
+    command=[
+        "python",
+        "calculate-ellipse-area.py",
+        "{{.inputs.a}}",
+        "{{.inputs.b}}",
+        "/var/outputs",
+    ],
+)
+
+s1 = ContainerTask(
+    name="gatk-image-container-task",
+    input_data_dir="/var/inputs",
+    output_data_dir="/var/outputs",
     inputs=kwtypes(infile=FlyteFile),
-    output_locs=[OutputLocation(var="i", var_type=FlyteFile, location="{inputs.infile}")],
+    outputs=kwtypes(version=str, headlines=str),
+    image="docker.io/coacervate/provider:latest",
+    command=[
+        "/run/flyte_test.sh",
+        "{{.inputs.infile}}",
+        "/var/outputs",
+    ],
 )
 
 @task
