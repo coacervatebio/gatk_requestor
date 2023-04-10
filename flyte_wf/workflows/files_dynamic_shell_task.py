@@ -62,6 +62,7 @@ def process_samples(infiles: List[FlyteFile], regs: List[str]) -> str:
         idx = ic(al_in=i)
         for r in regs:
             per_reg = sc(al_in=i, idx_in=idx, reg=r)
+            per_reg_idx = ic(al_in=per_reg)
 
     return "PROCESSED"
 
