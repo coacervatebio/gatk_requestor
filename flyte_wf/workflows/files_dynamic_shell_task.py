@@ -26,13 +26,15 @@ s1 = ContainerTask(
     name="gatk-image-container-task",
     input_data_dir="/var/inputs",
     output_data_dir="/var/outputs",
-    inputs=kwtypes(infile=FlyteFile),
-    outputs=kwtypes(version=str, headlines=str),
-    image="docker.io/coacervate/provider:latest",
+    inputs=kwtypes(al_in=FlyteFile),
+    outputs=kwtypes(idx_out=FlyteFile),
+    image="docker.io/coacervate/requestor:latest",
     command=[
-        "/run/flyte_test.sh",
-        "{{.inputs.infile}}",
-        "/var/outputs",
+        "samtools",
+        "index",
+        "/var/inputs/al_in",
+        "-o",
+        "/var/outputs/idx_out"
     ],
 )
 
@@ -50,7 +52,7 @@ def process_samples(infiles: List[FlyteFile]) -> str:
 
     s1_out = []
     for i in infiles:
-        s1_out.append(s1(infile=i))
+        s1_out.append(s1(al_in=i))
 
     # first = infiles[0]
     # s1(infile=FlyteFile(first))
