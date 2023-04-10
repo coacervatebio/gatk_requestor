@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from flytekit import kwtypes, workflow, dynamic, task, ContainerTask
 from flytekit.types.file import FlyteFile
 
@@ -42,25 +42,32 @@ sc = ContainerTask(
 )
 
 @task
-def read_samps(samples: FlyteFile) -> List[FlyteFile]:
-    lst = []
+def read_config(samples: FlyteFile, regions: FlyteFile) -> Tuple[List[FlyteFile], List[str]]:
+    infiles = []
     with open(samples, 'r') as s_in:
         for i in s_in.readlines():
             ffs = f"s3://my-s3-bucket/input-data/{i}"
-            lst.append(FlyteFile(path=ffs.strip()))
-    return lst
+            infiles.append(FlyteFile(path=ffs.strip()))
+
+    regs = []
+    with open(regions, 'r') as r_in:
+        regs = [r.strip() for r in r_in.readlines()]
+
+    return infiles, regs
 
 @dynamic
-def process_samples(infiles: List[FlyteFile]) -> str:
+def process_samples(infiles: List[FlyteFile], regs: List[str]) -> str:
 
     for i in infiles:
         idx = ic(al_in=i)
-        per_reg = sc(al_in=i, idx_in=idx, reg="chr21")
+        for r in regs:
+            per_reg = sc(al_in=i, idx_in=idx, reg=r)
 
     return "PROCESSED"
 
 @workflow
-def wf(samples: FlyteFile) -> str:
-    ffs = read_samps(samples=samples)
-    out_ = process_samples(infiles=ffs)
-    return out_
+def wf(samples: FlyteFile, regions: FlyteFile) -> str:
+    
+    ffs, regs = read_config(samples=samples, regions=regions)
+    out_ = process_samples(infiles=ffs, regs=regs)
+    return "YUS"
