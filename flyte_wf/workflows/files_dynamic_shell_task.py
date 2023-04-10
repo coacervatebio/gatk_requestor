@@ -1,29 +1,9 @@
-import os
-from pathlib import Path
 from typing import List
 from flytekit import kwtypes, workflow, dynamic, task, ContainerTask
-from flytekit.extras.tasks.shell import OutputLocation
 from flytekit.types.file import FlyteFile
-from flytekit.types.directory import FlyteDirectory
 
-calculate_ellipse_area_python = ContainerTask(
-    name="ellipse-area-metadata-python",
-    input_data_dir="/var/inputs",
-    output_data_dir="/var/outputs",
-    inputs=kwtypes(a=float, b=float),
-    outputs=kwtypes(area=float, metadata=str),
-    image="ghcr.io/flyteorg/rawcontainers-python:v2",
-    command=[
-        "python",
-        "calculate-ellipse-area.py",
-        "{{.inputs.a}}",
-        "{{.inputs.b}}",
-        "/var/outputs",
-    ],
-)
-
-s1 = ContainerTask(
-    name="gatk-image-container-task",
+ic = ContainerTask(
+    name="index_cram",
     input_data_dir="/var/inputs",
     output_data_dir="/var/outputs",
     inputs=kwtypes(al_in=FlyteFile),
@@ -35,6 +15,29 @@ s1 = ContainerTask(
         "/var/inputs/al_in",
         "-o",
         "/var/outputs/idx_out"
+    ],
+)
+
+sc = ContainerTask(
+    name="split_cram",
+    input_data_dir="/var/inputs",
+    output_data_dir="/var/outputs",
+    inputs=kwtypes(al_in=FlyteFile, idx_in=FlyteFile, reg=str),
+    outputs=kwtypes(reg_out=FlyteFile),
+    image="docker.io/coacervate/requestor:latest",
+    command=[
+        "samtools",
+        "view",
+        "-T",
+        "/data/resources/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta",
+        "-O",
+        "cram",
+        "-o",
+        "/var/outputs/reg_out",
+        "-X",
+        "/var/inputs/al_in",
+        "/var/inputs/idx_in",
+        "{{.inputs.reg}}",
     ],
 )
 
@@ -50,12 +53,10 @@ def read_samps(samples: FlyteFile) -> List[FlyteFile]:
 @dynamic
 def process_samples(infiles: List[FlyteFile]) -> str:
 
-    s1_out = []
     for i in infiles:
-        s1_out.append(s1(al_in=i))
+        idx = ic(al_in=i)
+        per_reg = sc(al_in=i, idx_in=idx, reg="chr21")
 
-    # first = infiles[0]
-    # s1(infile=FlyteFile(first))
     return "PROCESSED"
 
 @workflow
