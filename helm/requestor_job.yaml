@@ -19,10 +19,10 @@ spec:
         - name: {{ .Values.yagna.rootVolName }}
           persistentVolumeClaim:
             claimName: {{ .Values.yagna.pvcName }}
-        - name: input-data
-          hostPath:
-            path: {{ .Values.manualJob.inputHostPath }}
-            type: Directory
+        # - name: input-data
+        #   hostPath:
+        #     path: {{ .Values.manualJob.inputHostPath }}
+        #     type: Directory
       containers:
         - name: {{ .Values.manualJob.containerName }}
           image: "{{ .Values.image.requestor.repository }}:{{ .Values.image.requestor.tag }}"
@@ -38,8 +38,8 @@ spec:
             - name: {{ .Values.yagna.rootVolName }}
               subPath: {{ .Values.yagna.socketSubpath }}
               mountPath: {{ .Values.yagna.socketMount }}
-            - name: input-data
-              mountPath: {{ .Values.manualJob.containerMountPath }}
+            # - name: input-data
+            #   mountPath: {{ .Values.manualJob.containerMountPath }}
           env:
           - name: YAGNA_API_URL
             value: "http://{{ .Values.yagna.svcName }}:{{ .Values.yagna.port }}"

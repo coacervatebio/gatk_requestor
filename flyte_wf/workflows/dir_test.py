@@ -6,13 +6,13 @@ from flytekit.types.file import FlyteFile
 
 
 @task
-def t1() -> List[FlyteFile]:
+def t1(indir: FlyteDirectory) -> List[FlyteFile]:
     files = []
-    for f in os.listdir(FlyteDirectory("s3://my-s3-bucket/arbitrary")):
-        files.append(f)
+    for f in os.listdir(indir):
+        files.append(os.path.join(indir, f))
     return files
 
 
 @workflow
 def wf():
-    t1()
+    t1(indir=FlyteDirectory("s3://my-s3-bucket/arbitrary"))
