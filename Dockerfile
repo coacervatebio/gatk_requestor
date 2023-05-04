@@ -23,13 +23,6 @@ ENV VENV /opt/venv
 RUN python3 -m venv ${VENV}
 ENV PATH="${VENV}/bin:$PATH"
 
-# Install Python dependencies
-COPY ./requirements.txt /root
-RUN pip install -r /root/requirements.txt
-
-# Copy the actual code
-COPY . /root
-
 # This tag is supplied by the build script and will be used to determine the version
 # when registering tasks, workflows, and launch plans
 ARG tag
@@ -42,9 +35,15 @@ RUN tar -xzf "golem-requestor-linux-${YAG_VER}.tar.gz"
 RUN mv golem-requestor-linux-${YAG_VER}/* /usr/local/bin/
 RUN rm -rf golem-requestor*
 
-
 # Install GATK4
 WORKDIR /home
 ARG GATK_VER=4.4.0.0
 ADD https://github.com/broadinstitute/gatk/releases/download/${GATK_VER}/gatk-${GATK_VER}.zip .
 RUN unzip gatk-${GATK_VER}.zip && mv gatk-${GATK_VER}/gatk-package-${GATK_VER}-local.jar /usr/local/share/ && rm -rf gatk-${GATK_VER}*
+
+# Install Python dependencies
+COPY ./requirements.txt /root
+RUN pip install -r /root/requirements.txt
+
+# Copy the actual code
+COPY . /root
