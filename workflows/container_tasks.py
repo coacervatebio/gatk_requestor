@@ -1,9 +1,52 @@
 import os
-from pathlib import Path
 from typing import List, Tuple
-from flytekit import kwtypes, workflow, dynamic, task, ContainerTask, current_context
+from flytekit import kwtypes, workflow, dynamic, task, ContainerTask
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
+from .pod_templates import yagna_requestor
+
+gt = ContainerTask(
+    name="golem-test",
+    input_data_dir="/mnt",
+    output_data_dir="/var/outputs",
+    inputs=kwtypes(),
+    outputs=kwtypes(),
+    image="docker.io/coacervate/requestor:latest",
+    pod_template = yagna_requestor,
+    # pod_template_name = "my-pod-template", # Modify vols / svc here for yagna
+    command=[
+        # "find",
+        # "/",
+        # "-name",
+        # "*cram*"
+        # "ls",
+        # "-la",
+        # "/mnt/indir",
+        "python",
+        "/data/agents/hello_golem.py"
+        # "sleep",
+        # "infinity"
+    ],
+)
+
+bt = ContainerTask(
+    name="basic-test",
+    input_data_dir="/var/inputs",
+    output_data_dir="/var/outputs",
+    inputs=kwtypes(indir=FlyteDirectory),
+    outputs=kwtypes(),
+    image="ghcr.io/flyteorg/rawcontainers-shell:v2",
+    # pod_template = pt,
+    # pod_template_name = "my-pod-template", # Modify vols / svc here for yagna
+    command=[
+        # "ls",
+        # "-la",
+        # "/var/inputs",
+        "sleep",
+        "infinity"
+    ],
+)
+
 
 cv = ContainerTask(
     name="call_variants",
@@ -58,33 +101,3 @@ sc = ContainerTask(
         "{{.inputs.reg}}",
     ],
 )
-
-@dynamic
-def process_samples(indir: FlyteDirectory, regs: List[str]) -> FlyteDirectory:
-
-    working_dir = current_context().working_directory
-    local_dir = Path(os.path.join(working_dir, "regions"))
-    local_dir.mkdir(exist_ok=True)
-
-    for f in os.listdir(indir):
-        fi = os.path.join(indir, f)
-        idx = ic(al_in=fi)
-        for r in regs:
-            per_reg = sc(al_in=fi, idx_in=idx, reg=r)
-            per_reg_idx = ic(al_in=per_reg)
-            os.rename(per_reg, os.path.join(local_dir, os.path.basename(per_reg)))
-            os.rename(per_reg, os.path.join(local_dir, os.path.basename(per_reg_idx)))
-    return local_dir
-
-@task
-def get_dir(dirpath: str) -> FlyteDirectory:
-    fd = FlyteDirectory(path=dirpath)
-    return fd
-
-@workflow
-def wf(dirpath: str) -> FlyteDirectory:
-    
-    fd = get_dir(dirpath=dirpath)
-    regs = ['chr21', 'chr22']
-    out_ = process_samples(indir=fd, regs=regs)
-    return out_
