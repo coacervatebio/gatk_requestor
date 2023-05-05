@@ -1,0 +1,25 @@
+---
+apiVersion: v1
+kind: PodTemplate
+metadata:
+  name: yagna-template
+template:
+  metadata:
+    labels:
+      module: yagna
+  spec:
+    volumes:
+      - name: yagna-storage
+        persistentVolumeClaim:
+          claimName: yagna-pvc
+    containers:
+      - name: primary
+        image: docker.io/rwgrim/docker-noop
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: yagna-storage
+          subPath: yagna-socket
+          mountPath: /tmp
+        env:
+        - name: YAGNA_API_URL
+          value: "http://yagna-service:7465"
