@@ -7,7 +7,7 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekitplugins.pod import Pod
-# from .pod_templates import yagna_requestor_ps
+from .pod_templates import yagna_requestor_ps
 
 
 @task
@@ -52,7 +52,7 @@ hg = ShellTask(
     """,
     inputs=kwtypes(),
     # output_locs=[],
-    # container_image='docker.io/coacervate/requestor:latest',
+    container_image='docker.io/coacervate/requestor:latest',
     # task_config=Pod(pod_spec=yagna_requestor_ps)
 )
 

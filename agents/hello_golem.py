@@ -33,7 +33,7 @@ async def main():
             print(completed.result.stdout)
 
 
-if __name__ == "__main__":
+def run():
 
     enable_default_logger(log_file="hello.log")
 

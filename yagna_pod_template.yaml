@@ -13,7 +13,7 @@ template:
         persistentVolumeClaim:
           claimName: yagna-pvc
     containers:
-      - name: primary
+      - name: default
         image: docker.io/rwgrim/docker-noop
         imagePullPolicy: Always
         volumeMounts:
