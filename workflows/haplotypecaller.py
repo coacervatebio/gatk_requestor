@@ -128,7 +128,7 @@ async def main():
         sleep(3600)
 
 
-if __name__ == "__main__":
+def run():
     args = arg_parser.parse_args()
 
     loop = asyncio.get_event_loop()
