@@ -1,20 +1,26 @@
 import os
-from flytekit import kwtypes, workflow, dynamic, task, ContainerTask
+from pathlib import Path
+from flytekit import kwtypes, workflow, dynamic, task, ContainerTask,current_context
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekitplugins.pod import Pod
 from .pod_templates import yagna_requestor_ps
 from .util_tasks import get_dir, hg, get_file, get_file_contents
+from .flyte_haplotypecaller import run
 
 @task(
     container_image='docker.io/coacervate/requestor:latest',
     task_config=Pod(pod_spec=yagna_requestor_ps)
     )
-def local_ls_task(indir: FlyteDirectory):
-    print(os.listdir(indir))
+def test_task(indir: FlyteDirectory):
+    working_dir = current_context().working_directory
+    local_dir = Path(os.path.join(working_dir, "vcf_files"))
+    local_dir.mkdir(exist_ok=True)
+
+    run(alpath=indir, vcfpath=local_dir)
 
 @workflow
 def wf():
     fd = get_dir(dirpath='s3://my-s3-bucket/input-data/alignments/chr22')
-    local_ls_task(indir=fd)
+    test_task(indir=fd)

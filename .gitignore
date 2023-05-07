@@ -12,18 +12,11 @@
 *.dict
 
 # Include small demo alignments
-!coacervate/results/alignments/full/HG03633.cram
-!coacervate/results/alignments/full/HG04149.cram
+!results/alignments/full/HG03633.cram
+!results/alignments/full/HG04149.cram
 
 # Debug
 debug/*
-
-# Snakemake
-**/.snakemake*
-
-# Benchmarking
-coacervate/benchmarks/*
-!coacervate/benchmarks/gather_benchmarks.py
 
 # Golem
 *.gvmi
@@ -35,16 +28,7 @@ Vagrantfile
 vagrant_provisioning.txt
 .vagrant/*
 
-# Big image files, keeping README to preserve folder
-**/gatk_release/*
-**/ref_hg38*
-!**/gatk_release/README.md
-
 # Test / Dev
 **/tmp*
 **/scratch.py
 **/pytest.log
-
-# Helm
-helm/my_values.yaml
-helm/my_test_values.yaml
