@@ -90,7 +90,7 @@ sc = ContainerTask(
         "samtools",
         "view",
         "-T",
-        "/data/resources/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta",
+        "/root/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta",
         "-O",
         "cram",
         "-o",

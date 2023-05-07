@@ -62,7 +62,9 @@ RUN wget https://github.com/samtools/samtools/releases/download/${SAMTOOLS_VER}/
  cd samtools-${SAMTOOLS_VER} && \
  ./configure --prefix=/usr/local && \
  make && \
- make install
+ make install && \
+ cd .. && \
+ rm -rf samtools-${SAMTOOLS_VER}
 
 # Install Python dependencies
 COPY ./requirements.txt /root

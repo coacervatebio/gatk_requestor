@@ -8,9 +8,9 @@ from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekitplugins.pod import Pod
 from .pod_templates import yagna_requestor_ps
+from .hello_golem import run
 
-
-@task
+@task(container_image='docker.io/coacervate/requestor:latest')
 def get_dir(dirpath: str) -> FlyteDirectory:
     fd = FlyteDirectory(path=dirpath)
     return fd
@@ -32,16 +32,22 @@ def get_file_contents(infile: FlyteFile) -> str:
         content = in_.read()
     return content
 
-# @task(
-#     container_image='docker.io/coacervate/requestor:latest',
-#     task_config=Pod(pod_spec=yagna_requestor_ps)
-# )
-# def get_golem_appkey() -> str:
-#     key_list = subprocess.run(["yagna", "app-key", "list", "--json"], capture_output=True)
-#     key = json.loads(key_list.stdout)[0].get('key')
-#     print(key)
-#     return key
+@task(
+    container_image='docker.io/coacervate/requestor:latest',
+    task_config=Pod(pod_spec=yagna_requestor_ps)
+)
+def get_golem_appkey() -> str:
+    key_list = subprocess.run(["yagna", "app-key", "list", "--json"], capture_output=True)
+    key = json.loads(key_list.stdout)[0].get('key')
+    print(key)
+    return key
 
+@task(
+    container_image='docker.io/coacervate/requestor:latest',
+    task_config=Pod(pod_spec=yagna_requestor_ps)
+    )
+def local_ls_task():
+    run()
 
 hg = ShellTask(
     name="hello_golem",
