@@ -36,25 +36,24 @@ TASK_TIMEOUT = timedelta(hours=2)
 def data(alignments_dir: Path, vcfs_dir: Path) -> Iterator[Task]:
     """Prepare a task object for every region-specific alignment"""
     logger.warning(f"Entering data func with {alignments_dir} and {vcfs_dir}")
-    for input in ['1', '2', '3']:
-        inputs = input
-    # for almt in alignments_dir.glob("*cram"):
-    #     logger.warning(f"Processing al {almt}")
-    #     sample = almt.with_suffix("").name
-    #     inputs = {
-    #         "sample": sample,
-    #         "req_align_path": alignments_dir.joinpath(f"{sample}.cram"),
-    #         "req_align_index_path": alignments_dir.joinpath(f"{sample}.cram.crai"),
-    #         "prov_align_path": PROV_INPATH.joinpath(f"{sample}.cram"),
-    #         "prov_align_index_path": PROV_INPATH.joinpath(f"{sample}.cram.crai"),
-    #         "region_str": alignments_dir.name,
-    #         "req_vcf_path": vcfs_dir.joinpath(alignments_dir.name, f"{sample}.g.vcf.gz"),
-    #         "req_vcf_index_path": vcfs_dir.joinpath(
-    #             alignments_dir.name, f"{sample}.g.vcf.gz.tbi"
-    #         ),
-    #         "prov_vcf_path": PROV_OUTPATH.joinpath(f"{sample}.g.vcf.gz"),
-    #         "prov_vcf_index_path": PROV_OUTPATH.joinpath(f"{sample}.g.vcf.gz.tbi"),
-    #     }
+
+    for almt in alignments_dir.glob("*cram"):
+        logger.warning(f"Processing al {almt}")
+        sample = almt.with_suffix("").name
+        inputs = {
+            "sample": sample,
+            "req_align_path": alignments_dir.joinpath(f"{sample}.cram"),
+            "req_align_index_path": alignments_dir.joinpath(f"{sample}.cram.crai"),
+            "prov_align_path": PROV_INPATH.joinpath(f"{sample}.cram"),
+            "prov_align_index_path": PROV_INPATH.joinpath(f"{sample}.cram.crai"),
+            "region_str": alignments_dir.name,
+            "req_vcf_path": vcfs_dir.joinpath(alignments_dir.name, f"{sample}.g.vcf.gz"),
+            "req_vcf_index_path": vcfs_dir.joinpath(
+                alignments_dir.name, f"{sample}.g.vcf.gz.tbi"
+            ),
+            "prov_vcf_path": PROV_OUTPATH.joinpath(f"{sample}.g.vcf.gz"),
+            "prov_vcf_index_path": PROV_OUTPATH.joinpath(f"{sample}.g.vcf.gz.tbi"),
+        }
         logger.warning(f"Made inputs {inputs}")
         yield Task(data=inputs)
 
@@ -77,15 +76,16 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
         #     task.data["req_align_index_path"], task.data["prov_align_index_path"]
         # )
 
-        run_arg = str(task.data)
+        # run_arg = str(task.data)
+        # run_arg = str(task.data['sample'])
 
-        # run_args = [
-            # str(task.data["prov_align_path"]),
-            # str(task.data["region_str"]),
-            # str(task.data["prov_vcf_path"]),
-        # ]
+        run_args = [
+            str(task.data["prov_align_path"]),
+            str(task.data["region_str"]),
+            str(task.data["prov_vcf_path"]),
+        ]
     
-        future_result = script.run("/bin/echo", run_arg)
+        future_result = script.run("/bin/echo", ' '.join(run_args))
         # future_result = script.run("/bin/echo", (' ').join(run_args))
         # future_result = script.run("/bin/sh", ENTRYPOINT_PATH, *run_args)
 

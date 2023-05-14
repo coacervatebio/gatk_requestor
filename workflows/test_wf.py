@@ -15,14 +15,11 @@ from .hello_golem import hello
     task_config=Pod(pod_spec=yagna_requestor_ps)
     )
 def test_task(indir: FlyteDirectory):
-    print("RUNNING TASK")
     working_dir = current_context().working_directory
     local_dir = Path(os.path.join(working_dir, "vcf_files"))
     local_dir.mkdir(exist_ok=True)
-    loca_indir = Path(indir)
-    print(type(indir))
-    print(type(local_dir))
-    call(alpath=indir, vcfpath=local_dir)
+    local_indir = Path(indir)
+    call(alpath=local_indir, vcfpath=local_dir)
     # hello()
 
 @workflow
