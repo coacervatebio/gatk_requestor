@@ -12,6 +12,10 @@ from yapapi.payload import vm
 
 
 logger = logging.getLogger(__name__)
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(logging.Formatter("[%(asctime)s %(levelname)s %(name)s] %(message)s"))
+console_handler.setLevel(logging.INFO)
+logger.addHandler(console_handler)
 
 greeting = "\nHello from Golem!"
 
