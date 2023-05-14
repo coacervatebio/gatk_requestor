@@ -28,7 +28,7 @@ TASK_TIMEOUT = timedelta(hours=2)
 
 def data(alignments_dir: Path, vcfs_dir: Path) -> Iterator[Task]:
     """Prepare a task object for every region-specific alignment"""
-
+    print(f"Entering data func with {alignments_dir} and {vcfs_dir}")
     for almt in alignments_dir.glob("*cram"):
         sample = almt.with_suffix("").name
         inputs = {
@@ -59,26 +59,25 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
     script = context.new_script(timeout=timedelta(minutes=30))
 
     async for task in tasks:
-        # Upload input alignments
-        script.upload_file(task.data["req_align_path"], task.data["prov_align_path"])
-        script.upload_file(
-            task.data["req_align_index_path"], task.data["prov_align_index_path"]
-        )
+        # # Upload input alignments
+        # script.upload_file(task.data["req_align_path"], task.data["prov_align_path"])
+        # script.upload_file(
+        #     task.data["req_align_index_path"], task.data["prov_align_index_path"]
+        # )
 
         run_args = [
             str(task.data["prov_align_path"]),
             str(task.data["region_str"]),
             str(task.data["prov_vcf_path"]),
         ]
+    
+        future_result = script.run("/bin/echo", (' ').join(run_args))
+        # future_result = script.run("/bin/sh", ENTRYPOINT_PATH, *run_args)
 
-        # future_result = script.run("/usr/bin/which", "tar")
-        # future_result = script.run("/usr/bin/tar", "xf", "/run/reference_HG38.tar.zst", "-C", "/golem/entrypoint", "&&", "/bin/ls", "/golem/entrypoint")
-        future_result = script.run("/bin/sh", ENTRYPOINT_PATH, *run_args)
-
-        script.download_file(task.data["prov_vcf_path"], task.data["req_vcf_path"])
-        script.download_file(
-            task.data["prov_vcf_index_path"], task.data["req_vcf_index_path"]
-        )
+        # script.download_file(task.data["prov_vcf_path"], task.data["req_vcf_path"])
+        # script.download_file(
+        #     task.data["prov_vcf_index_path"], task.data["req_vcf_index_path"]
+        # )
 
         # Pass the prepared sequence of steps to Executor
         yield script
@@ -88,6 +87,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
 
 
 async def main(alpath, vcfpath):
+    print('ENTERING MAIN')
     # Set of parameters for the VM run by each of the providers
     package = await vm.repo(
         image_hash='635e41034ced5d0622d0760bf6aac8377fdf225154d3f306f4fca805',
@@ -105,8 +105,8 @@ async def main(alpath, vcfpath):
             print(completed.result.stdout)
 
 
-def run(alpath, vcfpath):
-
+def call(alpath, vcfpath):
+    print("RUNNING CALL")
     loop = asyncio.get_event_loop()
     task = loop.create_task(main(alpath, vcfpath))
 

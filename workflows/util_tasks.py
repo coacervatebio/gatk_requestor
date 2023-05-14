@@ -8,7 +8,7 @@ from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekitplugins.pod import Pod
 from .pod_templates import yagna_requestor_ps
-from .hello_golem import run
+from .hello_golem import hello
 
 @task(container_image='docker.io/coacervate/requestor:latest')
 def get_dir(dirpath: str) -> FlyteDirectory:

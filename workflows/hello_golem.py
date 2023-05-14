@@ -2,6 +2,7 @@ import os
 import json
 import asyncio
 import subprocess
+import logging
 from time import sleep
 from typing import AsyncIterable
 
@@ -9,9 +10,14 @@ from yapapi import Golem, Task, WorkContext
 from yapapi.log import enable_default_logger
 from yapapi.payload import vm
 
+
+logger = logging.getLogger(__name__)
+
 greeting = "\nHello from Golem!"
 
 async def worker(context: WorkContext, tasks: AsyncIterable[Task]):
+    print("WORKER")
+    logger.warning("LOGGER WORKER")
     async for task in tasks:
         script = context.new_script()
         future_result = script.run("/bin/echo", greeting)
@@ -22,6 +28,8 @@ async def worker(context: WorkContext, tasks: AsyncIterable[Task]):
 
 
 async def main():
+    print("MAIN")
+    logger.warning("LOGGER MAIN")
     package = await vm.repo(
         image_hash="d646d7b93083d817846c2ae5c62c72ca0507782385a2e29291a3d376", # from Hello World Task example in docs
     )
@@ -33,7 +41,9 @@ async def main():
             print(completed.result.stdout)
 
 
-def run():
+def hello():
+    print("RUNNING HELLO")
+    logger.warning("LOGGER HELLO")
 
     enable_default_logger(log_file="hello.log")
 
@@ -43,6 +53,7 @@ def run():
         os.environ['YAGNA_APPKEY'] = json.loads(key_list.stdout)[0].get('key')
         sleep(5)
 
+    print("PRE-LOOP")
     loop = asyncio.get_event_loop()
     task = loop.create_task(main())
     loop.run_until_complete(task)

@@ -7,18 +7,22 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekitplugins.pod import Pod
 from .pod_templates import yagna_requestor_ps
 from .util_tasks import get_dir, hg, get_file, get_file_contents
-from .flyte_haplotypecaller import run
+from .flyte_haplotypecaller import call
+from .hello_golem import hello
 
 @task(
     container_image='docker.io/coacervate/requestor:latest',
     task_config=Pod(pod_spec=yagna_requestor_ps)
     )
 def test_task(indir: FlyteDirectory):
+    print("RUNNING TASK")
     working_dir = current_context().working_directory
     local_dir = Path(os.path.join(working_dir, "vcf_files"))
     local_dir.mkdir(exist_ok=True)
-
-    run(alpath=indir, vcfpath=local_dir)
+    print(type(indir))
+    print(type(local_dir))
+    # call(alpath=indir, vcfpath=local_dir)
+    hello()
 
 @workflow
 def wf():
