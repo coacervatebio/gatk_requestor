@@ -10,7 +10,6 @@ from yapapi import Golem, Task, WorkContext
 from yapapi.log import enable_default_logger
 from yapapi.payload import vm
 
-
 logger = logging.getLogger(__name__)
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(logging.Formatter("[%(asctime)s %(levelname)s %(name)s] %(message)s"))
@@ -20,7 +19,6 @@ logger.addHandler(console_handler)
 greeting = "\nHello from Golem!"
 
 async def worker(context: WorkContext, tasks: AsyncIterable[Task]):
-    print("WORKER")
     logger.warning("LOGGER WORKER")
     async for task in tasks:
         script = context.new_script()
@@ -32,7 +30,6 @@ async def worker(context: WorkContext, tasks: AsyncIterable[Task]):
 
 
 async def main():
-    print("MAIN")
     logger.warning("LOGGER MAIN")
     package = await vm.repo(
         image_hash="d646d7b93083d817846c2ae5c62c72ca0507782385a2e29291a3d376", # from Hello World Task example in docs
@@ -46,7 +43,6 @@ async def main():
 
 
 def hello():
-    print("RUNNING HELLO")
     logger.warning("LOGGER HELLO")
 
     enable_default_logger(log_file="hello.log")

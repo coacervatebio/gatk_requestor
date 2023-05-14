@@ -19,10 +19,11 @@ def test_task(indir: FlyteDirectory):
     working_dir = current_context().working_directory
     local_dir = Path(os.path.join(working_dir, "vcf_files"))
     local_dir.mkdir(exist_ok=True)
+    loca_indir = Path(indir)
     print(type(indir))
     print(type(local_dir))
-    # call(alpath=indir, vcfpath=local_dir)
-    hello()
+    call(alpath=indir, vcfpath=local_dir)
+    # hello()
 
 @workflow
 def wf():

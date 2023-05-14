@@ -8,6 +8,7 @@ This file contains the requestor part of our application. There are three areas 
 import os
 import json
 import asyncio
+import logging
 import argparse
 import subprocess
 from time import sleep
@@ -20,6 +21,12 @@ from yapapi import Golem, Task, WorkContext
 from yapapi.log import enable_default_logger
 from yapapi.payload import vm
 
+logger = logging.getLogger(__name__)
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(logging.Formatter("[%(asctime)s %(levelname)s %(name)s] %(message)s"))
+console_handler.setLevel(logging.INFO)
+logger.addHandler(console_handler)
+
 PROV_INPATH = Path("/golem/input")
 PROV_OUTPATH = Path("/golem/output")
 ENTRYPOINT_PATH = "/run/run.sh"
@@ -28,23 +35,27 @@ TASK_TIMEOUT = timedelta(hours=2)
 
 def data(alignments_dir: Path, vcfs_dir: Path) -> Iterator[Task]:
     """Prepare a task object for every region-specific alignment"""
-    print(f"Entering data func with {alignments_dir} and {vcfs_dir}")
-    for almt in alignments_dir.glob("*cram"):
-        sample = almt.with_suffix("").name
-        inputs = {
-            "sample": sample,
-            "req_align_path": alignments_dir.joinpath(f"{sample}.cram"),
-            "req_align_index_path": alignments_dir.joinpath(f"{sample}.cram.crai"),
-            "prov_align_path": PROV_INPATH.joinpath(f"{sample}.cram"),
-            "prov_align_index_path": PROV_INPATH.joinpath(f"{sample}.cram.crai"),
-            "region_str": alignments_dir.name,
-            "req_vcf_path": vcfs_dir.joinpath(alignments_dir.name, f"{sample}.g.vcf.gz"),
-            "req_vcf_index_path": vcfs_dir.joinpath(
-                alignments_dir.name, f"{sample}.g.vcf.gz.tbi"
-            ),
-            "prov_vcf_path": PROV_OUTPATH.joinpath(f"{sample}.g.vcf.gz"),
-            "prov_vcf_index_path": PROV_OUTPATH.joinpath(f"{sample}.g.vcf.gz.tbi"),
-        }
+    logger.warning(f"Entering data func with {alignments_dir} and {vcfs_dir}")
+    for input in ['1', '2', '3']:
+        inputs = input
+    # for almt in alignments_dir.glob("*cram"):
+    #     logger.warning(f"Processing al {almt}")
+    #     sample = almt.with_suffix("").name
+    #     inputs = {
+    #         "sample": sample,
+    #         "req_align_path": alignments_dir.joinpath(f"{sample}.cram"),
+    #         "req_align_index_path": alignments_dir.joinpath(f"{sample}.cram.crai"),
+    #         "prov_align_path": PROV_INPATH.joinpath(f"{sample}.cram"),
+    #         "prov_align_index_path": PROV_INPATH.joinpath(f"{sample}.cram.crai"),
+    #         "region_str": alignments_dir.name,
+    #         "req_vcf_path": vcfs_dir.joinpath(alignments_dir.name, f"{sample}.g.vcf.gz"),
+    #         "req_vcf_index_path": vcfs_dir.joinpath(
+    #             alignments_dir.name, f"{sample}.g.vcf.gz.tbi"
+    #         ),
+    #         "prov_vcf_path": PROV_OUTPATH.joinpath(f"{sample}.g.vcf.gz"),
+    #         "prov_vcf_index_path": PROV_OUTPATH.joinpath(f"{sample}.g.vcf.gz.tbi"),
+    #     }
+        logger.warning(f"Made inputs {inputs}")
         yield Task(data=inputs)
 
 
@@ -56,6 +67,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
     Tasks are provided from a common, asynchronous queue.
     The signature of this function cannot change, as it's used internally by `Executor`.
     """
+    logger.warning("Entering steps function..")
     script = context.new_script(timeout=timedelta(minutes=30))
 
     async for task in tasks:
@@ -65,13 +77,16 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
         #     task.data["req_align_index_path"], task.data["prov_align_index_path"]
         # )
 
-        run_args = [
-            str(task.data["prov_align_path"]),
-            str(task.data["region_str"]),
-            str(task.data["prov_vcf_path"]),
-        ]
+        run_arg = str(task.data)
+
+        # run_args = [
+            # str(task.data["prov_align_path"]),
+            # str(task.data["region_str"]),
+            # str(task.data["prov_vcf_path"]),
+        # ]
     
-        future_result = script.run("/bin/echo", (' ').join(run_args))
+        future_result = script.run("/bin/echo", run_arg)
+        # future_result = script.run("/bin/echo", (' ').join(run_args))
         # future_result = script.run("/bin/sh", ENTRYPOINT_PATH, *run_args)
 
         # script.download_file(task.data["prov_vcf_path"], task.data["req_vcf_path"])
@@ -87,7 +102,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
 
 
 async def main(alpath, vcfpath):
-    print('ENTERING MAIN')
+    logger.warning('ENTERING MAIN')
     # Set of parameters for the VM run by each of the providers
     package = await vm.repo(
         image_hash='635e41034ced5d0622d0760bf6aac8377fdf225154d3f306f4fca805',
@@ -106,7 +121,7 @@ async def main(alpath, vcfpath):
 
 
 def call(alpath, vcfpath):
-    print("RUNNING CALL")
+    logger.warning("RUNNING CALL")
     loop = asyncio.get_event_loop()
     task = loop.create_task(main(alpath, vcfpath))
 
