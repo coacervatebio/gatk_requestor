@@ -14,12 +14,13 @@ from .hello_golem import hello
     container_image='docker.io/coacervate/requestor:latest',
     task_config=Pod(pod_spec=yagna_requestor_ps)
     )
-def test_task(indir: FlyteDirectory):
+def test_task(indir: FlyteDirectory) -> FlyteDirectory:
     working_dir = current_context().working_directory
     local_dir = Path(os.path.join(working_dir, "vcf_files"))
     local_dir.mkdir(exist_ok=True)
     local_indir = Path(indir)
     call(alpath=local_indir, vcfpath=local_dir)
+    return local_dir
     # hello()
 
 @workflow

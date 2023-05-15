@@ -46,7 +46,7 @@ def data(alignments_dir: Path, vcfs_dir: Path) -> Iterator[Task]:
             "req_align_index_path": alignments_dir.joinpath(f"{sample}.cram.crai"),
             "prov_align_path": PROV_INPATH.joinpath(f"{sample}.cram"),
             "prov_align_index_path": PROV_INPATH.joinpath(f"{sample}.cram.crai"),
-            "region_str": alignments_dir.name,
+            "region_str": sample.split('_')[1],
             "req_vcf_path": vcfs_dir.joinpath(alignments_dir.name, f"{sample}.g.vcf.gz"),
             "req_vcf_index_path": vcfs_dir.joinpath(
                 alignments_dir.name, f"{sample}.g.vcf.gz.tbi"
@@ -70,11 +70,11 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
     script = context.new_script(timeout=timedelta(minutes=30))
 
     async for task in tasks:
-        # # Upload input alignments
-        # script.upload_file(task.data["req_align_path"], task.data["prov_align_path"])
-        # script.upload_file(
-        #     task.data["req_align_index_path"], task.data["prov_align_index_path"]
-        # )
+        # Upload input alignments
+        script.upload_file(task.data["req_align_path"], task.data["prov_align_path"])
+        script.upload_file(
+            task.data["req_align_index_path"], task.data["prov_align_index_path"]
+        )
 
         # run_arg = str(task.data)
         # run_arg = str(task.data['sample'])
@@ -85,14 +85,14 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
             str(task.data["prov_vcf_path"]),
         ]
     
-        future_result = script.run("/bin/echo", ' '.join(run_args))
+        # future_result = script.run("/bin/echo", ' '.join(run_args))
         # future_result = script.run("/bin/echo", (' ').join(run_args))
-        # future_result = script.run("/bin/sh", ENTRYPOINT_PATH, *run_args)
+        future_result = script.run("/bin/sh", ENTRYPOINT_PATH, *run_args)
 
-        # script.download_file(task.data["prov_vcf_path"], task.data["req_vcf_path"])
-        # script.download_file(
-        #     task.data["prov_vcf_index_path"], task.data["req_vcf_index_path"]
-        # )
+        script.download_file(task.data["prov_vcf_path"], task.data["req_vcf_path"])
+        script.download_file(
+            task.data["prov_vcf_index_path"], task.data["req_vcf_index_path"]
+        )
 
         # Pass the prepared sequence of steps to Executor
         yield script
