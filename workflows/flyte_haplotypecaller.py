@@ -71,13 +71,10 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
 
     async for task in tasks:
         # Upload input alignments
-        script.upload_file(task.data["req_align_path"], task.data["prov_align_path"])
-        script.upload_file(
-            task.data["req_align_index_path"], task.data["prov_align_index_path"]
-        )
-
-        # run_arg = str(task.data)
-        # run_arg = str(task.data['sample'])
+        # script.upload_file(task.data["req_align_path"], task.data["prov_align_path"])
+        # script.upload_file(
+        #     task.data["req_align_index_path"], task.data["prov_align_index_path"]
+        # )
 
         run_args = [
             str(task.data["prov_align_path"]),
@@ -85,14 +82,13 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
             str(task.data["prov_vcf_path"]),
         ]
     
-        # future_result = script.run("/bin/echo", ' '.join(run_args))
-        # future_result = script.run("/bin/echo", (' ').join(run_args))
-        future_result = script.run("/bin/sh", ENTRYPOINT_PATH, *run_args)
+        future_result = script.run("/bin/echo", ' '.join(run_args))
+        # future_result = script.run("/bin/sh", ENTRYPOINT_PATH, *run_args)
 
-        script.download_file(task.data["prov_vcf_path"], task.data["req_vcf_path"])
-        script.download_file(
-            task.data["prov_vcf_index_path"], task.data["req_vcf_index_path"]
-        )
+        # script.download_file(task.data["prov_vcf_path"], task.data["req_vcf_path"])
+        # script.download_file(
+        #     task.data["prov_vcf_index_path"], task.data["req_vcf_index_path"]
+        # )
 
         # Pass the prepared sequence of steps to Executor
         yield script
@@ -120,25 +116,25 @@ async def main(alpath, vcfpath):
             print(completed.result.stdout)
 
 
-def call(alpath, vcfpath):
-    logger.warning("RUNNING CALL")
-    loop = asyncio.get_event_loop()
-    task = loop.create_task(main(alpath, vcfpath))
+# def call(alpath, vcfpath):
+#     logger.warning("RUNNING CALL")
+#     loop = asyncio.get_event_loop()
+#     task = loop.create_task(main(alpath, vcfpath))
 
-    # yapapi debug logging to a file
-    enable_default_logger(
-        log_file=f"/tmp/haplotype_caller_{datetime.now().strftime('%Y%m%d-%H%M')}.log"
-    )
+#     # yapapi debug logging to a file
+#     enable_default_logger(
+#         log_file=f"/tmp/haplotype_caller_{datetime.now().strftime('%Y%m%d-%H%M')}.log"
+#     )
 
-    # Set app key
-    while os.getenv('YAGNA_APPKEY') is None:
-        key_list = subprocess.run(["yagna", "app-key", "list", "--json"], capture_output=True)
-        os.environ['YAGNA_APPKEY'] = json.loads(key_list.stdout)[0].get('key')
-        sleep(5)
+#     # Set app key
+#     while os.getenv('YAGNA_APPKEY') is None:
+#         key_list = subprocess.run(["yagna", "app-key", "list", "--json"], capture_output=True)
+#         os.environ['YAGNA_APPKEY'] = json.loads(key_list.stdout)[0].get('key')
+#         sleep(5)
 
-    try:
-        loop.run_until_complete(task)
-    except KeyboardInterrupt:
-        # Make sure Executor is closed gracefully before exiting
-        task.cancel()
-        loop.run_until_complete(task)
+#     try:
+#         loop.run_until_complete(task)
+#     except KeyboardInterrupt:
+#         # Make sure Executor is closed gracefully before exiting
+#         task.cancel()
+#         loop.run_until_complete(task)
