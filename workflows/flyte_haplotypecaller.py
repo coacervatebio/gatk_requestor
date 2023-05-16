@@ -23,8 +23,8 @@ from yapapi.payload import vm
 logger = logging.getLogger(__name__)
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(logging.Formatter("[%(asctime)s %(levelname)s %(name)s] %(message)s"))
-console_handler.setLevel(logging.DEBUG)
 logger.addHandler(console_handler)
+logger.setLevel(logging.DEBUG)
 
 PROV_INPATH = Path("/golem/input")
 PROV_OUTPATH = Path("/golem/output")
@@ -65,16 +65,16 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
     Tasks are provided from a common, asynchronous queue.
     The signature of this function cannot change, as it's used internally by `Executor`.
     """
-    logger.info("Executing steps on providers..")
+    logger.debug("Executing steps on providers..")
     script = context.new_script(timeout=timedelta(minutes=30))
 
     async for task in tasks:
         # Upload input alignments
-        # script.upload_file(task.data["req_align_path"], task.data["prov_align_path"])
-        # script.upload_file(
-        #     task.data["req_align_index_path"], task.data["prov_align_index_path"]
-        # )
-        # logger.info(f"Uploaded alignment from {task.data['req_align_path']}")
+        script.upload_file(task.data["req_align_path"], task.data["prov_align_path"])
+        script.upload_file(
+            task.data["req_align_index_path"], task.data["prov_align_index_path"]
+        )
+        logger.info(f"Uploaded alignment from {task.data['req_align_path']}")
 
         run_args = [
             str(task.data["prov_align_path"]),
@@ -82,14 +82,13 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
             str(task.data["prov_vcf_path"]),
         ]
     
-        future_result = script.run("/bin/echo", ' '.join(run_args))
-        # future_result = script.run("/bin/sh", ENTRYPOINT_PATH, *run_args)
+        future_result = script.run("/bin/sh", ENTRYPOINT_PATH, *run_args)
 
-        # script.download_file(task.data["prov_vcf_path"], task.data["req_vcf_path"])
-        # script.download_file(
-        #     task.data["prov_vcf_index_path"], task.data["req_vcf_index_path"]
-        # )
-        # logger.info(f"Downloaded VCF to {task.data['req_vcf_path']}")
+        script.download_file(task.data["prov_vcf_path"], task.data["req_vcf_path"])
+        script.download_file(
+            task.data["prov_vcf_index_path"], task.data["req_vcf_index_path"]
+        )
+        logger.info(f"Downloaded VCF to {task.data['req_vcf_path']}")
 
         # Pass the prepared sequence of steps to Executor
         yield script
@@ -99,10 +98,10 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
 
 
 async def main(alpath, vcfpath):
-    logger.warning('Executing haplotypecaller main..')
+    logger.debug('Executing haplotypecaller main..')
     # Set of parameters for the VM run by each of the providers
     image_hash='635e41034ced5d0622d0760bf6aac8377fdf225154d3f306f4fca805'
-    logger.info("Using provider image: {image_hash}")
+    logger.info(f'Using provider image: {image_hash}')
     package = await vm.repo(
         image_hash=image_hash,
         min_mem_gib=4.0,
@@ -111,7 +110,7 @@ async def main(alpath, vcfpath):
 
     budget = 5
     subnet_tag = 'public'
-    logger.debug('Executing tasks with budget {budget} on {subnet_tag} subnet')
+    logger.info(f'Executing tasks with budget {budget} on {subnet_tag} subnet')
     async with Golem(budget=budget, subnet_tag=subnet_tag) as golem:
         async for completed in golem.execute_tasks(
             steps,

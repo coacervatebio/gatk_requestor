@@ -22,7 +22,7 @@ def test_task(indir: FlyteDirectory) -> FlyteDirectory:
     local_dir.mkdir(exist_ok=True)
     local_indir = Path(indir)
     log_file = f"/tmp/haplotype_caller_{datetime.now().strftime('%Y%m%d-%H%M')}.log"
-    run_golem(main(alpath=local_indir, vcfpath=local_dir))#, log_file=log_file)
+    run_golem(main(alpath=local_indir, vcfpath=local_dir), log_file=log_file)
     return local_dir
     # hello()
 
