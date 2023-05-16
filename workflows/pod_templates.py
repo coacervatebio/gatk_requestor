@@ -20,13 +20,24 @@ yagna_requestor_ps = V1PodSpec(
                 V1VolumeMount(
                     name='yagna-storage',
                     sub_path='yagna-socket',
+                    mount_path='/yagna'
+                ),
+                ## DEBUG ##
+                V1VolumeMount( 
+                    name='yagna-storage',
+                    sub_path='logs',
                     mount_path='/tmp'
                 )
+                ############
             ],
             env=[
                 V1EnvVar(
                     name='YAGNA_API_URL',
                     value='http://yagna-service:7465'
+                ),
+                V1EnvVar(
+                    name='GSB_URL',
+                    value='unix:/yagna/yagna.sock'
                 )
             ]
         )

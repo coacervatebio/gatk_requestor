@@ -18,13 +18,12 @@ from tempfile import gettempdir
 from typing import AsyncIterable, Iterator
 from uuid import uuid4
 from yapapi import Golem, Task, WorkContext
-from yapapi.log import enable_default_logger
 from yapapi.payload import vm
 
 logger = logging.getLogger(__name__)
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(logging.Formatter("[%(asctime)s %(levelname)s %(name)s] %(message)s"))
-console_handler.setLevel(logging.INFO)
+console_handler.setLevel(logging.DEBUG)
 logger.addHandler(console_handler)
 
 PROV_INPATH = Path("/golem/input")
@@ -35,10 +34,10 @@ TASK_TIMEOUT = timedelta(hours=2)
 
 def data(alignments_dir: Path, vcfs_dir: Path) -> Iterator[Task]:
     """Prepare a task object for every region-specific alignment"""
-    logger.warning(f"Entering data func with {alignments_dir} and {vcfs_dir}")
+    logger.info(f"Preparing task data with alignments in {alignments_dir}, sending outputs to {vcfs_dir}")
 
     for almt in alignments_dir.glob("*cram"):
-        logger.warning(f"Processing al {almt}")
+        logger.info(f"Processing alignment {almt}")
         sample = almt.with_suffix("").name
         inputs = {
             "sample": sample,
@@ -54,7 +53,7 @@ def data(alignments_dir: Path, vcfs_dir: Path) -> Iterator[Task]:
             "prov_vcf_path": PROV_OUTPATH.joinpath(f"{sample}.g.vcf.gz"),
             "prov_vcf_index_path": PROV_OUTPATH.joinpath(f"{sample}.g.vcf.gz.tbi"),
         }
-        logger.warning(f"Made inputs {inputs}")
+        logger.info(f"Prepared inputs: {inputs}")
         yield Task(data=inputs)
 
 
@@ -66,7 +65,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
     Tasks are provided from a common, asynchronous queue.
     The signature of this function cannot change, as it's used internally by `Executor`.
     """
-    logger.warning("Entering steps function..")
+    logger.info("Executing steps on providers..")
     script = context.new_script(timeout=timedelta(minutes=30))
 
     async for task in tasks:
@@ -75,6 +74,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
         # script.upload_file(
         #     task.data["req_align_index_path"], task.data["prov_align_index_path"]
         # )
+        # logger.info(f"Uploaded alignment from {task.data['req_align_path']}")
 
         run_args = [
             str(task.data["prov_align_path"]),
@@ -89,6 +89,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
         # script.download_file(
         #     task.data["prov_vcf_index_path"], task.data["req_vcf_index_path"]
         # )
+        # logger.info(f"Downloaded VCF to {task.data['req_vcf_path']}")
 
         # Pass the prepared sequence of steps to Executor
         yield script
@@ -98,15 +99,20 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
 
 
 async def main(alpath, vcfpath):
-    logger.warning('ENTERING MAIN')
+    logger.warning('Executing haplotypecaller main..')
     # Set of parameters for the VM run by each of the providers
+    image_hash='635e41034ced5d0622d0760bf6aac8377fdf225154d3f306f4fca805'
+    logger.info("Using provider image: {image_hash}")
     package = await vm.repo(
-        image_hash='635e41034ced5d0622d0760bf6aac8377fdf225154d3f306f4fca805',
+        image_hash=image_hash,
         min_mem_gib=4.0,
         min_storage_gib=2.0,
     )
 
-    async with Golem(budget=5, subnet_tag='public') as golem:
+    budget = 5
+    subnet_tag = 'public'
+    logger.debug('Executing tasks with budget {budget} on {subnet_tag} subnet')
+    async with Golem(budget=budget, subnet_tag=subnet_tag) as golem:
         async for completed in golem.execute_tasks(
             steps,
             data(alpath, vcfpath),
@@ -115,26 +121,3 @@ async def main(alpath, vcfpath):
         ):
             print(completed.result.stdout)
 
-
-# def call(alpath, vcfpath):
-#     logger.warning("RUNNING CALL")
-#     loop = asyncio.get_event_loop()
-#     task = loop.create_task(main(alpath, vcfpath))
-
-#     # yapapi debug logging to a file
-#     enable_default_logger(
-#         log_file=f"/tmp/haplotype_caller_{datetime.now().strftime('%Y%m%d-%H%M')}.log"
-#     )
-
-#     # Set app key
-#     while os.getenv('YAGNA_APPKEY') is None:
-#         key_list = subprocess.run(["yagna", "app-key", "list", "--json"], capture_output=True)
-#         os.environ['YAGNA_APPKEY'] = json.loads(key_list.stdout)[0].get('key')
-#         sleep(5)
-
-#     try:
-#         loop.run_until_complete(task)
-#     except KeyboardInterrupt:
-#         # Make sure Executor is closed gracefully before exiting
-#         task.cancel()
-#         loop.run_until_complete(task)
