@@ -1,0 +1,34 @@
+# Python
+**/__pycache__/*
+
+# Sample files, alignments and references
+*.fastq
+*.fasta*
+*.gz
+*.vcf*
+*.bam*
+*.cram*
+*.sam*
+*.dict
+
+# Include small demo alignments
+# !results/alignments/full/HG03633.cram
+# !results/alignments/full/HG04149.cram
+
+# Debug
+debug/*
+
+# Golem
+*.gvmi
+**/goth/*
+!**/goth/*/goth-config.yml
+
+# Vagrant
+Vagrantfile
+vagrant_provisioning.txt
+.vagrant/*
+
+# Test / Dev
+**/tmp*
+**/scratch.py
+**/pytest.log
