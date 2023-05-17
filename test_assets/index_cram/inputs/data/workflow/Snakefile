@@ -1,9 +1,0 @@
-configfile: "/data/config/config.yml"
-
-include: "rules/mapping.smk"
-
-rule all:
-    input: 
-        "/data/results/alignments/full/HG03633.cram.crai"
-    output:
-        touch("/data/results/test.done")
