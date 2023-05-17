@@ -22,13 +22,6 @@ yagna_requestor_ps = V1PodSpec(
                     sub_path='yagna-socket',
                     mount_path='/yagna'
                 ),
-                ## DEBUG ##
-                V1VolumeMount( 
-                    name='yagna-storage',
-                    sub_path='logs',
-                    mount_path='/tmp'
-                )
-                ############
             ],
             env=[
                 V1EnvVar(

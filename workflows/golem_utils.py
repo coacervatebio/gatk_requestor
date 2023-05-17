@@ -2,15 +2,9 @@ import os
 import json
 import asyncio
 import subprocess
-from datetime import datetime, timezone
 from time import sleep
 from pathlib import Path
-import tempfile
-from yapapi import (
-    Golem,
-    NoPaymentAccountError,
-    __version__ as yapapi_version,
-)
+from yapapi import NoPaymentAccountError
 from yapapi.log import enable_default_logger
 
 def run_golem(main, log_file=None):

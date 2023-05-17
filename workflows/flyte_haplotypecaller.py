@@ -119,4 +119,3 @@ async def main(alpath, vcfpath):
             timeout=TASK_TIMEOUT,
         ):
             print(completed.result.stdout)
-
