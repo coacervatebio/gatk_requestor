@@ -1,6 +1,17 @@
 #!/bin/zsh
 
-docker build . -t coacervate/requestor:latest
-docker save coacervate/requestor:latest -o ~/Downloads/coacervate-requestor-latest.tar
-docker cp ~/Downloads/coacervate-requestor-latest.tar flyte-sandbox:/tmp
-docker exec -t flyte-sandbox ctr image import /tmp/coacervate-requestor-latest.tar
+REPO=$1
+IMAGE=$2
+TAG=$3
+
+printf "Building Docker image: %s/%s:%s\n" "$REPO" "$IMAGE" "$TAG"
+docker build . -t "$REPO/$IMAGE:$TAG"
+
+printf "Saving Docker image: %s/%s:%s\n" "$REPO" "$IMAGE" "$TAG"
+docker save "$REPO/$IMAGE:$TAG" -o ~/Downloads/"$REPO-$IMAGE-$TAG.tar"
+
+printf "Copying Docker image to flyte-sandbox:/tmp\n"
+docker cp ~/Downloads/"$REPO-$IMAGE-$TAG.tar" flyte-sandbox:/tmp
+
+printf "Importing Docker image on flyte-sandbox\n"
+docker exec -t flyte-sandbox ctr image import /tmp/"$REPO-$IMAGE-$TAG.tar"

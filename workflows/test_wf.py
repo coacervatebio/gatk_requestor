@@ -7,10 +7,9 @@ from flytekit.types.directory import FlyteDirectory
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekitplugins.pod import Pod
 from .pod_templates import yagna_requestor_ps
-from .util_tasks import get_dir, hg, get_file, get_file_contents
+from .utils import get_dir, hg, get_file, get_file_contents, run_golem, get_alignments
 from .flyte_haplotypecaller import main
 from .hello_golem import hello
-from .golem_utils import run_golem
 
 @task(
     container_image='docker.io/coacervate/requestor:latest',
@@ -29,4 +28,5 @@ def test_task(indir: FlyteDirectory) -> FlyteDirectory:
 @workflow
 def wf():
     fd = get_dir(dirpath='s3://my-s3-bucket/input-data/alignments/chr22')
-    test_task(indir=fd)
+    # test_task(indir=fd)
+    get_alignments(indir=fd)

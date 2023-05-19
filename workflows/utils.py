@@ -23,9 +23,12 @@ class Alignment:
     almt: FlyteFile
     idx: FlyteFile
 
-@task
-def get_alignments(dir: FlyteDirectory) -> List[Alignment]:
-    ...
+@task(container_image='docker.io/coacervate/requestor:latest')
+def get_alignments(indir: FlyteDirectory):# -> List[Alignment]:
+    for fn in os.listdir(indir):
+        fp = os.path.join(indir, fn)
+        print(fn)
+        print(fp)
 
 @task(container_image='docker.io/coacervate/requestor:latest')
 def get_dir(dirpath: str) -> FlyteDirectory:
