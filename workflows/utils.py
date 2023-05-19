@@ -20,15 +20,37 @@ from .hello_golem import hello
 @dataclass_json
 @dataclass
 class Alignment:
+    sample: str
+    reg: str
     almt: FlyteFile
+    idx: FlyteFile
+    
+@dataclass_json
+@dataclass
+class VCF:
+    sample: str
+    reg: str
+    vcf: FlyteFile
     idx: FlyteFile
 
 @task(container_image='docker.io/coacervate/requestor:latest')
-def get_alignments(indir: FlyteDirectory):# -> List[Alignment]:
+def dir_to_alignments(indir: FlyteDirectory) -> List[Alignment]:
+    samps = set()
     for fn in os.listdir(indir):
-        fp = os.path.join(indir, fn)
-        print(fn)
-        print(fp)
+        sample = fn.split('.')[0]
+        reg = sample.split('_')[1]
+        samps.add((sample, reg))
+
+    als = []
+    for s, r in samps:
+        al = Alignment(
+            sample=s,
+            reg=r,
+            almt = os.path.join(indir, f'{s}.cram'),
+            idx = os.path.join(indir, f'{s}.cram.crai')
+        )
+        als.append(al)
+    return als
 
 @task(container_image='docker.io/coacervate/requestor:latest')
 def get_dir(dirpath: str) -> FlyteDirectory:

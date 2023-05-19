@@ -12,6 +12,7 @@ import logging
 import argparse
 import subprocess
 from time import sleep
+from typing import List
 from datetime import timedelta, datetime
 from pathlib import Path
 from tempfile import gettempdir
@@ -19,6 +20,7 @@ from typing import AsyncIterable, Iterator
 from uuid import uuid4
 from yapapi import Golem, Task, WorkContext
 from yapapi.payload import vm
+from .utils import Alignment
 
 logger = logging.getLogger(__name__)
 console_handler = logging.StreamHandler()
@@ -32,7 +34,7 @@ ENTRYPOINT_PATH = "/run/run.sh"
 TASK_TIMEOUT = timedelta(hours=2)
 
 
-def data(alignments_dir: Path, vcfs_dir: Path) -> Iterator[Task]:
+def data(als: List[Alignment]) -> Iterator[Task]:
     """Prepare a task object for every region-specific alignment"""
     logger.info(f"Preparing task data with alignments in {alignments_dir}, sending outputs to {vcfs_dir}")
 
@@ -97,7 +99,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
         task.accept_result(result=await future_result)
 
 
-async def main(alpath, vcfpath):
+async def main(als):
     logger.debug('Executing haplotypecaller main..')
     # Set of parameters for the VM run by each of the providers
     image_hash='635e41034ced5d0622d0760bf6aac8377fdf225154d3f306f4fca805'
@@ -114,7 +116,7 @@ async def main(alpath, vcfpath):
     async with Golem(budget=budget, subnet_tag=subnet_tag) as golem:
         async for completed in golem.execute_tasks(
             steps,
-            data(alpath, vcfpath),
+            data(als),
             payload=package,
             timeout=TASK_TIMEOUT,
         ):
