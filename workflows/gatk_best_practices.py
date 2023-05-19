@@ -4,16 +4,23 @@ from typing import List, Tuple
 from flytekit import kwtypes, workflow, dynamic, task, ContainerTask, current_context
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
-from dataclasses import dataclass
-from dataclasses_json import dataclass_json
+from flytekitplugins.pod import Pod
 from .container_tasks import ic, sc
-from .util_tasks import get_dir
+from .utils import get_dir, run_golem
+from .pod_templates import yagna_requestor_ps
+from .flyte_haplotypecaller import main
 
-@dataclass_json
-@dataclass
-class Alignment:
-    almt: FlyteFile
-    idx: FlyteFile
+@task(
+    container_image='docker.io/coacervate/requestor:latest',
+    task_config=Pod(pod_spec=yagna_requestor_ps)
+    )
+def test_task(indir: FlyteDirectory) -> FlyteDirectory:
+    working_dir = current_context().working_directory
+    local_dir = Path(os.path.join(working_dir, "vcf_files"))
+    local_dir.mkdir(exist_ok=True)
+    local_indir = Path(indir)
+    run_golem(main(alpath=local_indir, vcfpath=local_dir), log_file=True)
+    return local_dir
 
 @dynamic
 def process_samples(indir: FlyteDirectory, regs: List[str]) -> FlyteDirectory:
