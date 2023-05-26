@@ -14,7 +14,7 @@ import subprocess
 from time import sleep
 from typing import List
 from datetime import timedelta, datetime
-from pathlib import Path
+from pathlib import Path, PurePath
 from tempfile import gettempdir
 from typing import AsyncIterable, Iterator
 from uuid import uuid4
@@ -28,35 +28,25 @@ console_handler.setFormatter(logging.Formatter("[%(asctime)s %(levelname)s %(nam
 logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
-PROV_INPATH = Path("/golem/input")
-PROV_OUTPATH = Path("/golem/output")
+PROV_INPATH = PurePath("/golem/input")
+PROV_OUTPATH = PurePath("/golem/output")
 ENTRYPOINT_PATH = "/run/run.sh"
 TASK_TIMEOUT = timedelta(hours=2)
 
 
-def data(als: List[Alignment]) -> Iterator[Task]:
+def data(pls: List[dict]) -> Iterator[Task]:
     """Prepare a task object for every region-specific alignment"""
-    logger.info(f"Preparing task data with alignments in {alignments_dir}, sending outputs to {vcfs_dir}")
+    logger.info(f"Processing payloads..")
+    logger.debug(f"Payloads: {pls}")
 
-    for almt in alignments_dir.glob("*cram"):
-        logger.info(f"Processing alignment {almt}")
-        sample = almt.with_suffix("").name
-        inputs = {
-            "sample": sample,
-            "req_align_path": alignments_dir.joinpath(f"{sample}.cram"),
-            "req_align_index_path": alignments_dir.joinpath(f"{sample}.cram.crai"),
-            "prov_align_path": PROV_INPATH.joinpath(f"{sample}.cram"),
-            "prov_align_index_path": PROV_INPATH.joinpath(f"{sample}.cram.crai"),
-            "region_str": sample.split('_')[1],
-            "req_vcf_path": vcfs_dir.joinpath(alignments_dir.name, f"{sample}.g.vcf.gz"),
-            "req_vcf_index_path": vcfs_dir.joinpath(
-                alignments_dir.name, f"{sample}.g.vcf.gz.tbi"
-            ),
-            "prov_vcf_path": PROV_OUTPATH.joinpath(f"{sample}.g.vcf.gz"),
-            "prov_vcf_index_path": PROV_OUTPATH.joinpath(f"{sample}.g.vcf.gz.tbi"),
-        }
-        logger.info(f"Prepared inputs: {inputs}")
-        yield Task(data=inputs)
+    for pl in pls:
+        logger.info(f"Processing alignment {pl.req_align_path}")
+        pl["prov_align_path"] = PROV_INPATH.joinpath(f"{pl.sample}.cram")
+        pl["prov_align_index_path"] = PROV_INPATH.joinpath(f"{pl.sample}.cram.crai")
+        pl["prov_vcf_path"] = PROV_OUTPATH.joinpath(f"{pl.sample}.g.vcf.gz")
+        pl["prov_vcf_index_path"] = PROV_OUTPATH.joinpath(f"{pl.sample}.g.vcf.gz.tbi")
+        logger.info(f"Prepared inputs: {pl}")
+        yield Task(data=pl)
 
 
 async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
@@ -99,7 +89,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
         task.accept_result(result=await future_result)
 
 
-async def main(als):
+async def main(pls):
     logger.debug('Executing haplotypecaller main..')
     # Set of parameters for the VM run by each of the providers
     image_hash='635e41034ced5d0622d0760bf6aac8377fdf225154d3f306f4fca805'
@@ -116,7 +106,7 @@ async def main(als):
     async with Golem(budget=budget, subnet_tag=subnet_tag) as golem:
         async for completed in golem.execute_tasks(
             steps,
-            data(als),
+            data(pls),
             payload=package,
             timeout=TASK_TIMEOUT,
         ):
