@@ -9,7 +9,7 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekitplugins.pod import Pod
 from .pod_templates import yagna_requestor_ps
 from .utils import get_dir, run_golem, dir_to_alignments, Alignment, VCF
-from .flyte_haplotypecaller import main
+from .flyte_haplotypecaller import main, call
 from .hello_golem import hello
 
 @task(
@@ -32,7 +32,7 @@ def test_task(als: List[Alignment]):# -> List[VCF]:
         }
         print(payload)
         payloads.append(payload)
-    run_golem(main(pls=payloads), log_file=True)
+    call(pls=payloads)
         # vcf = VCF(
         #     sample=al.sample,
         #     reg=al.reg,

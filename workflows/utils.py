@@ -135,7 +135,7 @@ def run_golem(main, log_file=False):
         sleep(5)
 
     loop = asyncio.get_event_loop()
-    task = loop.create_task(main)
+    task = loop.create_task(main())
 
     try:
         loop.run_until_complete(task)

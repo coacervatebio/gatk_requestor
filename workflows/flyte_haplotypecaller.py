@@ -20,6 +20,7 @@ from typing import AsyncIterable, Iterator
 from uuid import uuid4
 from yapapi import Golem, Task, WorkContext
 from yapapi.payload import vm
+from yapapi.log import enable_default_logger
 from .utils import Alignment
 
 logger = logging.getLogger(__name__)
@@ -61,6 +62,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
     script = context.new_script(timeout=timedelta(minutes=30))
 
     async for task in tasks:
+        logger.debug(f"Executing task: {task}")
         # Upload input alignments
         script.upload_file(task.data["req_align_path"], task.data["prov_align_path"])
         script.upload_file(
@@ -111,3 +113,27 @@ async def main(pls):
             timeout=TASK_TIMEOUT,
         ):
             print(completed.result.stdout)
+
+
+def call(pls):
+    logger.warning("RUNNING CALL")
+    loop = asyncio.get_event_loop()
+    task = loop.create_task(main(pls))
+
+    # yapapi debug logging to a file
+    enable_default_logger(
+        log_file=f"/tmp/haplotype_caller_{datetime.now().strftime('%Y%m%d-%H%M')}.log"
+    )
+
+    # Set app key
+    while os.getenv('YAGNA_APPKEY') is None:
+        key_list = subprocess.run(["yagna", "app-key", "list", "--json"], capture_output=True)
+        os.environ['YAGNA_APPKEY'] = json.loads(key_list.stdout)[0].get('key')
+        sleep(5)
+
+    try:
+        loop.run_until_complete(task)
+    except KeyboardInterrupt:
+        # Make sure Executor is closed gracefully before exiting
+        task.cancel()
+        loop.run_until_complete(task)
