@@ -20,6 +20,11 @@ def test_task(als: List[Alignment]):# -> List[VCF]:
     payloads = []
     for al in als:
         working_dir = PurePath(al.almt.path).parent
+
+        # Download alignment and index from object store to pod for uploading to Golem
+        al.almt.download()
+        al.idx.download()
+        
         print(working_dir)
         payload = {
             "sample": al.sample,

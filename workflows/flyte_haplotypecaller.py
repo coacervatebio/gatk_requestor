@@ -41,11 +41,12 @@ def data(pls: List[dict]) -> Iterator[Task]:
     logger.debug(f"Payloads: {pls}")
 
     for pl in pls:
-        logger.info(f"Processing alignment {pl.req_align_path}")
-        pl["prov_align_path"] = PROV_INPATH.joinpath(f"{pl.sample}.cram")
-        pl["prov_align_index_path"] = PROV_INPATH.joinpath(f"{pl.sample}.cram.crai")
-        pl["prov_vcf_path"] = PROV_OUTPATH.joinpath(f"{pl.sample}.g.vcf.gz")
-        pl["prov_vcf_index_path"] = PROV_OUTPATH.joinpath(f"{pl.sample}.g.vcf.gz.tbi")
+        logger.info(f'Processing alignment {pl["req_align_path"]}')
+        sample = pl['sample']
+        pl["prov_align_path"] = PROV_INPATH.joinpath(f"{sample}.cram")
+        pl["prov_align_index_path"] = PROV_INPATH.joinpath(f"{sample}.cram.crai")
+        pl["prov_vcf_path"] = PROV_OUTPATH.joinpath(f"{sample}.g.vcf.gz")
+        pl["prov_vcf_index_path"] = PROV_OUTPATH.joinpath(f"{sample}.g.vcf.gz.tbi")
         logger.info(f"Prepared inputs: {pl}")
         yield Task(data=pl)
 
@@ -63,6 +64,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
 
     async for task in tasks:
         logger.debug(f"Executing task: {task}")
+
         # Upload input alignments
         script.upload_file(task.data["req_align_path"], task.data["prov_align_path"])
         script.upload_file(
