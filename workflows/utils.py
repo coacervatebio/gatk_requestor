@@ -116,7 +116,7 @@ t1 = ShellTask(
     output_locs=[OutputLocation(var="i", var_type=FlyteFile, location="{inputs.x}")],
 )
 
-def run_golem(main, log_file=False):
+def run_golem(main, payloads, log_file=False):
 
     if log_file:
         log_file = f"/tmp/haplotype_caller_{datetime.now().strftime('%Y%m%d-%H%M')}.log"
@@ -135,7 +135,7 @@ def run_golem(main, log_file=False):
         sleep(5)
 
     loop = asyncio.get_event_loop()
-    task = loop.create_task(main())
+    task = loop.create_task(main(payloads))
 
     try:
         loop.run_until_complete(task)

@@ -16,16 +16,17 @@ from .hello_golem import hello
     container_image='docker.io/coacervate/requestor:latest',
     task_config=Pod(pod_spec=yagna_requestor_ps)
     )
-def test_task(als: List[Alignment]):# -> List[VCF]:
+def test_task(als: List[Alignment]) -> List[VCF]:
     payloads = []
+    vcfs = []
     for al in als:
         working_dir = PurePath(al.almt.path).parent
 
         # Download alignment and index from object store to pod for uploading to Golem
         al.almt.download()
         al.idx.download()
-        
-        print(working_dir)
+
+        # Prepare payload for passing to requestor agent
         payload = {
             "sample": al.sample,
             "region_str": al.reg,
@@ -35,19 +36,20 @@ def test_task(als: List[Alignment]):# -> List[VCF]:
             "req_vcf_path": working_dir.joinpath(f"{al.sample}.g.vcf.gz"),
             "req_vcf_index_path": working_dir.joinpath(f"{al.sample}.g.vcf.gz.tbi"),
         }
+
+        # Prepare VCF based on output paths
+        vcf = VCF(
+            sample=al.sample,
+            reg=al.reg,
+            vcf=FlyteFile(path=str(payload['req_vcf_path'])),
+            idx=FlyteFile(path=str(payload['req_vcf_index_path'])),
+        )
+        vcfs.append(vcf)
         print(payload)
         payloads.append(payload)
+
     call(pls=payloads)
-        # vcf = VCF(
-        #     sample=al.sample,
-        #     reg=al.reg,
-        #     vcf=FlyteFile(path=f'{basename}.g.vcf.gz'),
-        #     idx=FlyteFile(path=f'{basename}.g.vcf.gz.tbi')
-        # )
-        # vcfs.append(vcf)
-    # return vcfs
-    # return vcf objs
-    # hello()
+    return vcfs
 
 @workflow
 def wf():
