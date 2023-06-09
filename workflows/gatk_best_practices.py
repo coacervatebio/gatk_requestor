@@ -28,12 +28,7 @@ from .pod_templates import yagna_requestor_ps
     )
 def process_samples(indir: FlyteDirectory, regs: List[str]) -> List[VCF]:
 
-    working_dir = current_context().working_directory
-    local_dir = Path(os.path.join(working_dir, "regions"))
-    local_dir.mkdir(exist_ok=True)
-
     per_reg_als = []
-    # vcfs = []
     for f in os.listdir(indir):
         s = f.strip('.cram')
         fi = os.path.join(indir, f)
