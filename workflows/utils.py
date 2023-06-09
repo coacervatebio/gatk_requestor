@@ -34,6 +34,18 @@ class VCF:
     idx: FlyteFile
 
 @task(container_image='docker.io/coacervate/requestor:latest')
+def return_alignment(sample: str, reg: str, almt: FlyteFile, idx: FlyteFile) -> Alignment:
+    print(sample)
+    print(reg)
+    print(almt)
+    print(idx)
+    try:
+        al = Alignment(sample=sample, reg=reg, almt=almt, idx=idx)
+    except Exception:
+        al = Alignment(sample='dummy', reg=1, almt=FlyteFile(path='tmp'), idx=FlyteFile(path='tmp'))
+    return al
+
+@task(container_image='docker.io/coacervate/requestor:latest')
 def dir_to_alignments(indir: FlyteDirectory) -> List[Alignment]:
     samps = set()
     for fn in os.listdir(indir):

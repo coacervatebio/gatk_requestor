@@ -9,8 +9,9 @@ from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekitplugins.pod import Pod
 from .pod_templates import yagna_requestor_ps
 from .utils import get_dir, run_golem, dir_to_alignments, Alignment, VCF
-from .flyte_haplotypecaller import main, call
+from .flyte_haplotypecaller import main
 from .hello_golem import hello
+from .tasks import golem_call_variants
 
 @task(
     container_image='docker.io/coacervate/requestor:latest',
@@ -44,15 +45,16 @@ def test_task(als: List[Alignment]) -> List[VCF]:
             vcf=FlyteFile(path=str(payload['req_vcf_path'])),
             idx=FlyteFile(path=str(payload['req_vcf_index_path'])),
         )
+        
         vcfs.append(vcf)
-        print(payload)
         payloads.append(payload)
 
-    call(pls=payloads)
+    # Call requestor agent entrypoint with payloads
+    run_golem(main, payloads)
     return vcfs
 
 @workflow
 def wf():
     fd = get_dir(dirpath='s3://my-s3-bucket/input-data/alignments/chr22')
     als = dir_to_alignments(indir=fd)
-    test_task(als=als)
+    golem_call_variants(als=als)
