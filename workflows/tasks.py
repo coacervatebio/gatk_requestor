@@ -32,8 +32,8 @@ def golem_call_variants(als: List[Alignment]) -> List[VCF]:
             "working_dir": working_dir,
             "req_align_path": Path(al.almt.path),
             "req_align_index_path": Path(al.idx.path),
-            "req_vcf_path": working_dir.joinpath(f"{al.sample}.g.vcf.gz"),
-            "req_vcf_index_path": working_dir.joinpath(f"{al.sample}.g.vcf.gz.tbi"),
+            "req_vcf_path": working_dir.joinpath(f"{al.sample}_{al.reg}.g.vcf.gz"),
+            "req_vcf_index_path": working_dir.joinpath(f"{al.sample}_{al.reg}.g.vcf.gz.tbi"),
         }
 
         # Prepare VCF based on output paths

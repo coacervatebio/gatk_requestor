@@ -2,6 +2,7 @@ import os
 import json
 import asyncio
 import subprocess
+from pathlib import Path
 from typing import List, Tuple
 from time import sleep
 from datetime import datetime
@@ -35,15 +36,34 @@ class VCF:
 
 @task(container_image='docker.io/coacervate/requestor:latest')
 def return_alignment(sample: str, reg: str, almt: FlyteFile, idx: FlyteFile) -> Alignment:
-    print(sample)
-    print(reg)
-    print(almt)
-    print(idx)
-    try:
-        al = Alignment(sample=sample, reg=reg, almt=almt, idx=idx)
-    except Exception:
-        al = Alignment(sample='dummy', reg=1, almt=FlyteFile(path='tmp'), idx=FlyteFile(path='tmp'))
-    return al
+    return Alignment(sample=sample, reg=reg, almt=almt, idx=idx)
+
+@task(container_image='docker.io/coacervate/requestor:latest')
+def dir_to_vcfs(indir: FlyteDirectory):# -> List[VCF]:
+    samps = set()
+    for fp in Path(indir.path).rglob('*g.vcf.gz'):
+        print(fp)
+        print(dir(fp))
+        print(type(fp))
+        fn = fp.name
+        print(fn)
+        sample = fn.split('.')[0]
+        print(sample)
+        reg = sample.split('_')[-1]
+        print(reg)
+        samps.add((sample, reg))
+    print(samps)
+
+    # als = []
+    # for s, r in samps:
+    #     al = Alignment(
+    #         sample=s,
+    #         reg=r,
+    #         almt = os.path.join(indir, f'{s}.cram'),
+    #         idx = os.path.join(indir, f'{s}.cram.crai')
+    #     )
+    #     als.append(al)
+    # return als
 
 @task(container_image='docker.io/coacervate/requestor:latest')
 def dir_to_alignments(indir: FlyteDirectory) -> List[Alignment]:
