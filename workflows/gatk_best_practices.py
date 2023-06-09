@@ -26,7 +26,7 @@ from .pod_templates import yagna_requestor_ps
     container_image='docker.io/coacervate/requestor:latest',
     task_config=Pod(pod_spec=yagna_requestor_ps)
     )
-def process_samples(indir: FlyteDirectory, regs: List[str]) -> List[Alignment]:
+def process_samples(indir: FlyteDirectory, regs: List[str]) -> List[VCF]:
 
     working_dir = current_context().working_directory
     local_dir = Path(os.path.join(working_dir, "regions"))

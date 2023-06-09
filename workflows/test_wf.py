@@ -13,45 +13,45 @@ from .flyte_haplotypecaller import main
 from .hello_golem import hello
 from .tasks import golem_call_variants
 
-@task(
-    container_image='docker.io/coacervate/requestor:latest',
-    task_config=Pod(pod_spec=yagna_requestor_ps)
-    )
-def test_task(als: List[Alignment]) -> List[VCF]:
-    payloads = []
-    vcfs = []
-    for al in als:
-        working_dir = PurePath(al.almt.path).parent
+# @task(
+#     container_image='docker.io/coacervate/requestor:latest',
+#     task_config=Pod(pod_spec=yagna_requestor_ps)
+#     )
+# def test_task(als: List[Alignment]) -> List[VCF]:
+#     payloads = []
+#     vcfs = []
+#     for al in als:
+#         working_dir = PurePath(al.almt.path).parent
 
-        # Download alignment and index from object store to pod for uploading to Golem
-        al.almt.download()
-        al.idx.download()
+#         # Download alignment and index from object store to pod for uploading to Golem
+#         al.almt.download()
+#         al.idx.download()
 
-        # Prepare payload for passing to requestor agent
-        payload = {
-            "sample": al.sample,
-            "region_str": al.reg,
-            "working_dir": working_dir,
-            "req_align_path": Path(al.almt.path),
-            "req_align_index_path": Path(al.idx.path),
-            "req_vcf_path": working_dir.joinpath(f"{al.sample}.g.vcf.gz"),
-            "req_vcf_index_path": working_dir.joinpath(f"{al.sample}.g.vcf.gz.tbi"),
-        }
+#         # Prepare payload for passing to requestor agent
+#         payload = {
+#             "sample": al.sample,
+#             "region_str": al.reg,
+#             "working_dir": working_dir,
+#             "req_align_path": Path(al.almt.path),
+#             "req_align_index_path": Path(al.idx.path),
+#             "req_vcf_path": working_dir.joinpath(f"{al.sample}.g.vcf.gz"),
+#             "req_vcf_index_path": working_dir.joinpath(f"{al.sample}.g.vcf.gz.tbi"),
+#         }
 
-        # Prepare VCF based on output paths
-        vcf = VCF(
-            sample=al.sample,
-            reg=al.reg,
-            vcf=FlyteFile(path=str(payload['req_vcf_path'])),
-            idx=FlyteFile(path=str(payload['req_vcf_index_path'])),
-        )
+#         # Prepare VCF based on output paths
+#         vcf = VCF(
+#             sample=al.sample,
+#             reg=al.reg,
+#             vcf=FlyteFile(path=str(payload['req_vcf_path'])),
+#             idx=FlyteFile(path=str(payload['req_vcf_index_path'])),
+#         )
         
-        vcfs.append(vcf)
-        payloads.append(payload)
+#         vcfs.append(vcf)
+#         payloads.append(payload)
 
-    # Call requestor agent entrypoint with payloads
-    run_golem(main, payloads)
-    return vcfs
+#     # Call requestor agent entrypoint with payloads
+#     run_golem(main, payloads)
+#     return vcfs
 
 @workflow
 def wf():
