@@ -8,19 +8,6 @@ from flytekitplugins.pod import Pod
 from .tasks import index_cram, split_cram, golem_call_variants
 from .utils import get_dir, run_golem, Alignment, VCF, return_alignment
 from .pod_templates import yagna_requestor_ps
-# from .flyte_haplotypecaller import main
-
-# @task(
-#     container_image='docker.io/coacervate/requestor:latest',
-#     task_config=Pod(pod_spec=yagna_requestor_ps)
-#     )
-# def test_task(indir: FlyteDirectory) -> FlyteDirectory:
-#     working_dir = current_context().working_directory
-#     local_dir = Path(os.path.join(working_dir, "vcf_files"))
-#     local_dir.mkdir(exist_ok=True)
-#     local_indir = Path(indir)
-#     run_golem(main(alpath=local_indir, vcfpath=local_dir), log_file=True)
-#     return local_dir
 
 @dynamic(
     container_image='docker.io/coacervate/requestor:latest',
