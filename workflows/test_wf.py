@@ -13,7 +13,17 @@ from .flyte_haplotypecaller import main
 from .hello_golem import hello
 from .tasks import golem_call_variants
 
+combine_region = ShellTask(
+    name="combine_region",
+    debug=True,
+    script="""
+    gatk --java-options '-Xmx4g' GenomicsDBImport {params} -L {wildcards.reg} --genomicsdb-workspace-path {output}
+    """,
+    inputs=kwtypes(per_reg_vcfs=List(FlyteFile)),
+    output_locs=[OutputLocation(var="i", var_type=FlyteDirectory, location="{inputs.x}")],
+)
+
 @workflow
 def wf():
     fd = get_dir(dirpath='s3://my-s3-bucket/data/rp/ask2j94d6nwv9hz2f5kd-n1-0-dn14-0')
-    als = dir_to_vcfs(indir=fd)
+    vcfs = dir_to_vcfs(indir=fd)

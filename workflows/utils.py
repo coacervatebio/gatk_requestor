@@ -39,31 +39,36 @@ def return_alignment(sample: str, reg: str, almt: FlyteFile, idx: FlyteFile) -> 
     return Alignment(sample=sample, reg=reg, almt=almt, idx=idx)
 
 @task(container_image='docker.io/coacervate/requestor:latest')
-def dir_to_vcfs(indir: FlyteDirectory):# -> List[VCF]:
-    samps = set()
-    for fp in Path(indir.path).rglob('*g.vcf.gz'):
-        print(fp)
-        print(dir(fp))
-        print(type(fp))
-        fn = fp.name
-        print(fn)
-        sample = fn.split('.')[0]
-        print(sample)
-        reg = sample.split('_')[-1]
-        print(reg)
-        samps.add((sample, reg))
-    print(samps)
+def dir_to_vcfs(indir: FlyteDirectory) -> List[VCF]:
+    vcfs = {}
 
-    # als = []
-    # for s, r in samps:
-    #     al = Alignment(
-    #         sample=s,
-    #         reg=r,
-    #         almt = os.path.join(indir, f'{s}.cram'),
-    #         idx = os.path.join(indir, f'{s}.cram.crai')
-    #     )
-    #     als.append(al)
-    # return als
+    # Fetch FlyteDirectory from object storage and make
+    # list of relevant paths
+    indir.download()
+    all_paths = list(Path(indir.path).rglob('*g.vcf.gz*'))
+
+    for fp in all_paths:
+        
+        # Parse paths following 'sample_chr.extension' format
+        fn = fp.name
+        sample = fn.split('.')[0]
+        reg = sample.split('_')[-1]
+        
+        if not vcfs.get(sample):
+            vcfs[sample] = VCF(
+                sample=sample,
+                reg=reg,
+                vcf=FlyteFile(path='noop'),
+                idx=FlyteFile(path='noop')
+            )
+
+        if 'g.vcf.gz.tbi' in fn:
+            setattr(vcfs[sample], 'idx', FlyteFile(path=str(fp)))
+        elif 'g.vcf.gz' in fn:
+            setattr(vcfs[sample], 'vcf', FlyteFile(path=str(fp)))
+
+    return list(vcfs.values())
+
 
 @task(container_image='docker.io/coacervate/requestor:latest')
 def dir_to_alignments(indir: FlyteDirectory) -> List[Alignment]:
