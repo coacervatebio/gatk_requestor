@@ -8,7 +8,7 @@ from time import sleep
 from datetime import datetime
 from dataclasses import dataclass
 from dataclasses_json import dataclass_json
-from flytekit import kwtypes, workflow, dynamic, task, ContainerTask
+from flytekit import kwtypes, workflow, dynamic, task, ContainerTask, current_context
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
@@ -93,6 +93,25 @@ def dir_to_alignments(indir: FlyteDirectory) -> List[Alignment]:
 def get_dir(dirpath: str) -> FlyteDirectory:
     fd = FlyteDirectory(path=dirpath)
     return fd
+    
+@task(container_image='docker.io/coacervate/requestor:latest')
+def vcfs_to_dir(vcf_objs: List[VCF]) -> Tuple[List[str], FlyteDirectory]:
+    working_dir = current_context().working_directory
+    out_dir = Path(os.path.join(working_dir, "outdir"))
+    out_dir.mkdir(exist_ok=True)
+    print(type(out_dir))
+
+    vcf_names = []
+    for o in vcf_objs:
+        o.vcf.download()
+        o.idx.download()
+        os.rename(o.vcf.path, os.path.join(out_dir, os.path.basename(o.vcf.path)))
+        os.rename(o.idx.path, os.path.join(out_dir, os.path.basename(o.idx.path)))
+        vcf_names.append(Path(o.vcf.path).name)
+
+    vcf_dir = FlyteDirectory(path=str(out_dir))
+    
+    return vcf_names, vcf_dir
     
 @task
 def get_file(filepath: str) -> FlyteFile:
