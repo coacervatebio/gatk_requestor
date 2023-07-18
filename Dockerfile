@@ -6,10 +6,9 @@ ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 ENV PYTHONPATH /root
 
-# Apt installs
-ARG JRE_VER=17
+# Update and install deps
 RUN apt-get update && apt-get install --no-install-recommends -y \
- build-essential openjdk-${JRE_VER}-jre unzip \
+ build-essential unzip \
  libncurses5-dev \
  libbz2-dev \
  liblzma-dev \
@@ -24,7 +23,11 @@ RUN apt-get update && apt-get install --no-install-recommends -y \
  gnuplot \
  ca-certificates \
  gawk \
- python3 && \
+ python3
+
+# Install Java and clean up
+ARG JRE_VER=17
+RUN apt-get install --no-install-recommends -y openjdk-${JRE_VER}-jre &&\
  apt-get autoclean && rm -rf /var/lib/apt/lists/*
 
 # Install the AWS cli separately to prevent issues with boto being written over
@@ -51,7 +54,7 @@ RUN wget "https://github.com/golemfactory/yagna/releases/download/${YAG_VER}/gol
 ARG GATK_VER=4.4.0.0
 RUN wget https://github.com/broadinstitute/gatk/releases/download/${GATK_VER}/gatk-${GATK_VER}.zip && \
  unzip gatk-${GATK_VER}.zip && \
- mv gatk-${GATK_VER}/gatk-package-${GATK_VER}-local.jar /usr/local/share/ && \
+ mv gatk-${GATK_VER}/gatk-package-${GATK_VER}-local.jar /usr/local/share/gatk && \
  rm -rf gatk-${GATK_VER}*
 
 # Install samtools
@@ -66,9 +69,6 @@ RUN wget https://github.com/samtools/samtools/releases/download/${SAMTOOLS_VER}/
  cd .. && \
  rm -rf samtools-${SAMTOOLS_VER}
 
-# Install Python dependencies
-COPY ./requirements.txt /root
+# Copy code and install Python dependencies
+COPY ./data/* /root
 RUN pip install -r /root/requirements.txt
-
-# Copy the actual code
-COPY . /root

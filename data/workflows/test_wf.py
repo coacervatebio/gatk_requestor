@@ -20,8 +20,9 @@ combine_region = ShellTask(
     """
     mkdir /root/results/genomics_db_dir
     cd {inputs.vdir}
-    gatk --java-options '-Xmx4g' GenomicsDBImport {inputs.vnames_fmt} -L {inputs.reg} --genomicsdb-workspace-path {outputs.i}
+    ls -la /usr/local/share
     """,
+    # java -jar /usr/local/share/gatk GenomicsDBImport {inputs.vnames_fmt} -L {inputs.reg} --genomicsdb-workspace-path {outputs.i}
     inputs=kwtypes(vnames_fmt=str, vdir=FlyteDirectory, reg=str),
     output_locs=[OutputLocation(var="i", var_type=FlyteDirectory, location="/root/results/genomics_db_dir")],
     container_image='docker.io/coacervate/requestor:latest'
