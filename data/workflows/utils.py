@@ -17,6 +17,7 @@ from yapapi import NoPaymentAccountError
 from yapapi.log import enable_default_logger
 from .pod_templates import yagna_requestor_ps
 from .hello_golem import hello
+from .config import current_image
 
 @dataclass_json
 @dataclass
@@ -34,11 +35,11 @@ class VCF:
     vcf: FlyteFile
     idx: FlyteFile
 
-@task(container_image='docker.io/coacervate/requestor:latest')
+@task(container_image=current_image)
 def return_alignment(sample: str, reg: str, almt: FlyteFile, idx: FlyteFile) -> Alignment:
     return Alignment(sample=sample, reg=reg, almt=almt, idx=idx)
 
-@task(container_image='docker.io/coacervate/requestor:latest')
+@task(container_image=current_image)
 def dir_to_vcfs(indir: FlyteDirectory) -> List[VCF]:
     vcfs = {}
 
@@ -70,7 +71,7 @@ def dir_to_vcfs(indir: FlyteDirectory) -> List[VCF]:
     return list(vcfs.values())
 
 
-@task(container_image='docker.io/coacervate/requestor:latest')
+@task(container_image=current_image)
 def dir_to_alignments(indir: FlyteDirectory) -> List[Alignment]:
     samps = set()
     for fn in os.listdir(indir):
@@ -89,12 +90,12 @@ def dir_to_alignments(indir: FlyteDirectory) -> List[Alignment]:
         als.append(al)
     return als
 
-@task(container_image='docker.io/coacervate/requestor:latest')
+@task(container_image=current_image)
 def get_dir(dirpath: str) -> FlyteDirectory:
     fd = FlyteDirectory(path=dirpath)
     return fd
     
-@task(container_image='docker.io/coacervate/requestor:latest')
+@task(container_image=current_image)
 def prep_db_import(vcf_objs: List[VCF], region: str) -> Tuple[str, FlyteDirectory]:
     working_dir = current_context().working_directory
     out_dir = Path(os.path.join(working_dir, "outdir"))
@@ -133,7 +134,7 @@ def get_file_contents(infile: FlyteFile) -> str:
     return content
 
 @task(
-    container_image='docker.io/coacervate/requestor:latest',
+    container_image=current_image,
     task_config=Pod(pod_spec=yagna_requestor_ps)
 )
 def get_golem_appkey() -> str:
@@ -151,13 +152,13 @@ hg = ShellTask(
     """,
     inputs=kwtypes(),
     # output_locs=[],
-    container_image='docker.io/coacervate/requestor:latest',
+    container_image=current_image,
     # task_config=Pod(pod_spec=yagna_requestor_ps)
 )
 
 t1 = ShellTask(
     name="task_1",
-    container_image='docker.io/coacervate/requestor:latest',
+    container_image=current_image,
     debug=True,
     script="""
     set -ex

@@ -9,10 +9,11 @@ from .pod_templates import yagna_requestor
 from .utils import VCF, Alignment, run_golem
 from .pod_templates import yagna_requestor_ps
 from .flyte_haplotypecaller import main
+from .config import current_image
 
 
 @task(
-    container_image='docker.io/coacervate/requestor:latest',
+    container_image=current_image,
     task_config=Pod(pod_spec=yagna_requestor_ps)
     )
 def golem_call_variants(als: List[Alignment]) -> List[VCF]:
@@ -57,7 +58,7 @@ golem_test = ContainerTask(
     output_data_dir="/var/outputs",
     inputs=kwtypes(),
     outputs=kwtypes(),
-    image="docker.io/coacervate/requestor:latest",
+    image=current_image,
     pod_template = yagna_requestor,
     # pod_template_name = "my-pod-template", # Modify vols / svc here for yagna
     command=[
@@ -90,7 +91,7 @@ index_cram = ContainerTask(
     output_data_dir="/var/outputs",
     inputs=kwtypes(al_in=FlyteFile),
     outputs=kwtypes(idx_out=FlyteFile),
-    image="docker.io/coacervate/requestor:latest",
+    image=current_image,
     command=[
         "samtools",
         "index",
@@ -106,7 +107,7 @@ split_cram = ContainerTask(
     output_data_dir="/var/outputs",
     inputs=kwtypes(al_in=FlyteFile, idx_in=FlyteFile, reg=str),
     outputs=kwtypes(reg_out=FlyteFile),
-    image="docker.io/coacervate/requestor:latest",
+    image=current_image,
     command=[
         "samtools",
         "view",

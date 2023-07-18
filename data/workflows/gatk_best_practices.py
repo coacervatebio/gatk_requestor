@@ -8,9 +8,10 @@ from flytekitplugins.pod import Pod
 from .tasks import index_cram, split_cram, golem_call_variants
 from .utils import get_dir, run_golem, Alignment, VCF, return_alignment
 from .pod_templates import yagna_requestor_ps
+from .config import current_image
 
 @dynamic(
-    container_image='docker.io/coacervate/requestor:latest',
+    container_image=current_image,
     task_config=Pod(pod_spec=yagna_requestor_ps)
     )
 def process_samples(indir: FlyteDirectory, regs: List[str]) -> List[VCF]:
