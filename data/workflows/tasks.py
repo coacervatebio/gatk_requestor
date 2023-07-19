@@ -4,6 +4,7 @@ from typing import List, Tuple
 from flytekit import kwtypes, workflow, dynamic, task, ContainerTask
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
+from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekitplugins.pod import Pod
 from .pod_templates import yagna_requestor
 from .utils import VCF, Alignment, run_golem
@@ -11,6 +12,19 @@ from .pod_templates import yagna_requestor_ps
 from .flyte_haplotypecaller import main
 from .config import current_image
 
+
+combine_region = ShellTask(
+    name="combine_region",
+    debug=True,
+    script=
+    """
+    cd {inputs.vdir}
+    java -jar /usr/local/share/gatk GenomicsDBImport {inputs.vnames_fmt} -L {inputs.reg} --genomicsdb-workspace-path {outputs.i}
+    """,
+    inputs=kwtypes(vnames_fmt=str, vdir=FlyteDirectory, reg=str),
+    output_locs=[OutputLocation(var="i", var_type=FlyteDirectory, location="/root/results/genomics_db_dir")],
+    container_image=current_image
+)
 
 @task(
     container_image=current_image,
