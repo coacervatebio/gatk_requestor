@@ -15,7 +15,7 @@ yagna_requestor_ps = V1PodSpec(
         V1Container(
             name='primary',
             image='docker.io/rwgrim/docker-noop',
-            image_pull_policy='Always',
+            image_pull_policy='IfNotPresent',
             volume_mounts=[
                 V1VolumeMount(
                     name='yagna-storage',

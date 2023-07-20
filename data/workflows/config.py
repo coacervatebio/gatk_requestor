@@ -1,3 +1,3 @@
 # Workflow-wide config
 
-current_image='docker.io/coacervate/requestor:20230718'
+current_image='docker.io/coacervate/requestor:20230719'
