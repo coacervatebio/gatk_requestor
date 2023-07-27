@@ -31,5 +31,4 @@ vagrant_provisioning.txt
 # Test / Dev
 **/tmp*
 **/scratch.py
-**/test_wf.py
 **/pytest.log
