@@ -12,6 +12,20 @@ from .pod_templates import yagna_requestor_ps
 from .flyte_haplotypecaller import main
 from .config import current_image
 
+genotype = ShellTask(
+    name="genotype",
+    debug=True,
+    script=
+    """
+    java -jar /usr/local/share/gatk GenotypeGVCFs -R /root/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta -V gendb://{inputs.vdir} -O {outputs.v}
+    """,
+    inputs=kwtypes(vdir=FlyteDirectory, reg=str),
+    output_locs=[
+        OutputLocation(var="v", var_type=FlyteFile, location="/root/results/combined_{inputs.reg}.g.vcf.gz"),
+        OutputLocation(var="i", var_type=FlyteFile, location="/root/results/combined_{inputs.reg}.g.vcf.gz.tbi")
+    ],
+    container_image=current_image
+)
 
 combine_region = ShellTask(
     name="combine_region",

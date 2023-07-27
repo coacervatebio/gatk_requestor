@@ -32,12 +32,12 @@ genotype = ShellTask(
     debug=True,
     script=
     """
-    java -jar /usr/local/share/gatk GenotypeGVCFs -R  -V gendb://{inputs.vdir} -O {outputs.v}
+    java -jar /usr/local/share/gatk GenotypeGVCFs -R /root/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta -V gendb://{inputs.vdir} -O {outputs.v}
     """,
     inputs=kwtypes(vdir=FlyteDirectory, reg=str),
     output_locs=[
-        OutputLocation(var="v", var_type=FlyteFile, location="/root/results/genotyped/combined_{inputs.reg}.g.vcf.gz"),
-        OutputLocation(var="i", var_type=FlyteFile, location="/root/results/genotyped/combined_{inputs.reg}.g.vcf.gz.tbi")
+        OutputLocation(var="v", var_type=FlyteFile, location="/root/results/combined_{inputs.reg}.g.vcf.gz"),
+        OutputLocation(var="i", var_type=FlyteFile, location="/root/results/combined_{inputs.reg}.g.vcf.gz.tbi")
     ],
     container_image=current_image
 )
