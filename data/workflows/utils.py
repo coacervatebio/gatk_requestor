@@ -94,6 +94,22 @@ def dir_to_alignments(indir: FlyteDirectory) -> List[Alignment]:
 def get_dir(dirpath: str) -> FlyteDirectory:
     fd = FlyteDirectory(path=dirpath)
     return fd
+
+@task(container_image=current_image)
+def prep_gather_vcfs(combi_dirs: List[FlyteDirectory]) -> Tuple[str, FlyteDirectory]:
+    working_dir = current_context().working_directory
+    out_dir = Path(os.path.join(working_dir, "outdir"))
+    out_dir.mkdir(exist_ok=True)
+    od = FlyteDirectory(path=str(out_dir))
+    fnames = []
+    for i in combi_dirs:
+        i.download()
+        for f in os.listdir(i):
+            os.rename(os.path.join(i, f), os.path.join(out_dir, os.path.basename(f)))
+            if '.tbi' not in f:
+                fnames.append(f)
+    fnames_fmt = ' '.join([f'-I {i}' for i in fnames])
+    return fnames_fmt, od
     
 @task(container_image=current_image)
 def prep_db_import(vcf_objs: List[VCF], region: str) -> Tuple[str, FlyteDirectory]:

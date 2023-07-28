@@ -32,21 +32,20 @@ def prep_gather_vcfs(combi_dirs: List[FlyteDirectory]) -> Tuple[str, FlyteDirect
     working_dir = current_context().working_directory
     out_dir = Path(os.path.join(working_dir, "outdir"))
     out_dir.mkdir(exist_ok=True)
+    od = FlyteDirectory(path=str(out_dir))
     fnames = []
     for i in combi_dirs:
         i.download()
-        # rename files to new dir
-        # get fnames and format
-        od = FlyteDirectory(path=out_dir.path)
-        fnames_fmt = [f'-I {i}' for i in fnames]
+        for f in os.listdir(i):
+            os.rename(os.path.join(i, f), os.path.join(out_dir, os.path.basename(f)))
+            if '.tbi' not in f:
+                fnames.append(f)
+    fnames_fmt = ' '.join([f'-I {i}' for i in fnames])
     return fnames_fmt, od
 
 @workflow
 def wf():
-    fd = get_dir(dirpath='s3://my-s3-bucket/input-data/geno_out')
-    # vcf_objs = dir_to_vcfs(indir=fd)
-    # vnames, vdir = prep_db_import(vcf_objs=vcf_objs, region='chr22')
-    # combi = combine_region(vnames_fmt=vnames, vdir=vdir, reg='chr22')
-    # genotype(vdir=combi, reg='chr22', refloc=reference_location)
-    prep_gather_vcfs()
-    gather_vcfs
+    d1 = get_dir(dirpath='s3://my-s3-bucket/input-data/geno_out/chr21')
+    d2 = get_dir(dirpath='s3://my-s3-bucket/input-data/geno_out/chr22')
+    fmt, fd = prep_gather_vcfs(combi_dirs=[d1, d2])
+    gather_vcfs(vnames_fmt=fmt, vdir=fd)

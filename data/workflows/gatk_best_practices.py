@@ -5,8 +5,8 @@ from flytekit import kwtypes, workflow, dynamic, task, ContainerTask, current_co
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekitplugins.pod import Pod
-from .tasks import index_cram, split_cram, golem_call_variants, combine_region, genotype
-from .utils import get_dir, run_golem, Alignment, VCF, return_alignment, prep_db_import
+from .tasks import index_cram, split_cram, golem_call_variants, combine_region, genotype, gather_vcfs
+from .utils import get_dir, run_golem, Alignment, VCF, return_alignment, prep_db_import, prep_gather_vcfs
 from .pod_templates import yagna_requestor_ps
 from .config import current_image, reference_location
 
@@ -28,11 +28,16 @@ def process_samples(indir: FlyteDirectory, regs: List[str]) -> FlyteDirectory:
             per_reg_al = return_alignment(sample=s, reg=r, almt=per_reg, idx=per_reg_idx)
             per_reg_als.append(per_reg_al)
     
-        vcf_objs = golem_call_variants(als=per_reg_als)
+    vcf_objs = golem_call_variants(als=per_reg_als)
+
+    for r in regs:
         vnames, vdir = prep_db_import(vcf_objs=vcf_objs, region=r)
         db_out = combine_region(vnames_fmt=vnames, vdir=vdir, reg=r)
         geno_out = genotype(vdir=db_out, reg=r, refloc=reference_location)
         to_gather.append(geno_out)
+
+
+
 
     return db_out
 

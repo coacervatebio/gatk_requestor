@@ -12,6 +12,19 @@ from .pod_templates import yagna_requestor_ps
 from .flyte_haplotypecaller import main
 from .config import current_image
 
+gather_vcfs = ShellTask(
+    name="gather_vcfs",
+    debug=True,
+    script=
+    """
+    cd {inputs.vdir}
+    java -jar /usr/local/share/gatk GatherVcfs {inputs.vnames_fmt} -O {outputs.i}
+    """,
+    inputs=kwtypes(vnames_fmt=str, vdir=FlyteDirectory),
+    output_locs=[OutputLocation(var="i", var_type=FlyteFile, location="/root/results/gather_out.vcf.gz")],
+    container_image=current_image
+)
+
 genotype = ShellTask(
     name="genotype",
     debug=True,
