@@ -14,10 +14,9 @@ from .config import current_image, reference_location
     container_image=current_image,
     task_config=Pod(pod_spec=yagna_requestor_ps)
     )
-def process_samples(indir: FlyteDirectory, regs: List[str]) -> FlyteDirectory:
+def process_samples(indir: FlyteDirectory, regs: List[str]) -> FlyteFile:
 
     per_reg_als = []
-    to_gather = []
     for f in os.listdir(indir):
         s = f.strip('.cram')
         fi = os.path.join(indir, f)
@@ -30,19 +29,20 @@ def process_samples(indir: FlyteDirectory, regs: List[str]) -> FlyteDirectory:
     
     vcf_objs = golem_call_variants(als=per_reg_als)
 
+    to_gather = []
     for r in regs:
         vnames, vdir = prep_db_import(vcf_objs=vcf_objs, region=r)
         db_out = combine_region(vnames_fmt=vnames, vdir=vdir, reg=r)
         geno_out = genotype(vdir=db_out, reg=r, refloc=reference_location)
         to_gather.append(geno_out)
 
+    vnames_fmt, fd = prep_gather_vcfs(combi_dirs=to_gather)
+    gather_out = gather_vcfs(vnames_fmt=vnames_fmt, vdir=fd)
 
-
-
-    return db_out
+    return gather_out
 
 @workflow
-def wf() -> FlyteDirectory:
+def wf() -> FlyteFile:
     
     fd = get_dir(dirpath='s3://my-s3-bucket/input-data/alignments/full')
     regs = ['chr21', 'chr22']
