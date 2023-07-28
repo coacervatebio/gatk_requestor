@@ -33,7 +33,7 @@ genotype = ShellTask(
     java -jar /usr/local/share/gatk GenotypeGVCFs -R {inputs.refloc} -V gendb://{inputs.vdir} -O {outputs.o}/combined_{inputs.reg}.g.vcf.gz
     """,
     inputs=kwtypes(vdir=FlyteDirectory, reg=str, refloc=str),
-    output_locs=[OutputLocation(var="o", var_type=FlyteDirectory, location="/root/results")],
+    output_locs=[OutputLocation(var="o", var_type=FlyteDirectory, location="/root/results/output")],
     container_image=current_image
 )
 
