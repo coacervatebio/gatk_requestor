@@ -100,7 +100,6 @@ def prep_db_import(vcf_objs: List[VCF], region: str) -> Tuple[str, FlyteDirector
     working_dir = current_context().working_directory
     out_dir = Path(os.path.join(working_dir, "outdir"))
     out_dir.mkdir(exist_ok=True)
-    print(type(out_dir))
 
     vcf_names = []
     for o in [i for i in vcf_objs if i.reg == region]:
