@@ -1,16 +1,4 @@
-#!/usr/bin/env python3
-"""
-This file contains the requestor part of our application. There are three areas here:
-1. Splitting the data into multiple tasks, each of which can be executed by a provider.
-2. Defining what commands must be run within the provider's VM.
-3. Scheduling the tasks via a yagna node running locally.
-"""
-import os
-import json
-import asyncio
 import logging
-import argparse
-import subprocess
 from time import sleep
 from typing import List
 from datetime import timedelta, datetime
@@ -21,7 +9,7 @@ from uuid import uuid4
 from yapapi import Golem, Task, WorkContext
 from yapapi.payload import vm
 from yapapi.log import enable_default_logger
-from run.utils import Alignment
+from run.tasks.utils import Alignment
 
 logger = logging.getLogger(__name__)
 console_handler = logging.StreamHandler()

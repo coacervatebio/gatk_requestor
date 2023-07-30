@@ -1,14 +1,14 @@
 import os
-from pathlib import Path
-from typing import List, Tuple
-from flytekit import kwtypes, workflow, dynamic, task, ContainerTask, current_context
+from typing import List
+from flytekit import workflow, dynamic
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekitplugins.pod import Pod
-from .tasks import index_cram, split_cram, golem_call_variants, combine_region, genotype, gather_vcfs
-from .utils import get_dir, run_golem, Alignment, VCF, return_alignment, prep_db_import, prep_gather_vcfs, dir_to_vcfs
-from .pod_templates import yagna_requestor_ps
-from .config import current_image, reference_location
+from run.tasks.mapping import index_cram, split_cram 
+from run.tasks.calling import golem_call_variants, combine_region, genotype, gather_vcfs
+from run.tasks.utils import get_dir, return_alignment, prep_db_import, prep_gather_vcfs
+from run.pod.yagna_template import yagna_requestor_ps
+from run.config import current_image, reference_location
 
 @dynamic(
     container_image=current_image,

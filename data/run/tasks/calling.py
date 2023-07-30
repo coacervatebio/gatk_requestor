@@ -6,11 +6,10 @@ from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekit.extras.tasks.shell import OutputLocation, ShellTask
 from flytekitplugins.pod import Pod
-from .pod_templates import yagna_requestor
-from .utils import VCF, Alignment, run_golem
-from .pod_templates import yagna_requestor_ps
-from .flyte_haplotypecaller import main
-from .config import current_image
+from run.pod.yagna_template import yagna_requestor_ps
+from run.tasks.utils import VCF, Alignment, run_golem
+from run.agents.haplotypecaller import main
+from run.config import current_image
 
 gather_vcfs = ShellTask(
     name="gather_vcfs",

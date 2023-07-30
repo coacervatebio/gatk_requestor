@@ -15,9 +15,8 @@ from flytekit.types.directory import FlyteDirectory
 from flytekitplugins.pod import Pod
 from yapapi import NoPaymentAccountError
 from yapapi.log import enable_default_logger
-from .pod_templates import yagna_requestor_ps
-from .hello_golem import hello
-from .config import current_image
+from run.pod.yagna_template import yagna_requestor_ps, yagna_requestor
+from run.config import current_image
 
 @dataclass_json
 @dataclass
@@ -240,11 +239,11 @@ golem_test = ContainerTask(
     ],
 )
 
-basic_test = ContainerTask(
+sleep_task = ContainerTask(
     name="basic-test",
     input_data_dir="/var/inputs",
     output_data_dir="/var/outputs",
-    inputs=kwtypes(indir=FlyteDirectory),
+    inputs=kwtypes(),
     outputs=kwtypes(),
     image="ghcr.io/flyteorg/rawcontainers-shell:v2",
     # pod_template = pt,
