@@ -3,4 +3,7 @@
 current_image: 'docker.io/coacervate/requestor:20230730'
 reference_location: '/root/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta'
 
-# Golem config
+# Golem HaplotypeCaller config
+provider_image_hash: '635e41034ced5d0622d0760bf6aac8377fdf225154d3f306f4fca805'
+haplotypecaller_budget: 5
+haplotypecaller_subnet: 'public'

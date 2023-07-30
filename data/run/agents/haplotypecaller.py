@@ -9,7 +9,7 @@ from uuid import uuid4
 from yapapi import Golem, Task, WorkContext
 from yapapi.payload import vm
 from yapapi.log import enable_default_logger
-from run.tasks.utils import Alignment
+from run import config
 
 logger = logging.getLogger(__name__)
 console_handler = logging.StreamHandler()
@@ -19,7 +19,7 @@ logger.setLevel(logging.DEBUG)
 
 PROV_INPATH = PurePath("/golem/input")
 PROV_OUTPATH = PurePath("/golem/output")
-ENTRYPOINT_PATH = "/run/run.sh"
+PROV_ENTRYPOINT = "/run/run.sh"
 TASK_TIMEOUT = timedelta(hours=2)
 
 
@@ -66,7 +66,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
             str(task.data["prov_vcf_path"]),
         ]
     
-        future_result = script.run("/bin/sh", ENTRYPOINT_PATH, *run_args)
+        future_result = script.run("/bin/sh", PROV_ENTRYPOINT, *run_args)
 
         script.download_file(task.data["prov_vcf_path"], task.data["req_vcf_path"])
         script.download_file(
@@ -84,7 +84,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
 async def main(pls):
     logger.debug('Executing haplotypecaller main..')
     # Set of parameters for the VM run by each of the providers
-    image_hash='635e41034ced5d0622d0760bf6aac8377fdf225154d3f306f4fca805'
+    image_hash = config.provider_image_hash
     logger.info(f'Using provider image: {image_hash}')
     package = await vm.repo(
         image_hash=image_hash,
@@ -92,8 +92,8 @@ async def main(pls):
         min_storage_gib=2.0,
     )
 
-    budget = 5
-    subnet_tag = 'public'
+    budget = config.haplotypecaller_budget
+    subnet_tag = config.haplotypecaller_subnet
     logger.info(f'Executing tasks with budget {budget} on {subnet_tag} subnet')
     async with Golem(budget=budget, subnet_tag=subnet_tag) as golem:
         async for completed in golem.execute_tasks(
