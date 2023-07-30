@@ -253,3 +253,16 @@ sleep_task = ContainerTask(
         "infinity"
     ],
 )
+
+basic_shell = ShellTask(
+    name="basic-shell",
+    debug=True,
+    script=
+    """
+    echo hello
+    echo world > {outputs.i}
+    """,
+    inputs=kwtypes(),
+    output_locs=[OutputLocation(var="i", var_type=FlyteFile, location="basic_out.txt")],
+    container_image=current_image
+)
