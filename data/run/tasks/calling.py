@@ -9,7 +9,7 @@ from flytekitplugins.pod import Pod
 from run.pod.yagna_template import yagna_requestor_ps
 from run.tasks.utils import VCF, Alignment, run_golem
 from run.agents.haplotypecaller import main
-from run.config import current_image
+from run import config
 
 gather_vcfs = ShellTask(
     name="gather_vcfs",
@@ -21,7 +21,7 @@ gather_vcfs = ShellTask(
     """,
     inputs=kwtypes(vnames_fmt=str, vdir=FlyteDirectory),
     output_locs=[OutputLocation(var="i", var_type=FlyteFile, location="/root/results/gather_out.vcf.gz")],
-    container_image=current_image
+    container_image=config.current_image
 )
 
 genotype = ShellTask(
@@ -33,7 +33,7 @@ genotype = ShellTask(
     """,
     inputs=kwtypes(vdir=FlyteDirectory, reg=str, refloc=str),
     output_locs=[OutputLocation(var="o", var_type=FlyteDirectory, location="/root/results/output")],
-    container_image=current_image
+    container_image=config.current_image
 )
 
 combine_region = ShellTask(
@@ -46,11 +46,11 @@ combine_region = ShellTask(
     """,
     inputs=kwtypes(vnames_fmt=str, vdir=FlyteDirectory, reg=str),
     output_locs=[OutputLocation(var="i", var_type=FlyteDirectory, location="/root/results/genomics_db_dir")],
-    container_image=current_image
+    container_image=config.current_image
 )
 
 @task(
-    container_image=current_image,
+    container_image=config.current_image,
     task_config=Pod(pod_spec=yagna_requestor_ps)
     )
 def golem_call_variants(als: List[Alignment]) -> List[VCF]:

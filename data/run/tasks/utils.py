@@ -16,7 +16,7 @@ from flytekitplugins.pod import Pod
 from yapapi import NoPaymentAccountError
 from yapapi.log import enable_default_logger
 from run.pod.yagna_template import yagna_requestor_ps, yagna_requestor
-from run.config import current_image
+from run import config
 
 @dataclass_json
 @dataclass
@@ -34,11 +34,11 @@ class VCF:
     vcf: FlyteFile
     idx: FlyteFile
 
-@task(container_image=current_image)
+@task(container_image=config.current_image)
 def return_alignment(sample: str, reg: str, almt: FlyteFile, idx: FlyteFile) -> Alignment:
     return Alignment(sample=sample, reg=reg, almt=almt, idx=idx)
 
-@task(container_image=current_image)
+@task(container_image=config.current_image)
 def dir_to_vcfs(indir: FlyteDirectory) -> List[VCF]:
     vcfs = {}
 
@@ -70,7 +70,7 @@ def dir_to_vcfs(indir: FlyteDirectory) -> List[VCF]:
     return list(vcfs.values())
 
 
-@task(container_image=current_image)
+@task(container_image=config.current_image)
 def dir_to_alignments(indir: FlyteDirectory) -> List[Alignment]:
     samps = set()
     for fn in os.listdir(indir):
@@ -89,12 +89,12 @@ def dir_to_alignments(indir: FlyteDirectory) -> List[Alignment]:
         als.append(al)
     return als
 
-@task(container_image=current_image)
+@task(container_image=config.current_image)
 def get_dir(dirpath: str) -> FlyteDirectory:
     fd = FlyteDirectory(path=dirpath)
     return fd
 
-@task(container_image=current_image)
+@task(container_image=config.current_image)
 def prep_gather_vcfs(combi_dirs: List[FlyteDirectory]) -> Tuple[str, FlyteDirectory]:
     working_dir = current_context().working_directory
     out_dir = Path(os.path.join(working_dir, "outdir"))
@@ -110,7 +110,7 @@ def prep_gather_vcfs(combi_dirs: List[FlyteDirectory]) -> Tuple[str, FlyteDirect
     fnames_fmt = ' '.join([f'-I {i}' for i in fnames])
     return fnames_fmt, od
     
-@task(container_image=current_image)
+@task(container_image=config.current_image)
 def prep_db_import(vcf_objs: List[VCF], region: str) -> Tuple[str, FlyteDirectory]:
     working_dir = current_context().working_directory
     out_dir = Path(os.path.join(working_dir, "outdir"))
@@ -148,7 +148,7 @@ def get_file_contents(infile: FlyteFile) -> str:
     return content
 
 @task(
-    container_image=current_image,
+    container_image=config.current_image,
     task_config=Pod(pod_spec=yagna_requestor_ps)
 )
 def get_golem_appkey() -> str:
@@ -166,13 +166,13 @@ hg = ShellTask(
     """,
     inputs=kwtypes(),
     # output_locs=[],
-    container_image=current_image,
+    container_image=config.current_image,
     # task_config=Pod(pod_spec=yagna_requestor_ps)
 )
 
 t1 = ShellTask(
     name="task_1",
-    container_image=current_image,
+    container_image=config.current_image,
     debug=True,
     script="""
     set -ex
@@ -230,7 +230,7 @@ golem_test = ContainerTask(
     output_data_dir="/var/outputs",
     inputs=kwtypes(),
     outputs=kwtypes(),
-    image=current_image,
+    image=config.current_image,
     pod_template = yagna_requestor,
     # pod_template_name = "my-pod-template", # Modify vols / svc here for yagna
     command=[
@@ -264,5 +264,5 @@ basic_shell = ShellTask(
     """,
     inputs=kwtypes(),
     output_locs=[OutputLocation(var="i", var_type=FlyteFile, location="basic_out.txt")],
-    container_image=current_image
+    container_image=config.current_image
 )

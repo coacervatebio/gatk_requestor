@@ -8,10 +8,10 @@ from run.tasks.mapping import index_cram, split_cram
 from run.tasks.calling import golem_call_variants, combine_region, genotype, gather_vcfs
 from run.tasks.utils import get_dir, return_alignment, prep_db_import, prep_gather_vcfs
 from run.pod.yagna_template import yagna_requestor_ps
-from run.config import current_image, reference_location
+from run import config
 
 @dynamic(
-    container_image=current_image,
+    container_image=config.current_image,
     task_config=Pod(pod_spec=yagna_requestor_ps)
     )
 def process_samples(indir: FlyteDirectory, regs: List[str]) -> FlyteFile:
@@ -33,7 +33,7 @@ def process_samples(indir: FlyteDirectory, regs: List[str]) -> FlyteFile:
     for r in regs:
         vnames, vdir = prep_db_import(vcf_objs=vcf_objs, region=r)
         db_out = combine_region(vnames_fmt=vnames, vdir=vdir, reg=r)
-        geno_out = genotype(vdir=db_out, reg=r, refloc=reference_location)
+        geno_out = genotype(vdir=db_out, reg=r, refloc=config.reference_location)
         print(f'Adding {geno_out}')
         to_gather.append(geno_out)
 
