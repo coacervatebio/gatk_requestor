@@ -6,5 +6,3 @@ CONFIG_PATH = ROOT_PATH.joinpath('config.yaml')
 
 with open(CONFIG_PATH, 'r') as f:
     config = yaml.load(f, Loader=yaml.FullLoader)
-
-print(config)

@@ -11,5 +11,5 @@ from run.tasks.utils import get_file
 
 @workflow
 def wf():
-    al = get_file(filepath='s3://my-s3-bucket/input-data/alignments/full/HG03633_sub.cram')
-    index_cram_sh(al=al)
+    # al = get_file(filepath='s3://my-s3-bucket/input-data/alignments/full/HG03633_sub.cram')
+    index_cram_sh()
