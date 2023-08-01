@@ -1,5 +1,6 @@
 import os
 import json
+import filecmp
 import asyncio
 import subprocess
 from pathlib import Path
@@ -139,6 +140,12 @@ def get_file(filepath: str) -> FlyteFile:
 def get_files(fd: FlyteDirectory) -> List[FlyteFile]:
     infiles = [FlyteFile(os.path.join(fd, i)) for i in os.listdir(fd)]
     return infiles
+
+@task(container_image=config['current_image'])
+def compare_files(actual: FlyteFile, expected: FlyteFile) -> bool:
+    actual.download()
+    expected.download()
+    return filecmp.cmp(actual.path, expected.path, shallow=False)
 
 @task(container_image=config['current_image'])
 def get_file_contents(infile: FlyteFile) -> str:
