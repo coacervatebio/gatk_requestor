@@ -4,8 +4,8 @@ from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from run import config
 
-index_cram_sh = ShellTask(
-    name="index_cram_sh",
+index_cram = ShellTask(
+    name="index_cram",
     debug=True,
     script=
     """
@@ -16,24 +16,21 @@ index_cram_sh = ShellTask(
     container_image=config['current_image']
 )
 
-index_cram = ContainerTask(
-    name="index_cram_ct",
-    input_data_dir="/var/inputs",
-    output_data_dir="/var/outputs",
-    inputs=kwtypes(al_in=FlyteFile),
-    outputs=kwtypes(idx_out=FlyteFile),
-    image=config['current_image'],
-    command=[
-        "samtools",
-        "index",
-        "/var/inputs/al_in",
-        "-o",
-        "/var/outputs/idx_out"
-    ],
+split_cram = ShellTask(
+    name="split_cram",
+    debug=True,
+    script=
+    """
+    samtools view -T {inputs.ref_loc} \
+    -O cram -o {outputs.reg_al} -X {inputs.al} {inputs.idx} {inputs.reg}
+    """,
+    inputs=kwtypes(al=FlyteFile, idx=FlyteFile, reg=str, ref_loc=str),
+    output_locs=[OutputLocation(var="reg_al", var_type=FlyteFile, location="{inputs.al}_{inputs.reg}.cram")],
+    container_image=config['current_image']
 )
 
-split_cram = ContainerTask(
-    name="split_cram",
+split_cram_ct = ContainerTask(
+    name="split_cram_ct",
     input_data_dir="/var/inputs",
     output_data_dir="/var/outputs",
     inputs=kwtypes(al_in=FlyteFile, idx_in=FlyteFile, reg=str),
