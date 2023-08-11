@@ -20,10 +20,10 @@ def process_samples(indir: FlyteDirectory, regs: List[str]) -> FlyteFile:
     for f in os.listdir(indir):
         s = f.strip('.cram')
         fi = os.path.join(indir, f)
-        idx = index_cram(al_in=fi)
+        idx = index_cram(al=fi)
         for r in regs:
-            per_reg = split_cram(al_in=fi, idx_in=idx, reg=r)
-            per_reg_idx = index_cram(al_in=per_reg)
+            per_reg = split_cram(al=fi, idx=idx, sample=s, reg=r, ref_loc=config['reference_location'])
+            per_reg_idx = index_cram(al=per_reg)
             per_reg_al = return_alignment(sample=s, reg=r, almt=per_reg, idx=per_reg_idx)
             per_reg_als.append(per_reg_al)
     

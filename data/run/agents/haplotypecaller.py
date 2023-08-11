@@ -84,7 +84,7 @@ async def steps(context: WorkContext, tasks: AsyncIterable[Task]):
 async def main(pls):
     logger.debug('Executing haplotypecaller main..')
     # Set of parameters for the VM run by each of the providers
-    image_hash = config.provider_image_hash
+    image_hash = config['provider_image_hash']
     logger.info(f'Using provider image: {image_hash}')
     package = await vm.repo(
         image_hash=image_hash,
@@ -92,8 +92,8 @@ async def main(pls):
         min_storage_gib=2.0,
     )
 
-    budget = config.haplotypecaller_budget
-    subnet_tag = config.haplotypecaller_subnet
+    budget = config['haplotypecaller_budget']
+    subnet_tag = config['haplotypecaller_subnet']
     logger.info(f'Executing tasks with budget {budget} on {subnet_tag} subnet')
     async with Golem(budget=budget, subnet_tag=subnet_tag) as golem:
         async for completed in golem.execute_tasks(

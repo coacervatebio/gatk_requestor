@@ -74,9 +74,11 @@ def dir_to_vcfs(indir: FlyteDirectory) -> List[VCF]:
 @task(container_image=config['current_image'])
 def dir_to_alignments(indir: FlyteDirectory) -> List[Alignment]:
     samps = set()
+    # Alignments must follow naming convention of "sample_region.cram"
+    # Use "full" as region if not split by chrom
     for fn in os.listdir(indir):
         sample = fn.split('.')[0]
-        reg = sample.split('_')[1]
+        reg = sample.split('_')[-1]
         samps.add((sample, reg))
 
     als = []
@@ -146,6 +148,23 @@ def compare_files(actual: FlyteFile, expected: FlyteFile) -> bool:
     actual.download()
     expected.download()
     return filecmp.cmp(actual.path, expected.path, shallow=False)
+    
+@task(container_image=config['current_image'])
+def compare_dirs(actual: FlyteDirectory, expected: FlyteDirectory) -> bool:
+    actual.download()
+    expected.download()
+    return filecmp.dircmp(actual.path, expected.path)
+    
+@task(container_image=config['current_image'])
+def compare_vcf_objs(actual: List[VCF], expected: List[VCF]) -> bool:
+    for obj in actual:
+        print('Actual')
+        print(obj.vcf.path)
+    for obj in expected:
+        print('Expected')
+        print(obj.vcf.path)
+
+    # return filecmp.dircmp(actual.path, expected.path)
 
 @task(container_image=config['current_image'])
 def get_file_contents(infile: FlyteFile) -> str:
