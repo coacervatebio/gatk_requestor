@@ -75,7 +75,7 @@ def dir_to_vcfs(indir: FlyteDirectory) -> List[VCF]:
 def dir_to_alignments(indir: FlyteDirectory) -> List[Alignment]:
     samps = set()
     # Alignments must follow naming convention of "sample_region.cram"
-    # Use "full" as region if not split by chrom
+    # Use "full" as region if not split by chrom, otherwise must be "chr[1-23,X,Y,M]"
     for fn in os.listdir(indir):
         sample = fn.split('.')[0]
         reg = sample.split('_')[-1]
@@ -157,14 +157,27 @@ def compare_dirs(actual: FlyteDirectory, expected: FlyteDirectory) -> bool:
     
 @task(container_image=config['current_image'])
 def compare_vcf_objs(actual: List[VCF], expected: List[VCF]) -> bool:
-    for obj in actual:
-        print('Actual')
-        print(obj.vcf.path)
-    for obj in expected:
-        print('Expected')
-        print(obj.vcf.path)
+    working_dir = current_context().working_directory
+    paths = ''
 
-    # return filecmp.dircmp(actual.path, expected.path)
+    actual_dir = Path(os.path.join(working_dir, "actual"))
+    actual_dir.mkdir(exist_ok=True)
+    for o in actual:
+        o.vcf.download()
+        os.rename(o.vcf.path, os.path.join(actual_dir, os.path.basename(o.vcf.path)))
+        o.idx.download()
+        os.rename(o.idx.path, os.path.join(actual_dir, os.path.basename(o.idx.path)))
+
+
+    expected_dir = Path(os.path.join(working_dir, "expected"))
+    expected_dir.mkdir(exist_ok=True)
+    for o in expected:
+        o.vcf.download()
+        os.rename(o.vcf.path, os.path.join(expected_dir, os.path.basename(o.vcf.path)))
+        o.idx.download()
+        os.rename(o.idx.path, os.path.join(expected_dir, os.path.basename(o.idx.path)))
+
+    return len(filecmp.dircmp(actual_dir, expected_dir).diff_files) == 0
 
 @task(container_image=config['current_image'])
 def get_file_contents(infile: FlyteFile) -> str:
