@@ -5,13 +5,24 @@ from typing import List
 from flytekit import task, current_context
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
+from run.tasks.utils import VCF
 from run import config
 
 @task(container_image=config['current_image'])
-def compare_files(actual: FlyteFile, expected: FlyteFile) -> bool:
+def compare_file(actual: FlyteFile, expected: FlyteFile) -> bool:
     actual.download()
     expected.download()
     return filecmp.cmp(actual.path, expected.path, shallow=False)
+    
+@task(container_image=config['current_image'])
+def compare_files(actual: FlyteDirectory, expected: FlyteDirectory, to_compare: List[str]) -> bool:
+    actual.download()
+    expected.download()
+
+    results = filecmp.cmpfiles(actual.path, expected.path, to_compare, shallow=False)
+
+    # Return True if the 'different' and 'error' lists contain no files
+    return len(results[1]) == 0 and len(results[2]) == 0
     
 @task(container_image=config['current_image'])
 def compare_dirs(actual: FlyteDirectory, expected: FlyteDirectory) -> bool:
