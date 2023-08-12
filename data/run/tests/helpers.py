@@ -28,12 +28,11 @@ def compare_files(actual: FlyteDirectory, expected: FlyteDirectory, to_compare: 
 def compare_dirs(actual: FlyteDirectory, expected: FlyteDirectory) -> bool:
     actual.download()
     expected.download()
-    return filecmp.dircmp(actual.path, expected.path)
+    return len(filecmp.dircmp(actual, expected).diff_files) == 0
     
 @task(container_image=config['current_image'])
 def compare_vcf_objs(actual: List[VCF], expected: List[VCF]) -> bool:
     working_dir = current_context().working_directory
-    paths = ''
 
     actual_dir = Path(os.path.join(working_dir, "actual"))
     actual_dir.mkdir(exist_ok=True)

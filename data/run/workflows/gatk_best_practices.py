@@ -33,8 +33,7 @@ def process_samples(indir: FlyteDirectory, regs: List[str]) -> FlyteFile:
     for r in regs:
         vnames, vdir = prep_db_import(vcf_objs=vcf_objs, region=r)
         db_out = combine_region(vnames_fmt=vnames, vdir=vdir, reg=r)
-        geno_out = genotype(vdir=db_out, reg=r, ref_loc=config['reference_location'])
-        print(f'Adding {geno_out}')
+        geno_out = genotype(db_dir=db_out, reg=r, ref_loc=config['reference_location'])
         to_gather.append(geno_out)
 
     vnames_fmt, fd = prep_gather_vcfs(combi_dirs=to_gather)
