@@ -1,6 +1,7 @@
 from flytekit import workflow
 from run.tasks.mapping import index_cram
-from run.tasks.utils import get_file, compare_files
+from run.tasks.utils import get_file
+from run.tests.helpers import compare_files
 
 @workflow
 def test_index_cram_wf():

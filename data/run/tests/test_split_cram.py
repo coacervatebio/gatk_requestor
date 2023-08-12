@@ -1,6 +1,7 @@
 from flytekit import workflow
 from run.tasks.mapping import split_cram
-from run.tasks.utils import get_file, compare_files
+from run.tasks.utils import get_file
+from run.tests.helpers import compare_files
 from run import config
 
 @workflow

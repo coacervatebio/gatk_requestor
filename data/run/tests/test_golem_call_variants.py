@@ -1,6 +1,7 @@
 from flytekit import workflow
 from run.tasks.calling import golem_call_variants
-from run.tasks.utils import dir_to_alignments, compare_vcf_objs, get_dir, dir_to_vcfs
+from run.tasks.utils import dir_to_alignments, get_dir, dir_to_vcfs
+from run.tests.helpers import compare_vcf_objs
 
 @workflow
 def test_golem_call_variants_wf():
