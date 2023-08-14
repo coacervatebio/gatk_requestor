@@ -11,7 +11,7 @@ index_cram = ShellTask(
     samtools index {inputs.al} -o {outputs.idx}
     """,
     inputs=kwtypes(al=FlyteFile),
-    output_locs=[OutputLocation(var="idx", var_type=FlyteFile, location="{inputs.al}.crai")],
+    output_locs=[OutputLocation(var="idx", var_type=FlyteFile, location="{{inputs.al}}.crai")],
     container_image=config['current_image']
 )
 
@@ -20,10 +20,9 @@ split_cram = ShellTask(
     debug=True,
     script=
     """
-    samtools view -T {inputs.ref_loc} \
-    -O cram -o {outputs.reg_al} -X {inputs.al} {inputs.idx} {inputs.reg}
+    samtools view -T {inputs.ref_loc} -O cram -o {outputs.reg_al} -X {inputs.al} {inputs.idx} {inputs.reg}
     """,
     inputs=kwtypes(al=FlyteFile, idx=FlyteFile, sample=str, reg=str, ref_loc=str),
-    output_locs=[OutputLocation(var="reg_al", var_type=FlyteFile, location="/root/results/output/{inputs.sample}_{inputs.reg}.cram")],
+    output_locs=[OutputLocation(var="reg_al", var_type=FlyteFile, location=f"{config['output_dir']}/{{inputs.sample}}_{{inputs.reg}}.cram")],
     container_image=config['current_image']
 )

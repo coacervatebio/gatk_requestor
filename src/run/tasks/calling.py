@@ -17,10 +17,10 @@ gather_vcfs = ShellTask(
     script=
     """
     cd {inputs.vdir}
-    java -jar /usr/local/share/gatk GatherVcfs {inputs.vnames_fmt} -O {outputs.i}
+    java -jar /usr/local/share/gatk GatherVcfs {inputs.vnames_fmt} -O {outputs.o}
     """,
     inputs=kwtypes(vnames_fmt=str, vdir=FlyteDirectory),
-    output_locs=[OutputLocation(var="i", var_type=FlyteFile, location="/root/results/gather_out.vcf.gz")],
+    output_locs=[OutputLocation(var="o", var_type=FlyteFile, location=f"{config['output_dir']}/gather_out.vcf.gz")],
     container_image=config['current_image']
 )
 
@@ -29,10 +29,10 @@ genotype = ShellTask(
     debug=True,
     script=
     """
-    java -jar /usr/local/share/gatk GenotypeGVCFs -R {inputs.ref_loc} -V gendb://{inputs.db_dir} -O {outputs.o}/combined_{inputs.reg}.g.vcf.gz
+    java -jar /usr/local/share/gatk GenotypeGVCFs -R {inputs.ref_loc} -V gendb://{inputs.db_dir} -O {outputs.o}
     """,
     inputs=kwtypes(db_dir=FlyteDirectory, reg=str, ref_loc=str),
-    output_locs=[OutputLocation(var="o", var_type=FlyteDirectory, location="/root/results/output")],
+    output_locs=[OutputLocation(var="o", var_type=FlyteDirectory, location=f"{config['output_dir']}/combined_{{inputs.reg}}.g.vcf.gz")],
     container_image=config['current_image']
 )
 
@@ -42,10 +42,10 @@ combine_region = ShellTask(
     script=
     """
     cd {inputs.vdir}
-    java -jar /usr/local/share/gatk GenomicsDBImport {inputs.vnames_fmt} -L {inputs.reg} --genomicsdb-workspace-path {outputs.i}
+    java -jar /usr/local/share/gatk GenomicsDBImport {inputs.vnames_fmt} -L {inputs.reg} --genomicsdb-workspace-path {outputs.o}
     """,
     inputs=kwtypes(vnames_fmt=str, vdir=FlyteDirectory, reg=str),
-    output_locs=[OutputLocation(var="i", var_type=FlyteDirectory, location="/root/results/genomics_db_dir")],
+    output_locs=[OutputLocation(var="o", var_type=FlyteDirectory, location=f"{config['output_dir']}/genomics_db_dir")],
     container_image=config['current_image']
 )
 

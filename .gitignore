@@ -11,10 +11,6 @@
 *.sam*
 *.dict
 
-# Include small demo alignments
-# !results/alignments/full/HG03633.cram
-# !results/alignments/full/HG04149.cram
-
 # Debug
 debug/*
 

@@ -70,5 +70,5 @@ RUN wget https://github.com/samtools/samtools/releases/download/${SAMTOOLS_VER}/
  rm -rf samtools-${SAMTOOLS_VER}
 
 # Copy code and install Python dependencies
-COPY ./data /root
+COPY ./src /root
 RUN pip install -r /root/requirements.txt
