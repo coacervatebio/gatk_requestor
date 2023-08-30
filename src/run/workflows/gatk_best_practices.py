@@ -1,6 +1,6 @@
 import os
 from typing import List
-from flytekit import workflow, dynamic
+from flytekit import workflow, dynamic, LaunchPlan
 from flytekit.types.file import FlyteFile
 from flytekit.types.directory import FlyteDirectory
 from flytekitplugins.pod import Pod
@@ -42,9 +42,17 @@ def process_samples(indir: FlyteDirectory, regs: List[str]) -> FlyteFile:
     return gather_out
 
 @workflow
-def wf() -> FlyteFile:
+def wf(al_dir: str, regs: List[str]) -> FlyteFile:
     
-    fd = get_dir(dirpath='s3://my-s3-bucket/input-data/alignments/full')
-    regs = ['chr21', 'chr22']
+    fd = get_dir(dirpath=al_dir)
     out_ = process_samples(indir=fd, regs=regs)
     return out_
+
+builtin_lp = LaunchPlan.create(
+    "Built-In Launchplan",
+    wf, 
+    default_inputs={
+        "al_dir": "/root/data/alignments",
+        "regs": ["chr21", "chr22"]
+        }
+    )

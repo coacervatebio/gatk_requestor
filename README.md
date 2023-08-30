@@ -28,6 +28,14 @@ Coacervate accepts genomic sequence alignments and produces [joint called](https
 The recommended way of using Coacervate with your own data is to overwrite different files/directories in the requestor container with compatible equivalents from the host machine. For example, you can overwrite the config and input alignments with `-v /host/config:/data/config/config.yml` and ` -v /host/alignments:/data/results/alignments/full/`. Currently, inputs must be in the CRAM format. 
 
 ## Repo Tour
+Most of the layout of this repo is fairly self-explanatory, but a brief tour can be helpful for those that want to adapt functionality to their needs. Please refer to a slightly redacted tree of salient parts below.
+- The `reference` and `data` directories contain mostly static assets. Outputs from different steps are typically written to `data/output`.
+- The `run` dir contains the config, tasks, and workflow that make up the GATK proof-of-concept.
+   - Golem requestor agents are contained in `agents`, `hello_golem.py` exists as a simple test agent.
+   - Advanced pod configuration for communicating with the yagna daemon deployed in the cluster hosting Flyte is captured in `yagna_template.py`.
+   - Different Flyte tasks are separated by alignment mapping, variant calling and supporting utilities.
+   - Tests covering these tasks are also available with the testing strategy described in [this gist](https://gist.github.com/pryce-turner/298ab8bb7f8bb7ee1b2507dc068c938e).
+   - Finally, the POC workflow is available in it's eponymous directory, additional workflows should live alongside it.
 ```
 src
 ├── requirements.txt
