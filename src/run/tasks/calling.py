@@ -29,10 +29,10 @@ genotype = ShellTask(
     debug=True,
     script=
     """
-    java -jar /usr/local/share/gatk GenotypeGVCFs -R {inputs.ref_loc} -V gendb://{inputs.db_dir} -O {outputs.o}
+    java -jar /usr/local/share/gatk GenotypeGVCFs -R {inputs.ref_loc} -V gendb://{inputs.db_dir} -O {outputs.o}/combined_{inputs.reg}.g.vcf.gz
     """,
     inputs=kwtypes(db_dir=FlyteDirectory, reg=str, ref_loc=str),
-    output_locs=[OutputLocation(var="o", var_type=FlyteDirectory, location=f"{config['output_dir']}/combined_{{inputs.reg}}.g.vcf.gz")],
+    output_locs=[OutputLocation(var="o", var_type=FlyteDirectory, location=config['output_dir'])],
     container_image=config['current_image']
 )
 

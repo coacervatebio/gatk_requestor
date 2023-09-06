@@ -11,7 +11,7 @@ index_cram = ShellTask(
     samtools index {inputs.al} -o {outputs.idx}
     """,
     inputs=kwtypes(al=FlyteFile),
-    output_locs=[OutputLocation(var="idx", var_type=FlyteFile, location="{{inputs.al}}.crai")],
+    output_locs=[OutputLocation(var="idx", var_type=FlyteFile, location=f"{{inputs.al}}.crai")],
     container_image=config['current_image']
 )
 

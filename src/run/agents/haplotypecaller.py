@@ -1,21 +1,13 @@
-import logging
-from time import sleep
 from typing import List
-from datetime import timedelta, datetime
-from pathlib import Path, PurePath
+from datetime import timedelta
+from pathlib import PurePath
 from tempfile import gettempdir
 from typing import AsyncIterable, Iterator
 from uuid import uuid4
 from yapapi import Golem, Task, WorkContext
 from yapapi.payload import vm
 from yapapi.log import enable_default_logger
-from run import config
-
-logger = logging.getLogger(__name__)
-console_handler = logging.StreamHandler()
-console_handler.setFormatter(logging.Formatter("[%(asctime)s %(levelname)s %(name)s] %(message)s"))
-logger.addHandler(console_handler)
-logger.setLevel(logging.DEBUG)
+from run import config, logger
 
 PROV_INPATH = PurePath("/golem/input")
 PROV_OUTPATH = PurePath("/golem/output")
@@ -25,7 +17,7 @@ TASK_TIMEOUT = timedelta(hours=2)
 
 def data(pls: List[dict]) -> Iterator[Task]:
     """Prepare a task object for every region-specific alignment"""
-    logger.info(f"Processing payloads..")
+    logger.info("Processing payloads..")
     logger.debug(f"Payloads: {pls}")
 
     for pl in pls:
