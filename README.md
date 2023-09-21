@@ -12,20 +12,21 @@ Leveraging the fact that people are more likely to have access to [high-bandwidt
 
 Coacervate is a free and open-source public good, built to empower every citizen-scientist and eek out every last drop of efficiency in the name of progess.
 
-## Quickstart:
+## Approach
+Coacervate accepts genomic sequence alignments and produces [joint called](https://gatk.broadinstitute.org/hc/en-us/articles/360035890431-The-logic-of-joint-calling-for-germline-short-variants) VCF files ready for annotation and actionable interpretation. This is achieved by splitting the inputs to parallelize the most [computationally intensive](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0254363#pone-0254363-g003) step via the Golem Network. 
+
+## Status
+⚠️⚠️⚠️ This project is currently a **Proof of Concept** and undergoing a *significant* refactor. The Getting Started tutorial and testing are very much under-construction.
+
+## Getting Started:
+Please follow the [Getting Started tutorial](getting_started.md) to run your first workflow! Broadly, you'll need to: 
 - make sure docker and git are installed
 - install flytectl and start the demo cluster
 - git pull the project
 - register the workflows
 
-## Status
-⚠️⚠️⚠️ This project is currently a **Proof of Concept** and undergoing a *significant* refactor. The quickstart probably still works but is not representative of the new direction. Testing is very much under-construction.
-
-## Approach
-Coacervate accepts genomic sequence alignments and produces [joint called](https://gatk.broadinstitute.org/hc/en-us/articles/360035890431-The-logic-of-joint-calling-for-germline-short-variants) VCF files ready for annotation and actionable interpretation. This is achieved by splitting the inputs to parallelize the most [computationally intensive](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0254363#pone-0254363-g003) step via the Golem Network. 
-
 ## Getting Started with Your Own Data
-The recommended way of using Coacervate with your own data is to overwrite different files/directories in the requestor container with compatible equivalents from the host machine. For example, you can overwrite the config and input alignments with `-v /host/config:/data/config/config.yml` and ` -v /host/alignments:/data/results/alignments/full/`. Currently, inputs must be in the CRAM format. 
+Coacervate relies on Flyte to run it's workflows, which in turn uses an object store to manage all the data being worked on. If you're following the tutorial then you'll just use the small alignments baked into the requestor image. However, if you'd like to use your own data then you'll need to upload it to the object store and specify that upload path in the launchplan when firing your workflow. The flyte sandbox will spin up a minio instance which you can conveniently access in your browser at `http://localhost:30080/minio/browser` (you can login in with `minio`/`miniostorage`). Flyte can obviously use any object store as a backend, like S3, but that setup is out of scope for this README. Please also note that currently inputs must be in the CRAM format. 
 
 ## Repo Tour
 Most of the layout of this repo is fairly self-explanatory, but a brief tour can be helpful for those that want to adapt functionality to their needs. Please refer to a slightly redacted tree of salient parts below.

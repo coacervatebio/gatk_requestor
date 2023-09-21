@@ -9,71 +9,113 @@ from flytekit.types.directory import FlyteDirectory
 from run.tasks.utils import VCF
 from run import config, logger
 
-@task(container_image=config['current_image'])
-def compare_file(actual: FlyteFile, expected: FlyteFile) -> bool:
-    actual.download()
-    expected.download()
-    return filecmp.cmp(actual.path, expected.path, shallow=False)
-    
-@task(container_image=config['current_image'])
-def compare_files(actual: FlyteDirectory, expected: FlyteDirectory, to_compare: List[str]) -> bool:
-    actual.download()
-    expected.download()
-
-    results = filecmp.cmpfiles(actual.path, expected.path, to_compare, shallow=False)
-
-    # Return True if the 'different' and 'error' lists contain no files
-    return len(results[1]) == 0 and len(results[2]) == 0
-
-def compare_vcfs(generated_file, expected_file):
-    gv = ps.VariantFile(generated_file, "r")
-    ev = ps.VariantFile(expected_file, "r")
-    g_recs = [str(r) for r in gv.fetch()]
-    e_recs = [str(r) for r in ev.fetch()]
-    assert g_recs == e_recs
-
-def compare_directories_local(dir1, dir2):
+class ComparisonCrawler:
     """
-    Compare two directories and their subdirectories recursively.
-    
-    Args:
-        dir1 (str): Path to the first directory.
-        dir2 (str): Path to the second directory.
+    A unified class for all comparison operations across dirs/files/dataclasses
+    """
+
+    def __init__(self, checker, actual_dir, expected_dir, include, ignore) -> None:
+
+        checkers = {
+            'vcf': VcfChecker(),
+            'simple': SimpleChecker()
+        }
+
+        self.checker = checkers.get(checker)
+        self.actual_dir = actual_dir
+        self.expected_dir = expected_dir
+        self.include = include
+        self.ignore = ignore
+
+    def compare_directories(self):
+        """
+        Compare two directories and their subdirectories recursively.
+        """
+        dcmp = filecmp.dircmp(self.actual_dir, self.expected_dir, ignore=None)
+        logger.debug(f'Made dircmp object between {self.actual_dir} and {self.expected_dir}')
         
-    Returns:
-        bool: True if the directories and their contents match exactly, False otherwise.
-    """
-    dcmp = filecmp.dircmp(dir1, dir2, ignore=None)
-    logger.debug(f'Made dircmp object between {dir1} and {dir2}')
-    
-    # Check if files/dirs in the current directory match
-    if dcmp.left_only or dcmp.right_only:
-        return False
-    logger.debug("No uncommon files/dirs at the top level")
-
-    # Additional cmpfiles comparison because dcmp.diff_files does not allow shallow=False
-    match, mismatch, errors = filecmp.cmpfiles(dir1, dir2, dcmp.common_files, shallow=False)
-    # assert match, f'No files in {dcmp.common_files} matched between {dir1} and {dir2}'
-    assert not mismatch, f'The following files do not match: {mismatch}'
-    assert not errors, f'The following files threw errors when comparing: {errors}'
-
-    # Recursively compare subdirectories
-    for sub_dir in dcmp.common_dirs:
-        logger.debug(f'Checking {sub_dir}')
-        sub_dir1 = os.path.join(dir1, sub_dir)
-        sub_dir2 = os.path.join(dir2, sub_dir)
-        if not compare_directories_local(sub_dir1, sub_dir2):
+        # Check if files/dirs in the current directory match
+        if dcmp.left_only or dcmp.right_only:
             return False
-    
-    return True
-    
+        
+        logger.debug("No uncommon files/dirs at the top level")
+
+        # Filter files based on 'include' and 'ignore'
+        files = dcmp.common_files
+        if self.include:
+            files = [f for f in files if f in self.include]
+        if self.ignore:
+            files = [f for f in files if f not in self.ignore]
+
+        # Check files at current level
+        for f in files:
+            f1 = os.path.join(self.actual_dir, f)
+            f2 = os.path.join(self.expected_dir, f)
+            self.checker.compare_files(f1, f2)
+
+        # Recursively compare subdirectories
+        for sub_dir in dcmp.common_dirs:
+            logger.debug(f'Checking {sub_dir}')
+            sub_dir1 = os.path.join(self.actual_dir, sub_dir)
+            sub_dir2 = os.path.join(self.expected_dir, sub_dir)
+            if not self.compare_directories(sub_dir1, sub_dir2):
+                return False
+        
+        return True
+
+
+class SimpleChecker:
+    """Byte for byte file comparison checker using `filecmp.cmp`"""
+
+    @staticmethod
+    def compare_files(actual_file, expected_file):
+        # Check that cmp returns True (no difference between files)
+        assert filecmp.cmp(actual_file, expected_file, shallow=False), \
+            f'Deep comparison of {actual_file} and {expected_file} failed.'
+
+
+class VcfChecker:
+    """Compares VCFs based on records, excluding timestamped header"""
+
+    @staticmethod
+    def compare_files(actual_file, expected_file):
+        gv = ps.VariantFile(actual_file, "r")
+        ev = ps.VariantFile(expected_file, "r")
+        g_recs = [str(r) for r in gv.fetch()]
+        e_recs = [str(r) for r in ev.fetch()]
+        assert g_recs == e_recs
+
+
 @task(container_image=config['current_image'])
-def compare_dirs(actual: FlyteDirectory, expected: FlyteDirectory) -> bool:
+def compare_directories(actual: FlyteDirectory, expected: FlyteDirectory, checker: str, include: List[str], ignore: List[str]) -> bool:
+
     actual.download()
     expected.download()
-    assert compare_directories_local(actual, expected), f'Files between {actual.path} and {expected.path} or their subdirectories differ.'
-    return True
-    
+
+    crawler = ComparisonCrawler(checker, actual.path, expected.path, include, ignore)
+
+    return crawler.compare_directories()
+
+@task(container_image=config['current_image'])
+def compare_files(actual: FlyteFile, expected: FlyteFile, checker: str) -> bool:
+    working_dir = current_context().working_directory
+
+    actual_dir = Path(os.path.join(working_dir, "actual"))
+    actual_dir.mkdir(exist_ok=True)
+    actual.download()
+    a_name = os.path.basename(actual.path)
+    os.rename(actual.path, os.path.join(actual_dir, a_name))
+
+    expected_dir = Path(os.path.join(working_dir, "expected"))
+    expected_dir.mkdir(exist_ok=True)
+    expected.download()
+    e_name = os.path.basename(expected.path)
+    os.rename(expected.path, os.path.join(expected_dir, e_name))
+
+    crawler = ComparisonCrawler(checker, actual_dir, expected_dir, [a_name, e_name], [])
+
+    return crawler.compare_directories()
+
 @task(container_image=config['current_image'])
 def compare_vcf_objs(actual: List[VCF], expected: List[VCF]) -> bool:
     working_dir = current_context().working_directory
