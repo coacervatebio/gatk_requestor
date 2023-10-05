@@ -1,10 +1,10 @@
 FROM python:3.9-slim-bullseye
 
-WORKDIR /root
+WORKDIR /coa
 ENV VENV /opt/venv
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
-ENV PYTHONPATH /root
+ENV PYTHONPATH /coa
 
 # Update and install deps
 RUN apt-get update && apt-get install --no-install-recommends -y \
@@ -70,5 +70,5 @@ RUN wget https://github.com/samtools/samtools/releases/download/${SAMTOOLS_VER}/
  rm -rf samtools-${SAMTOOLS_VER}
 
 # Copy code and install Python dependencies
-COPY ./src /root
-RUN pip install -r /root/requirements.txt
+COPY ./src /coa
+RUN pip install -r /coa/requirements.txt

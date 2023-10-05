@@ -52,7 +52,7 @@ builtin_lp = LaunchPlan.create(
     "Built-In Launchplan",
     wf, 
     default_inputs={
-        "al_dir": "/root/data/alignments",
+        "al_dir": "/coa/data/alignments",
         "regs": ["chr21", "chr22"]
         }
     )

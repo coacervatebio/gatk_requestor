@@ -1,8 +1,8 @@
 # Workflow-wide config
 
-current_image: 'docker.io/coacervate/requestor:20230906'
-reference_location: '/root/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta'
-output_dir: '/root/data/output'
+current_image: 'docker.io/coacervate/requestor:20231004'
+reference_location: '/coa/reference/resources_broad_hg38_v0_Homo_sapiens_assembly38.fasta'
+output_dir: '/coa/data/output'
 
 # Golem HaplotypeCaller config
 provider_image_hash: '635e41034ced5d0622d0760bf6aac8377fdf225154d3f306f4fca805'

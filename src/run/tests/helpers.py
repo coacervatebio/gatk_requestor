@@ -1,6 +1,7 @@
 import os
 import filecmp
 import pysam as ps
+from time import sleep
 from pathlib import Path
 from typing import List
 from flytekit import task, current_context
@@ -17,11 +18,12 @@ class ComparisonCrawler:
     def __init__(self, checker, actual_dir, expected_dir, include, ignore) -> None:
 
         checkers = {
+            'simple': SimpleChecker(),
             'vcf': VcfChecker(),
-            'simple': SimpleChecker()
+            'cram': CramChecker()
         }
 
-        self.checker = checkers.get(checker)
+        self.checker = checkers[checker]
         self.actual_dir = actual_dir
         self.expected_dir = expected_dir
         self.include = include
@@ -38,6 +40,7 @@ class ComparisonCrawler:
         if dcmp.left_only or dcmp.right_only:
             return False
         
+        logger.debug("helloooooo")
         logger.debug("No uncommon files/dirs at the top level")
 
         # Filter files based on 'include' and 'ignore'
@@ -46,9 +49,11 @@ class ComparisonCrawler:
             files = [f for f in files if f in self.include]
         if self.ignore:
             files = [f for f in files if f not in self.ignore]
+        logger.debug(f'Files determined as {files} after filtering for include/ignore')
 
-        # Check files at current level
+        logger.debug('Checking files at current level')
         for f in files:
+            logger.debug(f'Currently comparing {f}')
             f1 = os.path.join(self.actual_dir, f)
             f2 = os.path.join(self.expected_dir, f)
             self.checker.compare_files(f1, f2)
@@ -69,6 +74,7 @@ class SimpleChecker:
 
     @staticmethod
     def compare_files(actual_file, expected_file):
+        logger.debug(f'Comparing {actual_file} to {expected_file}')
         # Check that cmp returns True (no difference between files)
         assert filecmp.cmp(actual_file, expected_file, shallow=False), \
             f'Deep comparison of {actual_file} and {expected_file} failed.'
@@ -79,11 +85,25 @@ class VcfChecker:
 
     @staticmethod
     def compare_files(actual_file, expected_file):
-        gv = ps.VariantFile(actual_file, "r")
+        logger.debug(f'Comparing {actual_file} to {expected_file}')
+        av = ps.VariantFile(actual_file, "r")
         ev = ps.VariantFile(expected_file, "r")
-        g_recs = [str(r) for r in gv.fetch()]
+        a_recs = [str(r) for r in av.fetch()]
         e_recs = [str(r) for r in ev.fetch()]
-        assert g_recs == e_recs
+        assert a_recs == e_recs
+
+
+class CramChecker:
+    """Compares CRAMs based on records, ignoring compression differences"""
+
+    @staticmethod
+    def compare_files(actual_file, expected_file):
+        logger.debug(f'Comparing {actual_file} to {expected_file}')
+        aa = ps.AlignmentFile(actual_file, "rc", reference_filename=config['reference_location'])
+        ea = ps.AlignmentFile(expected_file, "rc", reference_filename=config['reference_location'])
+        a_recs = [str(r) for r in aa.fetch(until_eof=True)]
+        e_recs = [str(r) for r in ea.fetch(until_eof=True)]
+        assert a_recs == e_recs
 
 
 @task(container_image=config['current_image'])
@@ -138,3 +158,7 @@ def compare_vcf_objs(actual: List[VCF], expected: List[VCF]) -> bool:
         os.rename(o.idx.path, os.path.join(expected_dir, os.path.basename(o.idx.path)))
 
     return len(filecmp.dircmp(actual_dir, expected_dir).diff_files) == 0
+
+@task(container_image=config['current_image'])
+def sleep_task(duration: float):
+    sleep(duration)

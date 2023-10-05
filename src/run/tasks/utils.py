@@ -165,7 +165,7 @@ hg = ShellTask(
     debug=True,
     script="""
     set -ex
-    python /root/agents/hello_golem.py
+    python /coa/agents/hello_golem.py
     """,
     inputs=kwtypes(),
     # output_locs=[],
@@ -238,7 +238,7 @@ golem_test = ContainerTask(
     # pod_template_name = "my-pod-template", # Modify vols / svc here for yagna
     command=[
         "python",
-        "/root/run/agents/hello_golem.py"
+        "/coa/run/agents/hello_golem.py"
     ],
 )
 

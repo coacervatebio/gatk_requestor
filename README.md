@@ -18,7 +18,7 @@ Coacervate accepts genomic sequence alignments and produces [joint called](https
 ## Status
 ⚠️⚠️⚠️ This project is currently a **Proof of Concept** and undergoing a *significant* refactor. The Getting Started tutorial and testing are very much under-construction.
 
-## Getting Started:
+## Getting Started
 Please follow the [Getting Started tutorial](getting_started.md) to run your first workflow! Broadly, you'll need to: 
 - make sure docker and git are installed
 - install flytectl and start the demo cluster
